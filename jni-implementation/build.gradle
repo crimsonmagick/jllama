@@ -6,7 +6,7 @@ def javaHome = System.getProperty("java.home")
 
 library {
     source.from 'src/main/cpp', '../jni-bindings/build/generated/sources/headers/java/main'
-    publicHeaders.from '../jni-bindings/build/generated/sources/headers/java/main', "$javaHome/include", "$javaHome/include/linux", "$javaHome/include/win32"
+    publicHeaders.from '../jni-bindings/build/generated/sources/headers/java/main', "$javaHome/include", "$javaHome/include/linux", "$javaHome/include/win32", "$javaHome/include/darwin"
 }
 
 tasks.withType(CppCompile) {
