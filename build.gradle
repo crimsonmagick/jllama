@@ -1,20 +1,15 @@
-plugins {
-    id 'groovy'
-}
+group 'com.mangomelancholy'
+version '0.0.1-SNAPSHOT'
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+task runProgram(type: JavaExec) {
+    description = 'Runs the main program'
+    group = 'application'
 
-repositories {
-    mavenCentral()
-}
+    dependsOn ':jni-bindings:build', ':jni-implementation:build'
+    mainClass = 'com.mangomelancholy.llama.cpp.java.bindings.Main'
+    systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
 
-dependencies {
-    implementation 'org.apache.groovy:groovy:4.0.10'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
-}
-
-test {
-    useJUnitPlatform()
+    doFirst {
+        classpath = files(project(':jni-bindings').sourceSets.main.runtimeClasspath)
+    }
 }
