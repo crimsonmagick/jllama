@@ -9,6 +9,9 @@ task runProgram(type: JavaExec) {
     mainClass = 'com.mangomelancholy.llama.cpp.java.bindings.Main'
     systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
 
+    final String llamaLocation = "${projectDir}/build/cmake/release/bin"
+    environment 'PATH', "${System.getenv('PATH')}${File.pathSeparator}${llamaLocation}"
+
     doFirst {
         classpath = files(project(':jni-bindings').sourceSets.main.runtimeClasspath)
     }
