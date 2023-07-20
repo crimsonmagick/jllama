@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include "com_mangomelancholy_llama_cpp_java_bindings_Main.h"
 
+typedef void (*llama_backend_init)(bool);
+
 #ifdef _WIN32
 #include <windows.h>
 
 JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_Main_initializeLlama
   (JNIEnv * env, jobject thisObject, jboolean useNuma) {
-    typedef void (*llama_backend_init)(bool);
     HINSTANCE hLlamaDLL = NULL;
     hLlamaDLL = LoadLibrary("llama.dll");
 
@@ -33,9 +34,41 @@ JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_Main_ini
 
 #elif defined(__unix__)
 
+#include <dlfcn.h>
+
 JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_Main_initializeLlama
   (JNIEnv * env, jobject thisObject, jboolean useNuma) {
-    printf("WARNING - UNIX-LIKE ARCHITECTURE NOT SUPPORTED\n");
+
+    void* handle = dlopen("libllama.so", RTLD_LAZY);
+
+    if (!handle) {
+        printf("could not load the dynamic library, error: %s\n", dlerror());
+        return;
+    }
+
+    // clear any existing error
+    dlerror();
+
+    // resolve function address here
+    llama_backend_init func = (llama_backend_init) dlsym(handle, "llama_backend_init");
+
+    char *error = dlerror();
+    if (error != NULL)  {
+        printf("could not locate the function, error: %s\n", error);
+        dlclose(handle);
+        return;
+    }
+
+    printf("loaded function successfully!");
+
+    try {
+      func(useNuma);
+      printf("Initialized llama.cpp backend\n");
+    } catch (...) {
+      printf("WARNING - Failed to initialized llama.cpp backend");
+    }
+
+    dlclose(handle);
 }
 
 #else
