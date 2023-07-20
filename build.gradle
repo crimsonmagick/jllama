@@ -11,12 +11,12 @@ task runProgram(type: JavaExec) {
     mainClass = 'com.mangomelancholy.llama.cpp.java.bindings.Main'
     systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
 
-    final isWindows = current().isWindows()
-    final llamaRelativePath = isWindows ? '/build/cmake/release/bin'
+    final llamaRelativePath = current().isWindows() ? '/build/cmake/release/bin'
             : '/build/cmake/release'
     final String llamaAbsolutePath = projectDir as String + llamaRelativePath
 
-    final envVariableName = isWindows ? 'PATH' : 'LD_LIBRARY_PATH'
+    final envVariableName = current().isWindows() ? 'PATH' :
+            current().isMacOsX() ? 'DYLD_LIBRARY_PATH' : 'LD_LIBRARY_PATH'
     final envVariableValue = System.getenv(envVariableName) ? System.getenv(envVariableName) : ''
     environment envVariableName, "${envVariableValue}${File.pathSeparator}${llamaAbsolutePath}"
 

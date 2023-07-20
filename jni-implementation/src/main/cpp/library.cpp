@@ -32,14 +32,20 @@ JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_Main_ini
     FreeLibrary(hLlamaDLL);
 }
 
-#elif defined(__unix__)
+#elif defined(__unix__) || defined(__APPLE__)
+
+#ifdef __APPLE__
+#define LIBRARY_NAME "libllama.dylib"
+#else
+#define LIBRARY_NAME "libllama.so"
+#endif
 
 #include <dlfcn.h>
 
 JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_Main_initializeLlama
   (JNIEnv * env, jobject thisObject, jboolean useNuma) {
 
-    void* handle = dlopen("libllama.so", RTLD_LAZY);
+    void* handle = dlopen(LIBRARY_NAME, RTLD_LAZY);
 
     if (!handle) {
         printf("could not load the dynamic library, error: %s\n", dlerror());
