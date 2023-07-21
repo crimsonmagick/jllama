@@ -1,13 +1,13 @@
 #ifndef LLAMA_CPP_DYNAMICLIBRARYEXCEPTION_H
 #define LLAMA_CPP_DYNAMICLIBRARYEXCEPTION_H
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
-class DynamicLibraryException: public std::exception {
+class DynamicLibraryException: public std::runtime_error {
 
  public:
-  explicit DynamicLibraryException(const char* message) : exception(message) {
+  explicit DynamicLibraryException(const char* message) : runtime_error(message) {
 
   }
 };

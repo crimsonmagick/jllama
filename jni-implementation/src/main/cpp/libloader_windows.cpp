@@ -1,9 +1,9 @@
 #ifdef _WIN32
-#include <cstdio>
+#include "libloader.h"
+
+#include <format>
 #include <iostream>
 #include <windows.h>
-#include <format>
-#include "libloader.h"
 #include "exceptions/dynamic-library-exception.h"
 
 #define LIBRARY_SUFFIX ".dll"
@@ -15,24 +15,32 @@ void loadLibrary(const std::string libName) {
   llamaHandle = LoadLibrary(libraryFileName.c_str());
 
   if (!llamaHandle) {
-    std::string errorMessage = std::format("could not load the dynamic library, error: {}", GetLastError());
-    std::cout << errorMessage;
+    std::string errorMessage = std::format(
+        "could not load the dynamic library with libraryFileName={}, error={}",
+        libraryFileName,
+        GetLastError());
+    std::cerr << errorMessage << std::endl;
     throw DynamicLibraryException(errorMessage.c_str());
   }
 }
 
 void closeLibrary() {
+  // TODO what if freeing the library fails?
   FreeLibrary(llamaHandle);
 }
 
-void* getFunctionAddress(const std::string functionName) {
-  void * func = GetProcAddress(llamaHandle, functionName.c_str());
+void *getFunctionAddress(const std::string functionName) {
+  void *func = GetProcAddress(llamaHandle, functionName.c_str());
+
   if (!func) {
-    printf("could not locate the function\n");
-    // TODO throw exception
-    return NULL;
+    std::string errorMessage = std::format(
+        "Could not locate the function with functionName={}, error={}",
+        functionName,
+        GetLastError());
+    std::cerr << errorMessage << std::endl;
+    throw DynamicLibraryException(errorMessage.c_str());
   }
-  printf("loaded function successfully!\n");
+  std::cout << "loaded function successfully!" << std::endl;
   return func;
 }
 #endif
