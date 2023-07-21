@@ -1,10 +1,12 @@
 #ifdef _WIN32
 #include <cstdio>
+#include <iostream>
 #include <windows.h>
+#include <format>
 #include "libloader.h"
+#include "exceptions/dynamic-library-exception.h"
 
 #define LIBRARY_SUFFIX ".dll"
-
 
 HINSTANCE llamaHandle = NULL;
 
@@ -13,9 +15,9 @@ void loadLibrary(const std::string libName) {
   llamaHandle = LoadLibrary(libraryFileName.c_str());
 
   if (!llamaHandle) {
-    printf("could not load the dynamic library, error: %d\n", GetLastError());
-    // TODO throw exception instead
-    return;
+    std::string errorMessage = std::format("could not load the dynamic library, error: {}", GetLastError());
+    std::cout << errorMessage;
+    throw DynamicLibraryException(errorMessage.c_str());
   }
 }
 

@@ -1,16 +1,26 @@
+import static org.gradle.internal.os.OperatingSystem.current
+
 plugins {
-    id 'cpp-library'
+  id 'cpp-library'
 }
 
 def javaHome = System.getProperty("java.home")
 
 library {
-    source.from 'src/main/cpp', '../jni-bindings/build/generated/sources/headers/java/main'
-    privateHeaders.from '../jni-bindings/build/generated/sources/headers/java/main',
-            "$javaHome/include", "$javaHome/include/linux", "$javaHome/include/win32",
-            "$javaHome/include/darwin"
+  binaries.configureEach {
+    if (current().isWindows()) { {
+      compileTask.get().compilerArgs.add('/std:c++latest')
+      }
+    } else {
+        compileTask.get().compilerArgs.add('-std=c++20')
+    }
+  }
+  source.from 'src/main/cpp', '../jni-bindings/build/generated/sources/headers/java/main'
+  privateHeaders.from '../jni-bindings/build/generated/sources/headers/java/main',
+    "$javaHome/include", "$javaHome/include/linux", "$javaHome/include/win32",
+    "$javaHome/include/darwin"
 }
 
 tasks.withType(CppCompile) {
-    dependsOn ':jni-bindings:compileJava'
+  dependsOn ':jni-bindings:compileJava'
 }

@@ -15,7 +15,7 @@ public class Main {
     final long result = main.sum(first, second);
     System.out.printf("%d + %d = %d\n", first, second, result);
 
-    main.initializeLlama(false);
+    main.initializeLlama(true);
   }
 
   private native void sayHello();
