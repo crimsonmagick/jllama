@@ -2,7 +2,7 @@
 #include "libloader.h"
 
 #include <dlfcn.h>
-#include <format>
+#include <sstream>
 #include <iostream>
 #include "exceptions/dynamic-library-exception.h"
 
@@ -23,10 +23,11 @@ void loadLibrary(std::string libName) {
   llamaHandle = dlopen(libraryFileName.c_str(), RTLD_LAZY);
 
     if (!llamaHandle) {
-    std::string errorMessage = std::format(
-        "could not load the dynamic library with libraryFileName={}, error={}",
-        libraryFileName,
-        dlerror());
+    std::stringstream errorMessageStream;
+    errorMessageStream
+        << "Could not load the dynamic library with libraryFileName="
+        << libraryFileName << "error=" << dlerror();
+    std::string errorMessage = errorMessageStream.str();
     std::cerr << errorMessage << std::endl;
     throw DynamicLibraryException(errorMessage.c_str());
   }
@@ -45,9 +46,10 @@ void* getFunctionAddress(std::string functionName) {
 
   char *error = dlerror();
   if (error != NULL)  {
-    std::string errorMessage = std::format(
-        "Could not locate the function with functionName={}, error={}",
-        functionName, error);
+    std::stringstream errorMessageStream;
+    errorMessageStream << "Could not locate the function with functionName="
+                       << functionName << "error=" << error;
+    std::string errorMessage = errorMessageStream.str();
     std::cerr << errorMessage << std::endl;
     throw DynamicLibraryException(errorMessage.c_str());
   }

@@ -1,8 +1,8 @@
 #ifdef _WIN32
 #include "libloader.h"
 
-#include <format>
 #include <iostream>
+#include <sstream>
 #include <windows.h>
 #include "exceptions/dynamic-library-exception.h"
 
@@ -15,10 +15,11 @@ void loadLibrary(const std::string libName) {
   llamaHandle = LoadLibrary(libraryFileName.c_str());
 
   if (!llamaHandle) {
-    std::string errorMessage = std::format(
-        "could not load the dynamic library with libraryFileName={}, error={}",
-        libraryFileName,
-        GetLastError());
+    std::stringstream errorMessageStream;
+    errorMessageStream
+        << "Could not load the dynamic library with libraryFileName="
+        << libraryFileName << "error=" << GetLastError();
+    std::string errorMessage = errorMessageStream.str();
     std::cerr << errorMessage << std::endl;
     throw DynamicLibraryException(errorMessage.c_str());
   }
@@ -33,10 +34,10 @@ void *getFunctionAddress(const std::string functionName) {
   void *func = GetProcAddress(llamaHandle, functionName.c_str());
 
   if (!func) {
-    std::string errorMessage = std::format(
-        "Could not locate the function with functionName={}, error={}",
-        functionName,
-        GetLastError());
+    std::stringstream errorMessageStream;
+    errorMessageStream << "Could not locate the function with functionName="
+                       << functionName << "error=" << GetLastError();
+    std::string errorMessage = errorMessageStream.str();
     std::cerr << errorMessage << std::endl;
     throw DynamicLibraryException(errorMessage.c_str());
   }
