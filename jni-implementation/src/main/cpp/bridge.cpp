@@ -7,23 +7,37 @@
 typedef void (*llama_backend_init)(bool);
 typedef void (*llama_backend_free)();
 
-JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_initializeLlama(JNIEnv* env, jobject thisObject, jboolean useNuma) {
+JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_loadLibrary(JNIEnv* env, jobject thisObject) {
   try {
     loadLibrary("llama");
-    llama_backend_init func = (llama_backend_init) getFunctionAddress("llama_backend_init");
-    func(useNuma);
-    std::cout << "Initialized llama.cpp backend" << std::endl;
   } catch (const DynamicLibraryException& e) {
     jni::throwException(env, e);
   }
 }
 
-JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_terminateLlama(JNIEnv* env, jobject thisObject) {
+JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_closeLibrary(JNIEnv* env, jobject thisObject) {
+  try {
+    closeLibrary();
+  } catch (const DynamicLibraryException& e) {
+    jni::throwException(env, e);
+  }
+}
+
+JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaBackendInit(JNIEnv* env, jobject thisObject, jboolean useNuma) {
+  try {
+    llama_backend_init func = (llama_backend_init) getFunctionAddress("llama_backend_init");
+    func(useNuma);
+    std::cout << "Initialized llama.cpp backend\n";
+  } catch (const DynamicLibraryException& e) {
+    jni::throwException(env, e);
+  }
+}
+
+JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaBackendFree(JNIEnv* env, jobject thisObject) {
   try {
     llama_backend_free llamaFree = (llama_backend_free) getFunctionAddress("llama_backend_free");
     llamaFree();
-    closeLibrary();
-    std::cout << "llama freed, dll terminated" << std::endl;
+    std::cout << "llama freed\n";
   } catch (const DynamicLibraryException& e) {
     jni::throwException(env, e);
   }

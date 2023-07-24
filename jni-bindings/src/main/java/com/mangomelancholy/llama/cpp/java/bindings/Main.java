@@ -8,10 +8,12 @@ public class Main {
   public static void main(final String[] args) {
     try {
       final LlamaManager llamaManager = new LlamaManagerJNIImpl();
-      llamaManager.initializeLlama(true);
-      llamaManager.terminateLlama();
+      llamaManager.loadLibrary();
+      llamaManager.llamaBackendInit(true);
+      llamaManager.llamaBackendFree();
+      llamaManager.closeLibrary();
     } catch (RuntimeException e) {
-      System.out.println("OH NO!! ohNo=" + e.getMessage());
+      System.out.println("Fatal exception occurred, exceptionMessage=" + e.getMessage());
     }
   }
 

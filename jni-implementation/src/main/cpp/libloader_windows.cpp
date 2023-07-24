@@ -20,7 +20,7 @@ void loadLibrary(const std::string libName) {
         << "Could not load the dynamic library with libraryFileName="
         << libraryFileName << ", error=" << GetLastError();
     std::string errorMessage = errorMessageStream.str();
-    std::cerr << errorMessage << std::endl;
+    std::cerr << errorMessage << "\n";
     throw DynamicLibraryException(errorMessage.c_str());
   }
 }
@@ -30,7 +30,7 @@ void closeLibrary() {
     std::stringstream errorMessageStream;
     errorMessageStream << "FreeLibrary(llamaHandle) failed, error=" << GetLastError();
     std::string errorMessage = errorMessageStream.str();
-    std::cerr << errorMessage << std::endl;
+    std::cerr << errorMessage << "\n";
     throw new DynamicLibraryException(errorMessage.c_str());
   }
 }
@@ -43,10 +43,10 @@ void *getFunctionAddress(const std::string functionName) {
     errorMessageStream << "Could not locate the function with functionName="
                        << functionName << ", error=" << GetLastError();
     std::string errorMessage = errorMessageStream.str();
-    std::cerr << errorMessage << std::endl;
+    std::cerr << errorMessage << "\n";
     throw DynamicLibraryException(errorMessage.c_str());
   }
-  std::cout << "loaded function successfully!" << std::endl;
+  std::cout << "loaded function successfully!\n";
   return func;
 }
 #endif
