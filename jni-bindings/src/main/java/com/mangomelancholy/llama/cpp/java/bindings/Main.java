@@ -9,6 +9,7 @@ public class Main {
     try {
       final LlamaManager llamaManager = new LlamaManagerJNIImpl();
       llamaManager.initializeLlama(true);
+      llamaManager.terminateLlama();
     } catch (RuntimeException e) {
       System.out.println("OH NO!! ohNo=" + e.getMessage());
     }
