@@ -6,21 +6,12 @@ public class Main {
     System.loadLibrary("jni-implementation");
   }
   public static void main(final String[] args) {
-    final Main main = new Main();
-
-    main.sayHello();
-
-    final int first = 1;
-    final int second = 3;
-    final long result = main.sum(first, second);
-    System.out.printf("%d + %d = %d\n", first, second, result);
-
-    main.initializeLlama(true);
+    try {
+      final LlamaManager llamaManager = new LlamaManagerJNIImpl();
+      llamaManager.initializeLlama(true);
+    } catch (RuntimeException e) {
+      System.out.println("OH NO!! ohNo=" + e.getMessage());
+    }
   }
 
-  private native void sayHello();
-
-  private native long sum(int first, int second);
-
-  private native void initializeLlama(boolean useNuma);
 }

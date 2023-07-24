@@ -22,7 +22,7 @@ void loadLibrary(std::string libName) {
   const std::string libraryFileName = LIBRARY_PREFIX + libName + LIBRARY_SUFFIX;
   llamaHandle = dlopen(libraryFileName.c_str(), RTLD_LAZY);
 
-    if (!llamaHandle) {
+  if (!llamaHandle) {
     std::stringstream errorMessageStream;
     errorMessageStream
         << "Could not load the dynamic library with libraryFileName="
@@ -34,8 +34,16 @@ void loadLibrary(std::string libName) {
 }
 
 void closeLibrary() {
-  // TODO what if freeing the library fails?
-  dlclose(llamaHandle);
+    // clear any existing error
+    dlerror();
+
+    if (!dlclose(llamaHandle)) {
+      std::stringstream errorMessageStream;
+      errorMessageStream << "dlclose(llamaHandle) failed, error=" << dlerror();
+      std::string errorMessage = errorMessageStream.str();
+      std::cerr << errorMessage << std::endl;
+      throw new DynamicLibraryException(errorMessage.c_str());
+    }
 }
 
 void* getFunctionAddress(std::string functionName) {
