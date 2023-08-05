@@ -11,7 +11,7 @@ task runProgram(type: JavaExec) {
     mainClass = 'com.mangomelancholy.llama.cpp.java.bindings.Main'
     systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
 
-    final llamaRelativePath = current().isWindows() ? '/build/cmake/release/bin'
+    final llamaRelativePath = current().isWindows() ? '/build/cmake/release/bin/release'
             : '/build/cmake/release'
     final String llamaAbsolutePath = projectDir as String + llamaRelativePath
 
