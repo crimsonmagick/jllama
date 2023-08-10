@@ -1,14 +1,15 @@
 #include <iostream>
 #include <cstdio>
+#include "llama.h"
 #include "com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl.h"
 #include "exceptions/dynamic-library-exception.h"
 #include "jni.h"
 #include "libloader.h"
-#include "../../../../external/llama.cpp/llama.h"
 
 typedef void (*llama_backend_init_pointer)(bool);
 typedef void (*llama_backend_free_pointer)();
-typedef llama_model* (*llama_load_model_from_file_pointer)(const char*, struct llama_context_params);
+typedef llama_model *(*llama_load_model_from_file_pointer)
+    (const char *, struct llama_context_params);
 
 extern "C" {
 
@@ -77,7 +78,7 @@ extern "C" {
               "llama_load_model_from_file");
       jclass javaParamsClass = env->GetObjectClass(javaParams);
 
-      jbyte *pathBytes = env->GetByteArrayElements(path, NULL);
+      jbyte *pathBytes = env->GetByteArrayElements(path, nullptr);
       jsize length = env->GetArrayLength(path);
       char *llamaPath = new char[length + 1];
       memcpy(llamaPath, pathBytes, length);
@@ -115,7 +116,7 @@ extern "C" {
   JNIEXPORT jbyteArray
   JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTimesC
       (JNIEnv *env, jobject thisObject, jbyteArray path) {
-    jbyte *bytes = env->GetByteArrayElements(path, NULL);
+    jbyte *bytes = env->GetByteArrayElements(path, nullptr);
     jsize len = env->GetArrayLength(path);
     char *cStr = new char[len + 1];
     memcpy(cStr, bytes, len);

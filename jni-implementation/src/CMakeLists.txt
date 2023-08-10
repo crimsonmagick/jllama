@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
-project(jni_implementation)
+project(jni-implementation)
 
 set(CMAKE_CXX_STANDARD 23)
 
 get_filename_component(JNI_BINDINGS_DIR ../../jni-bindings/build/generated/sources/headers/java/main ABSOLUTE)
+get_filename_component(LLAMA_DIR external/llama.cpp ABSOLUTE)
 
 set(JAVA_HOME $ENV{JAVA8_HOME})
 set(JAVA_INCLUDE ${JAVA_HOME}/include)
@@ -20,3 +21,10 @@ else()
 endif()
 
 add_subdirectory(main/cpp)
+
+option(BUILD_LLAMA_CPP "Option to build llama.cpp" OFF)
+
+if (BUILD_LLAMA_CPP)
+    add_subdirectory(external/llama.cpp)
+endif()
+

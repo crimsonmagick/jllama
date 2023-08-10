@@ -17,8 +17,8 @@ library {
   }
   source.from 'src/main/cpp', '../jni-bindings/build/generated/sources/headers/java/main'
   privateHeaders.from '../jni-bindings/build/generated/sources/headers/java/main',
-    "$javaHome/include", "$javaHome/include/linux", "$javaHome/include/win32",
-    "$javaHome/include/darwin"
+    'src/external/llama.cpp', "$javaHome/include", "$javaHome/include/linux",
+    "$javaHome/include/win32", "$javaHome/include/darwin"
 }
 
 tasks.withType(CppCompile) {
