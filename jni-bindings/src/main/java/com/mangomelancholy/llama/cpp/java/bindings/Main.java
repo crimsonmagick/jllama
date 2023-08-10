@@ -1,10 +1,14 @@
 package com.mangomelancholy.llama.cpp.java.bindings;
 
+import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 
 public class Main {
 
   static {
+    final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+    final String pid = jvmName.split("@")[0];
+    System.out.printf("pid=%s%n", pid);
     System.loadLibrary("jni-implementation");
   }
   public static void main(final String[] args) {
