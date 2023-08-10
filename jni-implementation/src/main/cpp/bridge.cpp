@@ -82,11 +82,12 @@ extern "C" {
       jsize length = env->GetArrayLength(path);
       char *llamaPath = new char[length + 1];
       memcpy(llamaPath, pathBytes, length);
-      llamaPath[length] = '\n';
+      llamaPath[length] = '\0';
 
       jfieldID seedFieldId = env->GetFieldID(javaParamsClass, "seed", "J");
       long seed = env->GetLongField(javaParams, seedFieldId);
       // TODO marshall java params to llama_params and call method
+      delete[] llamaPath;
     } catch (const DynamicLibraryException &e) {
       jni::throwException(env, e);
     }
@@ -96,7 +97,7 @@ extern "C" {
   JNIEXPORT jbyteArray
   JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTimesCpp
       (JNIEnv *env, jobject thisObject, jbyteArray path) {
-    jbyte *bytes = env->GetByteArrayElements(path, NULL);
+    jbyte *bytes = env->GetByteArrayElements(path, nullptr);
     jsize len = env->GetArrayLength(path);
 
     std::string cppStr(reinterpret_cast<char *>(bytes), len);

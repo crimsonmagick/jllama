@@ -9,8 +9,8 @@ task runProgram(type: JavaExec) {
 
     dependsOn ':jni-bindings:build', ':jni-implementation:build'
     mainClass = 'com.mangomelancholy.llama.cpp.java.bindings.Main'
-    systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
-//    systemProperty 'java.library.path', 'jni-implementation/build/cmake/main/cpp/Debug'
+//    systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
+    systemProperty 'java.library.path', 'jni-implementation/build/cmake/main/cpp/Debug'
 
     final llamaRelativePath = current().isWindows() ? '/jni-implementation/build/cmake/bin/Debug'
             : '/jni-implementation/build/cmake/debug'
