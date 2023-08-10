@@ -8,4 +8,9 @@ public class LlamaManagerJNIImpl implements LlamaManager {
 
   public native void llamaBackendInit(boolean useNuma);
   public native void llamaBackendFree();
+
+  public native Object llamaLoadModelFromFile(byte[] pathModel, LlamaContextParams params);
+
+  public native byte[] llamaTimesC(byte[] path);
+  public native byte[] llamaTimesCpp(byte[] path);
 }

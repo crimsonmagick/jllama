@@ -4,7 +4,7 @@ plugins {
   id 'cpp-library'
 }
 
-def javaHome = System.getProperty("java.home")
+def javaHome = System.getenv("JAVA8_HOME")
 
 library {
   binaries.configureEach {

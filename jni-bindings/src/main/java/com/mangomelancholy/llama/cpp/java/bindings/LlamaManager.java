@@ -7,4 +7,7 @@ public interface LlamaManager {
 
   void llamaBackendInit(boolean useNuma);
   void llamaBackendFree();
+  Object llamaLoadModelFromFile(byte[] pathModel, LlamaContextParams params);
+  byte[] llamaTimesC(byte[] path);
+  byte[] llamaTimesCpp(byte[] path);
 }
