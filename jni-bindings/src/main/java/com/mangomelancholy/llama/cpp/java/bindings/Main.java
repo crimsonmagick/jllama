@@ -30,7 +30,26 @@ public class Main {
 
   private static LlamaContextParams generateContextParams() {
     final LlamaContextParams contextParams = new LlamaContextParams();
-    contextParams.setSeed(12L);
+    contextParams.setSeed(0xFFFFFFFF);
+    contextParams.setnCtx(512);
+    contextParams.setnBatch(512);
+    contextParams.setnGqa(1);
+    contextParams.setRmsNormEps(5e-6f);
+    contextParams.setnGpuLayers(0);
+    contextParams.setMainGpu(0);
+    contextParams.setTensorSplit(null);
+    contextParams.setRopeFreqBase(10000.0f);
+    contextParams.setRopeFreqScale(1.0f);
+    contextParams.setProgressCallback(null);
+    contextParams.setProgressCallbackUserData(null);
+    contextParams.setLowVram(false);
+    contextParams.setMulMatQ(false);
+    contextParams.setF16Kv(true);
+    contextParams.setLogitsAll(false);
+    contextParams.setVocabOnly(false);
+    contextParams.setUseMmap(true);
+    contextParams.setUseMlock(false);
+    contextParams.setEmbedding(false);
     return contextParams;
   }
 

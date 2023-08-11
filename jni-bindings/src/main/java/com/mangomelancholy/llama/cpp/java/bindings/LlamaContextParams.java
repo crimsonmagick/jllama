@@ -3,7 +3,7 @@ package com.mangomelancholy.llama.cpp.java.bindings;
 import java.util.function.BiConsumer;
 
 public class LlamaContextParams {
-    private long seed;
+    private int seed; // unsigned
     private int nCtx;
     private int nBatch;
     private int nGqa;
@@ -28,7 +28,7 @@ public class LlamaContextParams {
         return seed;
     }
 
-    public void setSeed(long seed) {
+    public void setSeed(int seed) {
         this.seed = seed;
     }
 

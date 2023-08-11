@@ -84,10 +84,34 @@ extern "C" {
       memcpy(llamaPath, pathBytes, length);
       llamaPath[length] = '\0';
 
-      jfieldID seedFieldId = env->GetFieldID(javaParamsClass, "seed", "J");
-      long seed = env->GetLongField(javaParams, seedFieldId);
-      // TODO marshall java params to llama_params and call method
+      jfloatArray floatArray = jni::getJFloatArray(env, javaParamsClass, javaParams, "tensorSplit");
+      const float * tensorSplit = floatArray ? env->GetFloatArrayElements(floatArray, nullptr) : nullptr;
+      llama_context_params contextParams = {
+          jni::getUnsignedInt32(env, javaParamsClass, javaParams, "seed"),
+          jni::getInt32(env, javaParamsClass, javaParams, "nCtx"),
+          jni::getInt32(env, javaParamsClass, javaParams, "nBatch"),
+          jni::getInt32(env, javaParamsClass, javaParams, "nGqa"),
+          jni::getFloat(env, javaParamsClass, javaParams, "rmsNormEps"),
+          jni::getInt32(env, javaParamsClass, javaParams, "nGpuLayers"),
+          jni::getInt32(env, javaParamsClass, javaParams, "mainGpu"),
+          tensorSplit,
+          jni::getFloat(env, javaParamsClass, javaParams, "ropeFreqBase"),
+          jni::getFloat(env, javaParamsClass, javaParams, "ropeFreqScale"),
+          nullptr,
+          nullptr,
+          jni::getBool(env, javaParamsClass, javaParams, "lowVram"),
+          jni::getBool(env, javaParamsClass, javaParams, "mulMatQ"),
+          jni::getBool(env, javaParamsClass, javaParams, "f16Kv"),
+          jni::getBool(env, javaParamsClass, javaParams, "logitsAll"),
+          jni::getBool(env, javaParamsClass, javaParams, "vocabOnly"),
+          jni::getBool(env, javaParamsClass, javaParams, "useMmap"),
+          jni::getBool(env, javaParamsClass, javaParams, "useMlock"),
+          jni::getBool(env, javaParamsClass, javaParams, "embedding")
+      };
       delete[] llamaPath;
+      if (tensorSplit) {
+        env->ReleaseFloatArrayElements(floatArray, (jfloat*)tensorSplit, JNI_ABORT);
+      }
     } catch (const DynamicLibraryException &e) {
       jni::throwException(env, e);
     }
