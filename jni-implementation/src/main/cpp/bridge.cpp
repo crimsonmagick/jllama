@@ -115,7 +115,13 @@ extern "C" {
       if (tensorSplit) {
         env->ReleaseFloatArrayElements(floatArray, (jfloat*)tensorSplit, JNI_ABORT);
       }
-      return jni::constructLlamaOpaqueModel(env, model);
+
+      if (!model) {
+        jni::throwJNIException(env, jni::JNIException("Unable to load llama model from file"));
+        return nullptr;
+      } else {
+        return jni::constructLlamaOpaqueModel(env, model);
+      }
     } catch (const DynamicLibraryException &e) {
       jni::throwDLLException(env, e);
     } catch (const jni::JNIException &e) {
