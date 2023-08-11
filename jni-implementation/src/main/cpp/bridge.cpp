@@ -115,9 +115,7 @@ extern "C" {
       if (tensorSplit) {
         env->ReleaseFloatArrayElements(floatArray, (jfloat*)tensorSplit, JNI_ABORT);
       }
-      jlong llamaModelPointer = reinterpret_cast<jlong>(model);
-
-      return (jobject) nullptr;
+      return jni::constructLlamaOpaqueModel(env, model);
     } catch (const DynamicLibraryException &e) {
       jni::throwDLLException(env, e);
     } catch (const jni::JNIException &e) {

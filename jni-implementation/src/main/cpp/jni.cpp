@@ -74,4 +74,24 @@ namespace jni {
                          "com/mangomelancholy/llama/cpp/java/bindings/exceptions/JNIException", e.what());
   }
 
+  jobject constructLlamaOpaqueModel(JNIEnv *env, llama_model *modelPointer) {
+    auto jmodelPointer = reinterpret_cast<jlong>(modelPointer);
+
+    jclass llamaOpaqueModelClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaOpaqueModel");
+    if (llamaOpaqueModelClass == nullptr) {
+      throw JNIException("Unable to find LlamaOpaqueModel class");
+    }
+
+    jmethodID constructor = env->GetMethodID(llamaOpaqueModelClass, "<init>", "(J)V");
+    if (constructor == nullptr) {
+      throw JNIException("Unable to find LlamaOpaqueModel constructor");
+    }
+
+    jobject llamaOpaqueModelObj = env->NewObject(llamaOpaqueModelClass, constructor, jmodelPointer);
+    if (llamaOpaqueModelObj == nullptr) {
+      throw JNIException("Unable to initialize LlamaOpaqueModel");
+    }
+    return llamaOpaqueModelObj;
+  }
+
 }
