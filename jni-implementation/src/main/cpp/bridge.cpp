@@ -21,7 +21,7 @@ extern "C" {
     try {
       loadLibrary("llama");
     } catch (const DynamicLibraryException &e) {
-      jni::throwException(env, e);
+      jni::throwDLLException(env, e);
     }
   }
 
@@ -32,7 +32,7 @@ extern "C" {
     try {
       closeLibrary();
     } catch (const DynamicLibraryException &e) {
-      jni::throwException(env, e);
+      jni::throwDLLException(env, e);
     }
   }
 
@@ -47,7 +47,7 @@ extern "C" {
       func(useNuma);
       std::cout << "Initialized llama.cpp backend\n";
     } catch (const DynamicLibraryException &e) {
-      jni::throwException(env, e);
+      jni::throwDLLException(env, e);
     }
   }
 
@@ -61,7 +61,7 @@ extern "C" {
       llamaFree();
       std::cout << "llama freed\n";
     } catch (const DynamicLibraryException &e) {
-      jni::throwException(env, e);
+      jni::throwDLLException(env, e);
     }
   }
 
@@ -108,14 +108,21 @@ extern "C" {
           jni::getBool(env, javaParamsClass, javaParams, "useMlock"),
           jni::getBool(env, javaParamsClass, javaParams, "embedding")
       };
+
+      llama_model* model = llamaLoadModel(llamaPath, contextParams);
+
       delete[] llamaPath;
       if (tensorSplit) {
         env->ReleaseFloatArrayElements(floatArray, (jfloat*)tensorSplit, JNI_ABORT);
       }
+      jlong llamaModelPointer = reinterpret_cast<jlong>(model);
+
+      return (jobject) nullptr;
     } catch (const DynamicLibraryException &e) {
-      jni::throwException(env, e);
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException &e) {
+      jni::throwJNIException(env, e);
     }
-    return (jobject) nullptr;
   }
 
   JNIEXPORT jbyteArray

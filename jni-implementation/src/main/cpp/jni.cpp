@@ -21,21 +21,6 @@ namespace jni {
     return static_cast<uint32_t>(env->GetIntField(jInstance, fieldId));
   }
 
-  void throwException(JNIEnv * env, const DynamicLibraryException& e) {
-    jclass jExceptionClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/exceptions/DynamicLibraryException");
-    if (jExceptionClass == nullptr) {
-      std::cerr << "ERROR - Unable to lookup Java Exception class DynamicLibraryException" << std::endl;
-      return;
-    }
-    jmethodID constructor = env->GetMethodID(jExceptionClass, "<init>", "(Ljava/lang/String;)V");
-    if (constructor == nullptr) {
-      std::cerr << "ERROR - Unable to lookup constructor for class DynamicLibraryException" << std::endl;
-      return;
-    }
-    jstring jmsg = env->NewStringUTF(e.what());
-    auto jException = (jthrowable) env->NewObject(jExceptionClass, constructor, jmsg);
-    env->Throw(jException);
-  }
   float getFloat(JNIEnv *env, jclass jType, jobject jInstance, const char *fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "F");
     if (!fieldId) {
@@ -43,6 +28,7 @@ namespace jni {
     }
     return static_cast<float>(env->GetFloatField(jInstance, fieldId));
   }
+
   bool getBool(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "Z");
     if (!fieldId) {
@@ -56,4 +42,36 @@ namespace jni {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "[F");
     return (jfloatArray) env->GetObjectField(jInstance, fieldId);
   }
+
+  void throwNativeException(JNIEnv *env, const char* className,
+                            const char* message) {
+    jclass jExceptionClass = env->FindClass(className);
+    if (jExceptionClass == nullptr) {
+      std::cerr << "ERROR - Unable to lookup Java Exception class " << className
+                << std::endl;
+      return;
+    }
+    jmethodID constructor =
+        env->GetMethodID(jExceptionClass, "<init>", "(Ljava/lang/String;)V");
+    if (constructor == nullptr) {
+      std::cerr << "ERROR - Unable to lookup constructor for class "
+                << className << std::endl;
+      return;
+    }
+    jstring jmsg = env->NewStringUTF(message);
+    auto jException =
+        (jthrowable) env->NewObject(jExceptionClass, constructor, jmsg);
+    env->Throw(jException);
+  }
+
+  void throwDLLException(JNIEnv * env, const DynamicLibraryException& e) {
+    throwNativeException(env,
+                         "com/mangomelancholy/llama/cpp/java/bindings/exceptions/DynamicLibraryException", e.what());
+  }
+
+  void throwJNIException(JNIEnv *env, const JNIException &e) {
+    throwNativeException(env,
+                         "com/mangomelancholy/llama/cpp/java/bindings/exceptions/JNIException", e.what());
+  }
+
 }
