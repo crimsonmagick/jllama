@@ -3,6 +3,7 @@
 #include "exceptions/dynamic-library-exception.h"
 
 struct llama_model;
+struct llama_context;
 
 namespace jni {
 
@@ -20,7 +21,9 @@ namespace jni {
   bool getBool(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   jfloatArray getJFloatArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
   jobject constructLlamaOpaqueModel(JNIEnv* env, llama_model* modelPointer);
+  llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaOpaqueModel);
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);
   void throwJNIException(JNIEnv* env, const JNIException& e);
+  jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer);
 }
 #endif //LLAMA_CPP_JAVA_BINDINGS_JNI_H

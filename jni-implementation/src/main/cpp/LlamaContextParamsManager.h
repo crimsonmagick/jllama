@@ -5,8 +5,9 @@
 
 class LlamaContextParamsManager {
   public:
-  explicit LlamaContextParamsManager(JNIEnv* env, jbyteArray jPath,
+  LlamaContextParamsManager(JNIEnv* env, jbyteArray jPath,
                                      jobject javaContextParams);
+  LlamaContextParamsManager(JNIEnv* env, jobject javaContextParams);
   ~LlamaContextParamsManager();
   char* getPath();
   llama_context_params getParams();
@@ -14,7 +15,7 @@ class LlamaContextParamsManager {
   private:
   JNIEnv* env;
   char* path;
-  llama_context_params llamaContextParams;
+  llama_context_params llamaContextParams{};
   jfloatArray tensorSplitFloatArray;
   const float* tensorSplit;
 

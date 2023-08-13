@@ -19,8 +19,11 @@ public class Main {
           "C:\\Users\\welby\\workspace\\ai\\llama-cpp-java-bindings\\models\\llama-2-7b\\ggml-model-q4_0.bin";
       llamaManager.loadLibrary();
       llamaManager.llamaBackendInit(true);
-      final LlamaOpaqueModel llamaOpaqueModel = llamaManager.llamaLoadModelFromFile(modelPath.getBytes(StandardCharsets.UTF_8),
-          generateContextParams());
+      final LlamaContextParams llamaContextParams = generateContextParams();
+      final LlamaOpaqueModel llamaOpaqueModel = llamaManager.llamaLoadModelFromFile(
+          modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
+      final LlamaOpaqueContext llamaOpaqueContext =
+          llamaManager.llamaLoadContextWithModel(llamaOpaqueModel, llamaContextParams);
       llamaManager.llamaBackendFree();
       llamaManager.closeLibrary();
     } catch (RuntimeException e) {

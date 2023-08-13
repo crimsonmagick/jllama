@@ -5,10 +5,12 @@
 #include "llama.h"
 #include "LlamaContextParamsManager.h"
 
-typedef void (*llama_backend_init_pointer)(bool);
-typedef void (*llama_backend_free_pointer)();
-typedef llama_model *(*llama_load_model_from_file_pointer)
-    (const char *, struct llama_context_params);
+typedef void (* llama_backend_init_pointer)(bool);
+typedef void (* llama_backend_free_pointer)();
+typedef llama_model* (* llama_load_model_from_file_pointer)
+    (const char*, struct llama_context_params);
+typedef llama_context* (* llama_new_context_with_model_pointer)
+    (llama_model*, llama_context_params);
 
 extern "C" {
 
@@ -89,5 +91,31 @@ extern "C" {
     }
     return nullptr;
   }
+
+  JNIEXPORT jobject
+  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaLoadContextWithModel
+      (JNIEnv* env, jobject thisObject, jobject jllamaModel, jobject jContextParams) {
+
+    try {
+      llama_new_context_with_model_pointer llamaCreateContext =
+          (llama_new_context_with_model_pointer) getFunctionAddress(
+              "llama_new_context_with_model");
+
+      auto paramsManager = LlamaContextParamsManager(env, jContextParams);
+      auto llamaModel = jni::getLlamaModelPointer(env, jllamaModel);
+      llama_context* context = llamaCreateContext(llamaModel, paramsManager.getParams());
+
+      if (context) {
+        return jni::constructLlamaOpaqueContext(env, context);
+      }
+      jni::throwJNIException(env, jni::JNIException("Unable to create context from llama model"));
+    } catch (const DynamicLibraryException &e) {
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException &e) {
+      jni::throwJNIException(env, e);
+    }
+    return nullptr;
+  }
+
 
 }

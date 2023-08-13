@@ -6,4 +6,5 @@ public interface LlamaManager {
   void llamaBackendInit(boolean useNuma);
   void llamaBackendFree();
   LlamaOpaqueModel llamaLoadModelFromFile(byte[] pathModel, LlamaContextParams params);
+  LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams llamaContextParams);
 }
