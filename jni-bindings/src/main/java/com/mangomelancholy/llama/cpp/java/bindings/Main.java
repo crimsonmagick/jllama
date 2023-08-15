@@ -24,6 +24,11 @@ public class Main {
           modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
       final LlamaOpaqueContext llamaOpaqueContext =
           llamaManager.llamaLoadContextWithModel(llamaOpaqueModel, llamaContextParams);
+      final String stringToTokenize = "Hello there, my name is Fred. What is yours?";
+      final byte[] toTokenize = stringToTokenize.getBytes(StandardCharsets.UTF_8);
+      final int maxTokenCount = stringToTokenize.length();
+      final int[] tokens = new int[maxTokenCount];
+      final int tokenCount = llamaManager.llamaTokenizeWithModel(llamaOpaqueModel, toTokenize, tokens, maxTokenCount, true);
       llamaManager.llamaBackendFree();
       llamaManager.closeLibrary();
     } catch (RuntimeException e) {

@@ -117,5 +117,9 @@ extern "C" {
     return nullptr;
   }
 
+JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTokenizeWithModel
+    (JNIEnv *, jobject, jobject, jbyteArray, jintArray, jint, jboolean) {
+    return static_cast<jint>(0);
+  }
 
 }

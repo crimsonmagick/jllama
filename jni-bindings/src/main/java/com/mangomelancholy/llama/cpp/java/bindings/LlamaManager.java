@@ -7,4 +7,5 @@ public interface LlamaManager {
   void llamaBackendFree();
   LlamaOpaqueModel llamaLoadModelFromFile(byte[] pathModel, LlamaContextParams params);
   LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams llamaContextParams);
+  int llamaTokenizeWithModel(LlamaOpaqueModel model, byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
 }
