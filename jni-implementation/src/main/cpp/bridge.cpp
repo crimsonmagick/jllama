@@ -4,6 +4,7 @@
 #include "libloader.h"
 #include "llama.h"
 #include "LlamaContextParamsManager.h"
+#include "Utf8StringManager.h"
 
 typedef void (* llama_backend_init_pointer)(bool);
 typedef void (* llama_backend_free_pointer)();
@@ -11,6 +12,8 @@ typedef llama_model* (* llama_load_model_from_file_pointer)
     (const char*, struct llama_context_params);
 typedef llama_context* (* llama_new_context_with_model_pointer)
     (llama_model*, llama_context_params);
+typedef int(* llama_tokenize_with_model_pointer)
+    (llama_model*, const char*, llama_token*, int, bool);
 
 extern "C" {
 
@@ -42,6 +45,11 @@ extern "C" {
       JNIEnv *env,
       jobject thisObject,
       jboolean useNuma) {
+    // TODO move to build?
+    if (sizeof(jint) != sizeof(llama_token)) {
+      jni::throwJNIException(env, jni::JNIException("Java int value is the not the same size as a token. Aborting init..."));
+      return;
+    }
     try {
       llama_backend_init_pointer func =
           (llama_backend_init_pointer) getFunctionAddress("llama_backend_init");
@@ -117,8 +125,41 @@ extern "C" {
     return nullptr;
   }
 
-JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTokenizeWithModel
-    (JNIEnv *, jobject, jobject, jbyteArray, jintArray, jint, jboolean) {
+  JNIEXPORT jint
+  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTokenizeWithModel
+      (JNIEnv* env,
+       jobject thisObject,
+       jobject jllamaModel,
+       jbyteArray jToTokenize,
+       jintArray jTokensOut,
+       jint jmaxTokens,
+       jboolean jBos) {
+    try {
+      llama_tokenize_with_model_pointer tokenize =
+          (llama_tokenize_with_model_pointer) getFunctionAddress(
+              "llama_tokenize_with_model");
+
+      auto llamaModel = jni::getLlamaModelPointer(env, jllamaModel);
+
+      auto stringManager = Utf8StringManager(env, jToTokenize);
+      auto toTokenize = stringManager.getUtf8String();
+      jint* tokensOut = env->GetIntArrayElements(jTokensOut, nullptr);
+      int result = tokenize(llamaModel,
+                            toTokenize,
+                            reinterpret_cast<llama_token*>(tokensOut),
+                            jmaxTokens,
+                            jBos);
+      if (result > 0 ) {
+        env->ReleaseIntArrayElements(jTokensOut, tokensOut, 0);
+      } else {
+        env->ReleaseIntArrayElements(jTokensOut, tokensOut, JNI_ABORT);
+      }
+      return result;
+    } catch (const DynamicLibraryException& e) {
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException& e) {
+      jni::throwJNIException(env, e);
+    }
     return static_cast<jint>(0);
   }
 
