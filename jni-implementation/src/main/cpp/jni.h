@@ -25,5 +25,6 @@ namespace jni {
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);
   void throwJNIException(JNIEnv* env, const JNIException& e);
   jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer);
+  llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext);
 }
 #endif //LLAMA_CPP_JAVA_BINDINGS_JNI_H

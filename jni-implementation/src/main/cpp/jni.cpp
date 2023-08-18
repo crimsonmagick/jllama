@@ -125,5 +125,16 @@ namespace jni {
     }
     return reinterpret_cast<llama_model*>(env->GetLongField(llamaOpaqueModel, fieldId));
   }
+  llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext) {
+    jclass llamaOpaqueContextClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaOpaqueContext");
+    if (llamaOpaqueContextClass == nullptr) {
+      throw JNIException("Unable to find LlamaOpaqueContext class");
+    }
+    jfieldID fieldId = env->GetFieldID(llamaOpaqueContextClass, "contextPointer", "J");
+    if (!fieldId) {
+      throw JNIException("Unable to find contextPointer field for LlamaOpaqueContext class");
+    }
+    return reinterpret_cast<llama_context*>(env->GetLongField(jLlamaContext, fieldId));
+  }
 
 }

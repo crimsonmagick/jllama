@@ -6,6 +6,8 @@
 #include "LlamaContextParamsManager.h"
 #include "Utf8StringManager.h"
 
+const int FAILURE = 1;
+
 typedef void (* llama_backend_init_pointer)(bool);
 typedef void (* llama_backend_free_pointer)();
 typedef llama_model* (* llama_load_model_from_file_pointer)
@@ -14,6 +16,7 @@ typedef llama_context* (* llama_new_context_with_model_pointer)
     (llama_model*, llama_context_params);
 typedef int(* llama_tokenize_with_model_pointer)
     (llama_model*, const char*, llama_token*, int, bool);
+typedef int(* llama_eval_pointer)(llama_context*, llama_token*, int, int, int);
 
 extern "C" {
 
@@ -160,7 +163,7 @@ extern "C" {
     } catch (const jni::JNIException& e) {
       jni::throwJNIException(env, e);
     }
-    return static_cast<jint>(0);
+    return FAILURE;
   }
 
   JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaEval(
@@ -171,9 +174,20 @@ extern "C" {
       jint jnTokens,
       jint jnPast,
       jint jnThreads) {
-
-
-    return 0;
+    try {
+      llama_eval_pointer eval = (llama_eval_pointer) getFunctionAddress(
+          "llama_eval");
+      auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+      jint* tokens = env->GetIntArrayElements(jTokens, nullptr);
+      int result = eval(llamaContext, reinterpret_cast<int*>(tokens), jnTokens, jnPast, jnThreads);
+      env->ReleaseIntArrayElements(jTokens, tokens, JNI_ABORT);
+      return result;
+    } catch (const DynamicLibraryException& e) {
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException& e) {
+      jni::throwJNIException(env, e);
+    }
+    return FAILURE;
   }
 
 }
