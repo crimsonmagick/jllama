@@ -19,11 +19,12 @@ public class LlamaManagerJNIImpl implements LlamaManager {
       LlamaContextParams params);
 
   @Override
-  public native LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel,
-      LlamaContextParams params);
+  public native LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams params);
 
   @Override
-  public native int llamaTokenizeWithModel(LlamaOpaqueModel model, byte[] text, int[] tokens,
-      int nMaxTokens, boolean addBos);
+  public native int llamaTokenizeWithModel(LlamaOpaqueModel model, byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
+
+  @Override
+  public native int llamaEval(LlamaOpaqueContext context, int[] tokens, int nTokens, int nPast, int nThreads);
 
 }

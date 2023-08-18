@@ -29,6 +29,11 @@ public class Main {
       final int maxTokenCount = stringToTokenize.length();
       final int[] tokens = new int[maxTokenCount];
       final int tokenCount = llamaManager.llamaTokenizeWithModel(llamaOpaqueModel, toTokenize, tokens, maxTokenCount, true);
+      if (llamaManager.llamaEval(llamaOpaqueContext, tokens, tokenCount, 0, 1) == 0) {
+        System.out.println("SUCCESS - Eval was a success!");
+      } else {
+        System.out.println("FAILURE - Eval was a failure!");
+      }
       llamaManager.llamaBackendFree();
       llamaManager.closeLibrary();
     } catch (RuntimeException e) {

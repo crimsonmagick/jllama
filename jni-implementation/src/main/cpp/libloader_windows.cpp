@@ -46,7 +46,6 @@ void *getFunctionAddress(const std::string functionName) {
     std::cerr << errorMessage << "\n";
     throw DynamicLibraryException(errorMessage.c_str());
   }
-  std::cout << "loaded function successfully!\n";
   return func;
 }
 #endif

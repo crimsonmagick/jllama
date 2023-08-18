@@ -163,4 +163,17 @@ extern "C" {
     return static_cast<jint>(0);
   }
 
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaEval(
+      JNIEnv* env,
+      jobject thisObject,
+      jobject jContext,
+      jintArray jTokens,
+      jint jnTokens,
+      jint jnPast,
+      jint jnThreads) {
+
+
+    return 0;
+  }
+
 }
