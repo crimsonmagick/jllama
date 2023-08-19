@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -29,24 +31,36 @@ public class Main {
           modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
       final LlamaOpaqueContext llamaOpaqueContext =
           llamaManager.llamaLoadContextWithModel(llamaOpaqueModel, llamaContextParams);
+
       final String stringToTokenize = "Hello there, my name is Fred. What is yours?";
       final byte[] toTokenize = stringToTokenize.getBytes(StandardCharsets.UTF_8);
       final int maxTokenCount = stringToTokenize.length();
-      final int[] tokens = new int[maxTokenCount];
-      final int tokenCount = llamaManager.llamaTokenizeWithModel(llamaOpaqueModel, toTokenize, tokens, maxTokenCount, true);
-      final int threads = Runtime.getRuntime().availableProcessors() * 2;
-      if (llamaManager.llamaEval(llamaOpaqueContext, tokens, tokenCount, 0, threads) == 0) {
-        System.out.println("SUCCESS - Eval was a success!");
-      } else {
-        System.out.println("FAILURE - Eval was a failure!");
-      }
+      final int[] tokensTemp = new int[maxTokenCount];
+      final int tokenCount = llamaManager.llamaTokenizeWithModel(llamaOpaqueModel, toTokenize, tokensTemp, maxTokenCount, true);
+      final int[] tokens = new int[tokenCount];
+      System.arraycopy(tokensTemp, 0, tokens, 0, tokenCount);
+
+      final int threads = Runtime.getRuntime().availableProcessors() + 1;
+
       List<Integer> generatedTokens = new ArrayList<>(GENERATED_TOKEN_COUNT);
-      for (int i = 0; i < GENERATED_TOKEN_COUNT; i++) {
-        float[] logits = llamaManager.llamaGetLogits(llamaOpaqueContext);
-        LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
-        int generatedToken = llamaManager.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
-        generatedTokens.add(generatedToken);
+
+      llamaManager.llamaEval(llamaOpaqueContext, tokens, tokenCount, 0, threads);
+      float[] logits = llamaManager.llamaGetLogits(llamaOpaqueContext);
+      LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
+      int previousToken = llamaManager.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
+      generatedTokens.add(previousToken);
+      for (int i = 1; i < GENERATED_TOKEN_COUNT; i++) {
+        final int res = llamaManager.llamaEval(llamaOpaqueContext, new int[]{previousToken}, tokenCount, i,
+            threads);
+        if (res != 0) {
+          throw new RuntimeException("Non zero response from eval");
+        }
+        logits = llamaManager.llamaGetLogits(llamaOpaqueContext);
+        tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
+        previousToken = llamaManager.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
+        generatedTokens.add(previousToken);
       }
+
       final String generatedText = generatedTokens.stream()
           .map(token -> new String(llamaManager.llamaTokenToStr(llamaOpaqueContext, token),
               StandardCharsets.UTF_8))

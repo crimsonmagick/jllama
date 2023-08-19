@@ -17,6 +17,7 @@ typedef llama_context* (* llama_new_context_with_model_pointer)
 typedef int(* llama_tokenize_with_model_pointer)
     (llama_model*, const char*, llama_token*, int, bool);
 typedef int(* llama_eval_pointer)(llama_context*, llama_token*, int, int, int);
+typedef const char* (* llama_token_to_str_pointer)(llama_context*, llama_token);
 
 extern "C" {
 
@@ -199,7 +200,24 @@ extern "C" {
   }
 
   JNIEXPORT jbyteArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTokenToStr(JNIEnv* env, jobject thisObject, jobject jContext, jint jToken) {
-    return env->NewByteArray(0);
+    try {
+      auto detokenize = (llama_token_to_str_pointer) getFunctionAddress(
+          "llama_token_to_str");
+
+      auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+
+      const char * result = detokenize(llamaContext, jToken);
+      auto length = static_cast<jsize>(strlen(result));
+      jbyteArray detokenized = env->NewByteArray(length);
+      env->SetByteArrayRegion(detokenized, 0, length, reinterpret_cast<const jbyte*>(result));
+      return detokenized;
+    } catch (const DynamicLibraryException& e) {
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException& e) {
+      jni::throwJNIException(env, e);
+    }
+    return nullptr;
+//    return env->NewByteArray(0);
   }
 
 }
