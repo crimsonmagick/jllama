@@ -1,7 +1,6 @@
 package com.mangomelancholy.llama.cpp.java.bindings;
 
-public interface LlamaManager {
-
+public interface LlamaCpp {
   void loadLibrary();
 
   void closeLibrary();

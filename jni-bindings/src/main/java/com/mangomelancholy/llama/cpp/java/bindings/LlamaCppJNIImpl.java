@@ -1,6 +1,7 @@
 package com.mangomelancholy.llama.cpp.java.bindings;
 
-public class LlamaManagerJNIImpl implements LlamaManager {
+class LlamaCppJNIImpl implements LlamaCpp {
+  static LlamaCppJNIImpl singleton;
 
   @Override
   public native void loadLibrary();

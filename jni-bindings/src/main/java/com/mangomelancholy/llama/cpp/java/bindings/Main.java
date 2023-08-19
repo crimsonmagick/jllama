@@ -2,16 +2,10 @@ package com.mangomelancholy.llama.cpp.java.bindings;
 
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Main {
 
-  static final int GENERATED_TOKEN_COUNT = 50;
+  static final int GENERATED_TOKEN_COUNT = 200;
 
   static {
     final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
@@ -22,7 +16,7 @@ public class Main {
 
   public static void main(final String[] args) {
     try {
-      final LlamaManager llamaManager = new LlamaManagerJNIImpl();
+      final LlamaCpp llamaManager = new LlamaCppJNIImpl();
       final Detokenizer detokenizer = new Detokenizer(llamaManager);
       final String modelPath =
           "C:\\Users\\welby\\workspace\\ai\\llama-cpp-java-bindings\\models\\llama-2-7b\\ggml-model-q4_0.bin";
@@ -34,26 +28,24 @@ public class Main {
       final LlamaOpaqueContext llamaOpaqueContext =
           llamaManager.llamaLoadContextWithModel(llamaOpaqueModel, llamaContextParams);
 
-      final String stringToTokenize = "Hello there, my name is Fred. What is yours?";
-      final byte[] toTokenize = stringToTokenize.getBytes(StandardCharsets.UTF_8);
-      final int maxTokenCount = stringToTokenize.length();
+      final String prompt = "I love my cat Winnie, he is ";
+      final byte[] toTokenize = prompt.getBytes(StandardCharsets.UTF_8);
+      final int maxTokenCount = prompt.length();
       final int[] tokensTemp = new int[maxTokenCount];
       final int tokenCount = llamaManager.llamaTokenizeWithModel(llamaOpaqueModel, toTokenize, tokensTemp, maxTokenCount, true);
       final int[] tokens = new int[tokenCount];
       System.arraycopy(tokensTemp, 0, tokens, 0, tokenCount);
-      System.out.println(
-          "detokenized: " + detokenizer.detokenize(Arrays.stream(tokens).boxed().collect(
-              Collectors.toList()), llamaOpaqueContext));
 
-      final int threads = Runtime.getRuntime().availableProcessors() + 1;
+      // availableProcessors is the number of logical cores - we want physical cores as our basis for thread allocation
+      final int threads = Runtime.getRuntime().availableProcessors() / 2;
 
-      List<Integer> generatedTokens = new ArrayList<>(GENERATED_TOKEN_COUNT);
 
       llamaManager.llamaEval(llamaOpaqueContext, tokens, tokenCount, 0, threads);
       float[] logits = llamaManager.llamaGetLogits(llamaOpaqueContext);
       LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
       int previousToken = llamaManager.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
-      generatedTokens.add(previousToken);
+      System.out.print(prompt);
+      System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
       for (int i = tokenCount + 1; i < GENERATED_TOKEN_COUNT + tokenCount + 1; i++) {
         final int res = llamaManager.llamaEval(llamaOpaqueContext, new int[]{previousToken}, 1, i, threads);
         if (res != 0) {
@@ -62,11 +54,8 @@ public class Main {
         logits = llamaManager.llamaGetLogits(llamaOpaqueContext);
         tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
         previousToken = llamaManager.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
-        generatedTokens.add(previousToken);
+        System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
       }
-
-      final String generatedText = detokenizer.detokenize(generatedTokens, llamaOpaqueContext);
-      System.out.println("Llama says: " + generatedText);
 
       llamaManager.llamaBackendFree();
       llamaManager.closeLibrary();

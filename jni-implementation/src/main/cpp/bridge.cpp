@@ -1,4 +1,4 @@
-#include "com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl.h"
+#include "com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl.h"
 #include "exceptions/dynamic-library-exception.h"
 #include "jni.h"
 #include "libloader.h"
@@ -26,7 +26,7 @@ typedef llama_token(* llama_sample_token_greedy_pointer)
 extern "C" {
 
   JNIEXPORT void
-  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_loadLibrary(
+  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_loadLibrary(
       JNIEnv *env,
       jobject thisObject) {
 
@@ -38,7 +38,7 @@ extern "C" {
   }
 
   JNIEXPORT void
-  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_closeLibrary(
+  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_closeLibrary(
       JNIEnv *env,
       jobject thisObject) {
     try {
@@ -49,15 +49,10 @@ extern "C" {
   }
 
   JNIEXPORT void
-  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaBackendInit(
+  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaBackendInit(
       JNIEnv *env,
       jobject thisObject,
       jboolean useNuma) {
-    // TODO move to build?
-    if (sizeof(jint) != sizeof(llama_token)) {
-      jni::throwJNIException(env, jni::JNIException("Java int value is the not the same size as a token. Aborting init..."));
-      return;
-    }
     try {
       llama_backend_init_pointer func =
           (llama_backend_init_pointer) getFunctionAddress("llama_backend_init");
@@ -68,7 +63,7 @@ extern "C" {
   }
 
   JNIEXPORT void
-  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaBackendFree(
+  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaBackendFree(
       JNIEnv *env,
       jobject thisObject) {
     try {
@@ -81,7 +76,7 @@ extern "C" {
   }
 
   JNIEXPORT jobject
-  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaLoadModelFromFile(
+  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaLoadModelFromFile(
       JNIEnv *env,
       jobject thisObject,
       jbyteArray path,
@@ -109,7 +104,7 @@ extern "C" {
   }
 
   JNIEXPORT jobject
-  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaLoadContextWithModel
+  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaLoadContextWithModel
       (JNIEnv* env, jobject thisObject, jobject jllamaModel, jobject jContextParams) {
 
     try {
@@ -134,7 +129,7 @@ extern "C" {
   }
 
   JNIEXPORT jint
-  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTokenizeWithModel
+  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenizeWithModel
       (JNIEnv* env,
        jobject thisObject,
        jobject jllamaModel,
@@ -171,7 +166,7 @@ extern "C" {
     return FAILURE;
   }
 
-  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaEval(
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaEval(
       JNIEnv* env,
       jobject thisObject,
       jobject jContext,
@@ -195,7 +190,7 @@ extern "C" {
     return FAILURE;
   }
 
-  JNIEXPORT jfloatArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaGetLogits(JNIEnv * env, jobject thisObject, jobject jContext) {
+  JNIEXPORT jfloatArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaGetLogits(JNIEnv * env, jobject thisObject, jobject jContext) {
     try {
       auto getLogits = (llama_get_logits_pointer) getFunctionAddress(
           "llama_get_logits");
@@ -214,7 +209,7 @@ extern "C" {
     return nullptr;
   }
 
-  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaSampleTokenGreedy (JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates) {
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleTokenGreedy (JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates) {
     try {
       auto sampleTokenGreedily = (llama_sample_token_greedy_pointer) getFunctionAddress("llama_sample_token_greedy");
       auto llamaContext = jni::getLlamaContextPointer(env, jContext);
@@ -230,7 +225,7 @@ extern "C" {
     return FAILURE;
   }
 
-  JNIEXPORT jbyteArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTokenToStr(JNIEnv* env, jobject thisObject, jobject jContext, jint jToken) {
+  JNIEXPORT jbyteArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenToStr(JNIEnv* env, jobject thisObject, jobject jContext, jint jToken) {
     try {
       auto detokenize = (llama_token_to_str_pointer) getFunctionAddress(
           "llama_token_to_str");
