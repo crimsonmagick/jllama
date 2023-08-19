@@ -27,4 +27,13 @@ public class LlamaManagerJNIImpl implements LlamaManager {
   @Override
   public native int llamaEval(LlamaOpaqueContext context, int[] tokens, int nTokens, int nPast, int nThreads);
 
+  @Override
+  public native float[] llamaGetLogits(LlamaOpaqueContext context);
+
+  @Override
+  public native int llamaSampleTokenGreedy(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
+
+  @Override
+  public native byte[] llamaTokenToStr(LlamaOpaqueContext context, int llamaToken);
+
 }

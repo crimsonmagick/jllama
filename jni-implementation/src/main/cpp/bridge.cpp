@@ -190,4 +190,16 @@ extern "C" {
     return FAILURE;
   }
 
+  JNIEXPORT jfloatArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaGetLogits(JNIEnv * env, jobject thisObject, jobject jContext) {
+    return env->NewFloatArray(0);
+  }
+
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaSampleTokenGreedy (JNIEnv* env, jobject thisObject, jobject, jobject jCandidates) {
+    return 0;
+  }
+
+  JNIEXPORT jbyteArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTokenToStr(JNIEnv* env, jobject thisObject, jobject jContext, jint jToken) {
+    return env->NewByteArray(0);
+  }
+
 }

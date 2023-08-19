@@ -2,8 +2,13 @@ package com.mangomelancholy.llama.cpp.java.bindings;
 
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Main {
+
+  static final int GENERATED_TOKEN_COUNT = 50;
 
   static {
     final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
@@ -29,12 +34,25 @@ public class Main {
       final int maxTokenCount = stringToTokenize.length();
       final int[] tokens = new int[maxTokenCount];
       final int tokenCount = llamaManager.llamaTokenizeWithModel(llamaOpaqueModel, toTokenize, tokens, maxTokenCount, true);
-      final int threads = Runtime.getRuntime().availableProcessors() + 1;
+      final int threads = Runtime.getRuntime().availableProcessors() * 2;
       if (llamaManager.llamaEval(llamaOpaqueContext, tokens, tokenCount, 0, threads) == 0) {
         System.out.println("SUCCESS - Eval was a success!");
       } else {
         System.out.println("FAILURE - Eval was a failure!");
       }
+      List<Integer> generatedTokens = new ArrayList<>(GENERATED_TOKEN_COUNT);
+      for (int i = 0; i < GENERATED_TOKEN_COUNT; i++) {
+        float[] logits = llamaManager.llamaGetLogits(llamaOpaqueContext);
+        LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
+        int generatedToken = llamaManager.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
+        generatedTokens.add(generatedToken);
+      }
+      final String generatedText = generatedTokens.stream()
+          .map(token -> new String(llamaManager.llamaTokenToStr(llamaOpaqueContext, token),
+              StandardCharsets.UTF_8))
+          .collect(Collectors.joining());
+      System.out.println("Llama says: " + generatedText);
+
       llamaManager.llamaBackendFree();
       llamaManager.closeLibrary();
     } catch (RuntimeException e) {
