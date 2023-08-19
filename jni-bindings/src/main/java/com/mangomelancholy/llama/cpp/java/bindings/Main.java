@@ -3,6 +3,7 @@ package com.mangomelancholy.llama.cpp.java.bindings;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,6 +23,7 @@ public class Main {
   public static void main(final String[] args) {
     try {
       final LlamaManager llamaManager = new LlamaManagerJNIImpl();
+      final Detokenizer detokenizer = new Detokenizer(llamaManager);
       final String modelPath =
           "C:\\Users\\welby\\workspace\\ai\\llama-cpp-java-bindings\\models\\llama-2-7b\\ggml-model-q4_0.bin";
       llamaManager.loadLibrary();
@@ -39,6 +41,9 @@ public class Main {
       final int tokenCount = llamaManager.llamaTokenizeWithModel(llamaOpaqueModel, toTokenize, tokensTemp, maxTokenCount, true);
       final int[] tokens = new int[tokenCount];
       System.arraycopy(tokensTemp, 0, tokens, 0, tokenCount);
+      System.out.println(
+          "detokenized: " + detokenizer.detokenize(Arrays.stream(tokens).boxed().collect(
+              Collectors.toList()), llamaOpaqueContext));
 
       final int threads = Runtime.getRuntime().availableProcessors() + 1;
 
@@ -49,9 +54,8 @@ public class Main {
       LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
       int previousToken = llamaManager.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
       generatedTokens.add(previousToken);
-      for (int i = 1; i < GENERATED_TOKEN_COUNT; i++) {
-        final int res = llamaManager.llamaEval(llamaOpaqueContext, new int[]{previousToken}, tokenCount, i,
-            threads);
+      for (int i = tokenCount + 1; i < GENERATED_TOKEN_COUNT + tokenCount + 1; i++) {
+        final int res = llamaManager.llamaEval(llamaOpaqueContext, new int[]{previousToken}, 1, i, threads);
         if (res != 0) {
           throw new RuntimeException("Non zero response from eval");
         }
@@ -61,10 +65,7 @@ public class Main {
         generatedTokens.add(previousToken);
       }
 
-      final String generatedText = generatedTokens.stream()
-          .map(token -> new String(llamaManager.llamaTokenToStr(llamaOpaqueContext, token),
-              StandardCharsets.UTF_8))
-          .collect(Collectors.joining());
+      final String generatedText = detokenizer.detokenize(generatedTokens, llamaOpaqueContext);
       System.out.println("Llama says: " + generatedText);
 
       llamaManager.llamaBackendFree();

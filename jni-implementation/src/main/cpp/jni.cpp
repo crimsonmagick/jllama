@@ -1,5 +1,6 @@
 #include <iostream>
 #include <jni.h>
+#include <memory>
 #include "jni.h"
 #include "exceptions/dynamic-library-exception.h"
 
@@ -19,6 +20,14 @@ namespace jni {
       return 0;
     }
     return static_cast<uint32_t>(env->GetIntField(jInstance, fieldId));
+  }
+
+  size_t getSizeT(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "J");
+    if (!fieldId) {
+      return 0;
+    }
+    return static_cast<size_t>(env->GetIntField(jInstance, fieldId));
   }
 
   float getFloat(JNIEnv *env, jclass jType, jobject jInstance, const char *fieldName) {
@@ -135,6 +144,55 @@ namespace jni {
       throw JNIException("Unable to find contextPointer field for LlamaOpaqueContext class");
     }
     return reinterpret_cast<llama_context*>(env->GetLongField(jLlamaContext, fieldId));
+  }
+
+  llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray) {
+    jclass jTokenDataArrayClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaTokenDataArray");
+    if (jTokenDataArrayClass == nullptr) {
+      throw JNIException("Unable to find LlamaTokenDataArray class");
+    }
+    jfieldID jArrayFieldId = env->GetFieldID(jTokenDataArrayClass, "data", "[Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaTokenData;");
+    if (jArrayFieldId == nullptr) {
+      throw JNIException("Unable to find LlamaTokenData array \"data\"");
+    }
+
+    jclass jTokenDataClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaTokenData");
+    if (jTokenDataClass == nullptr) {
+      throw JNIException("Unable to find jTokenDataClass class");
+    }
+    jfieldID tokenFieldId = env->GetFieldID(jTokenDataClass, "llamaToken", "I");
+    if (tokenFieldId == nullptr) {
+      throw JNIException("Unable to find LlamaTokenData field `\"llamaToken\"");
+    }
+    jfieldID logitFieldId = env->GetFieldID(jTokenDataClass, "logit", "F");
+    if (logitFieldId == nullptr) {
+      throw JNIException("Unable to find LlamaTokenData field `\"logit\"");
+    }
+    jfieldID pFieldId = env->GetFieldID(jTokenDataClass, "p", "F");
+    if (pFieldId == nullptr) {
+      throw JNIException("Unable to find LlamaTokenData field `\"p\"");
+    }
+//    return static_cast<float>(env->GetFloatField(jInstance, fieldId));
+
+    auto jDataArray = reinterpret_cast<jobjectArray>(env->GetObjectField(jTokenDataArray, jArrayFieldId));
+    size_t size = jni::getSizeT(env, jTokenDataArrayClass, jTokenDataArray, "size");
+    bool sorted = jni::getBool(env, jTokenDataArrayClass, jTokenDataArray, "sorted");
+
+    auto dataArray = new llama_token_data[size];
+    for (jint i = 0; i < size; i++) {
+      jobject jTokenData = env->GetObjectArrayElement(jDataArray, i);
+      llama_token token = env->GetIntField(jTokenData, tokenFieldId);
+      float logit = env->GetFloatField(jTokenData, logitFieldId);
+      float p = env->GetFloatField(jTokenData, pFieldId);
+      dataArray[i] = llama_token_data {
+          token, logit, p
+      };
+      env->DeleteLocalRef(jTokenData);
+    }
+
+    return llama_token_data_array {
+      dataArray, size, sorted
+    };
   }
 
 }

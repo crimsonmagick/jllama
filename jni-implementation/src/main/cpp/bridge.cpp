@@ -18,6 +18,10 @@ typedef int(* llama_tokenize_with_model_pointer)
     (llama_model*, const char*, llama_token*, int, bool);
 typedef int(* llama_eval_pointer)(llama_context*, llama_token*, int, int, int);
 typedef const char* (* llama_token_to_str_pointer)(llama_context*, llama_token);
+typedef float* (* llama_get_logits_pointer)(llama_context*);
+typedef int (* llama_n_vocab_pointer)(const struct llama_context*);
+typedef llama_token(* llama_sample_token_greedy_pointer)
+    (struct llama_context*, llama_token_data_array*);
 
 extern "C" {
 
@@ -192,11 +196,38 @@ extern "C" {
   }
 
   JNIEXPORT jfloatArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaGetLogits(JNIEnv * env, jobject thisObject, jobject jContext) {
-    return env->NewFloatArray(0);
+    try {
+      auto getLogits = (llama_get_logits_pointer) getFunctionAddress(
+          "llama_get_logits");
+      auto getVocabLength = (llama_n_vocab_pointer) getFunctionAddress("llama_n_vocab");
+      auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+      float* logits = getLogits(llamaContext);
+      int vocabLength = getVocabLength(llamaContext);
+      auto jLogits = env->NewFloatArray(vocabLength);
+      env->SetFloatArrayRegion(jLogits, 0, vocabLength, logits);
+      return jLogits;
+    } catch (const DynamicLibraryException& e) {
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException& e) {
+      jni::throwJNIException(env, e);
+    }
+    return nullptr;
   }
 
-  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaSampleTokenGreedy (JNIEnv* env, jobject thisObject, jobject, jobject jCandidates) {
-    return 0;
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaSampleTokenGreedy (JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates) {
+    try {
+      auto sampleTokenGreedily = (llama_sample_token_greedy_pointer) getFunctionAddress("llama_sample_token_greedy");
+      auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+      llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+      jint sampled = sampleTokenGreedily(llamaContext, &candidates);
+      delete[] candidates.data;
+      return sampled;
+    } catch (const DynamicLibraryException& e) {
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException& e) {
+      jni::throwJNIException(env, e);
+    }
+    return FAILURE;
   }
 
   JNIEXPORT jbyteArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaManagerJNIImpl_llamaTokenToStr(JNIEnv* env, jobject thisObject, jobject jContext, jint jToken) {
@@ -217,7 +248,6 @@ extern "C" {
       jni::throwJNIException(env, e);
     }
     return nullptr;
-//    return env->NewByteArray(0);
   }
 
 }

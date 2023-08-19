@@ -12,7 +12,7 @@ task runProgram(type: JavaExec) {
 //    systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
     systemProperty 'java.library.path', 'jni-implementation/build/cmake/main/cpp/Debug'
 
-    final llamaRelativePath = current().isWindows() ? '/jni-implementation/build/cmake/bin/Debug'
+    final llamaRelativePath = current().isWindows() ? '/jni-implementation/build/cmake/bin/Release'
             : '/jni-implementation/build/cmake/debug'
     final String llamaAbsolutePath = projectDir as String + llamaRelativePath
 
