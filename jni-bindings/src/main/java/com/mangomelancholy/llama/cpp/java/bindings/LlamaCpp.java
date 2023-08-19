@@ -24,4 +24,8 @@ public interface LlamaCpp {
   int llamaSampleTokenGreedy(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
 
   byte[] llamaTokenToStr(LlamaOpaqueContext context, int llamaToken);
+
+  int llamaTokenBos();
+  int llamaTokenEos();
+  int llamaTokenNl();
 }

@@ -1,6 +1,5 @@
 package com.mangomelancholy.llama.cpp.java.bindings.runner;
 
-import com.mangomelancholy.llama.cpp.java.bindings.Detokenizer;
 import com.mangomelancholy.llama.cpp.java.bindings.LlamaContextParams;
 import com.mangomelancholy.llama.cpp.java.bindings.LlamaCpp;
 import com.mangomelancholy.llama.cpp.java.bindings.LlamaCppManager;
@@ -46,14 +45,14 @@ public class Main {
       // availableProcessors is the number of logical cores - we want physical cores as our basis for thread allocation
       final int threads = Runtime.getRuntime().availableProcessors() / 2;
 
-
       llamaCpp.llamaEval(llamaOpaqueContext, tokens, tokenCount, 0, threads);
       float[] logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
       LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
       int previousToken = llamaCpp.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
+      int newline = llamaCpp.llamaTokenNl();
       System.out.print(prompt);
       System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
-      for (int i = tokenCount + 1; i < GENERATED_TOKEN_COUNT + tokenCount + 1; i++) {
+      for (int i = tokenCount + 1; previousToken != newline; i++) {
         final int res = llamaCpp.llamaEval(llamaOpaqueContext, new int[]{previousToken}, 1, i, threads);
         if (res != 0) {
           throw new RuntimeException("Non zero response from eval");

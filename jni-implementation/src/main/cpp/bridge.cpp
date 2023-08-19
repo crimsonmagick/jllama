@@ -20,8 +20,9 @@ typedef int(* llama_eval_pointer)(llama_context*, llama_token*, int, int, int);
 typedef const char* (* llama_token_to_str_pointer)(llama_context*, llama_token);
 typedef float* (* llama_get_logits_pointer)(llama_context*);
 typedef int (* llama_n_vocab_pointer)(const struct llama_context*);
-typedef llama_token(* llama_sample_token_greedy_pointer)
+typedef llama_token (* llama_sample_token_greedy_pointer)
     (struct llama_context*, llama_token_data_array*);
+typedef llama_token (* get_special_token_pointer)();
 
 extern "C" {
 
@@ -243,6 +244,42 @@ extern "C" {
       jni::throwJNIException(env, e);
     }
     return nullptr;
+  }
+
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenBos(JNIEnv* env, jobject thisObject) {
+    try {
+      auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_bos");
+      return getBos();
+    } catch (const DynamicLibraryException& e) {
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException& e) {
+      jni::throwJNIException(env, e);
+    }
+    return FAILURE;
+  }
+
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenEos(JNIEnv* env, jobject thisObject) {
+    try {
+      auto getEos = (get_special_token_pointer) getFunctionAddress("llama_token_eos");
+      return getEos();
+    } catch (const DynamicLibraryException& e) {
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException& e) {
+      jni::throwJNIException(env, e);
+    }
+    return FAILURE;
+  }
+
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenNl(JNIEnv* env, jobject thisObject) {
+    try {
+      auto getNl = (get_special_token_pointer) getFunctionAddress("llama_token_nl");
+      return getNl();
+    } catch (const DynamicLibraryException& e) {
+      jni::throwDLLException(env, e);
+    } catch (const jni::JNIException& e) {
+      jni::throwJNIException(env, e);
+    }
+    return FAILURE;
   }
 
 }
