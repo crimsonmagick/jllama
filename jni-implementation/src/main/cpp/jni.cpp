@@ -2,7 +2,7 @@
 #include <jni.h>
 #include <memory>
 #include "jni.h"
-#include "exceptions/dynamic-library-exception.h"
+#include "exceptions/DynamicLibraryException.h"
 
 namespace jni {
 
@@ -75,7 +75,7 @@ namespace jni {
 
   void throwDLLException(JNIEnv * env, const DynamicLibraryException& e) {
     throwNativeException(env,
-                         "com/mangomelancholy/llama/cpp/java/bindings/exceptions/DynamicLibraryException", e.what());
+                         "com/mangomelancholy/llama/cpp/java/bindings/exceptions/LlamaCppException", e.what());
   }
 
   void throwJNIException(JNIEnv *env, const JNIException &e) {

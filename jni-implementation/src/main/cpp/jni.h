@@ -1,6 +1,6 @@
 #ifndef LLAMA_CPP_JAVA_BINDINGS_JNI_H
 #define LLAMA_CPP_JAVA_BINDINGS_JNI_H
-#include "exceptions/dynamic-library-exception.h"
+#include "exceptions/DynamicLibraryException.h"
 #include "llama.h"
 
 struct llama_model;

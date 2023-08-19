@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <windows.h>
-#include "exceptions/dynamic-library-exception.h"
+#include "exceptions/DynamicLibraryException.h"
 
 #define LIBRARY_SUFFIX ".dll"
 

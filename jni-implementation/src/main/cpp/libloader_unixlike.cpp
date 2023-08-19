@@ -4,7 +4,7 @@
 #include <dlfcn.h>
 #include <sstream>
 #include <iostream>
-#include "exceptions/dynamic-library-exception.h"
+#include "exceptions/DynamicLibraryException.h"
 
 #define LIBRARY_PREFIX "lib"
 

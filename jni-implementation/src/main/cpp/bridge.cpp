@@ -1,5 +1,5 @@
 #include "com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl.h"
-#include "exceptions/dynamic-library-exception.h"
+#include "exceptions/DynamicLibraryException.h"
 #include "jni.h"
 #include "libloader.h"
 #include "llama.h"
