@@ -8,7 +8,7 @@ task runProgram(type: JavaExec) {
     group = 'application'
 
     dependsOn ':jni-bindings:build', ':jni-implementation:build'
-    mainClass = 'com.mangomelancholy.llama.cpp.java.bindings.Main'
+    mainClass = 'com.mangomelancholy.llama.cpp.java.bindings.runner.Main'
 //    systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
     systemProperty 'java.library.path', 'jni-implementation/build/cmake/main/cpp/Debug'
 

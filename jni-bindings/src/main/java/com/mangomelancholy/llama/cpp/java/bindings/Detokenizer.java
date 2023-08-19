@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 public class Detokenizer {
 
-  public Detokenizer(final LlamaCpp llamaManager) {
-    this.llamaManager = llamaManager;
+  public Detokenizer(final LlamaCpp llamaCpp) {
+    this.llamaManager = llamaCpp;
   }
 
   private final LlamaCpp llamaManager;
