@@ -9,6 +9,11 @@ class LlamaSession {
   public:
   LlamaSession(JNIEnv* env) : env(env) {}
   void backendInit(bool useNuma);
+  void backendFree();
+  jobject loadModelFromFile(jbyteArray path, jobject javaParams);
+  jobject loadContextWithModel(jobject jModel, jobject jContextParams);
+  jint tokenizeWithModel(jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos);
+
 
   private:
   JNIEnv* env;

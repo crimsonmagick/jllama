@@ -32,7 +32,7 @@ public class Main {
       final LlamaOpaqueContext llamaOpaqueContext =
           llamaCpp.llamaLoadContextWithModel(llamaOpaqueModel, llamaContextParams);
 
-      final String prompt = "I love my cat Winnie, he is ";
+      final String prompt = "hello world in Java:  ";
       final byte[] toTokenize = prompt.getBytes(StandardCharsets.UTF_8);
       final int maxTokenCount = prompt.length();
       final int[] tokensTemp = new int[maxTokenCount];
@@ -41,7 +41,7 @@ public class Main {
       System.arraycopy(tokensTemp, 0, tokens, 0, tokenCount);
 
       // availableProcessors is the number of logical cores - we want physical cores as our basis for thread allocation
-      final int threads = Runtime.getRuntime().availableProcessors() / 2;
+      final int threads = Runtime.getRuntime().availableProcessors() / 2 - 1;
 
       llamaCpp.llamaEval(llamaOpaqueContext, tokens, tokenCount, 0, threads);
       float[] logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
@@ -50,7 +50,7 @@ public class Main {
       int newline = llamaCpp.llamaTokenNl();
       System.out.print(prompt);
       System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
-      for (int i = tokenCount + 1; previousToken != newline; i++) {
+      for (int i = tokenCount + 1; i < 100; i++) {
         final int res = llamaCpp.llamaEval(llamaOpaqueContext, new int[]{previousToken}, 1, i, threads);
         if (res != 0) {
           throw new RuntimeException("Non zero response from eval");
