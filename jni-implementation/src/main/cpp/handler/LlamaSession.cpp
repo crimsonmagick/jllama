@@ -123,3 +123,19 @@ jint LlamaSession::eval(jobject jContext,
     return result;
   });
 }
+
+typedef int (* llama_n_vocab_pointer)(const struct llama_context*);
+typedef float* (* llama_get_logits_pointer)(llama_context*);
+jfloatArray LlamaSession::getLogits(jobject jContext) {
+  return withJniExceptions([&jContext, this] {
+    auto getLogits = (llama_get_logits_pointer) getFunctionAddress(
+        "llama_get_logits");
+    auto getVocabLength = (llama_n_vocab_pointer) getFunctionAddress("llama_n_vocab");
+    auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+    float* logits = getLogits(llamaContext);
+    int vocabLength = getVocabLength(llamaContext);
+    auto jLogits = env->NewFloatArray(vocabLength);
+    env->SetFloatArrayRegion(jLogits, 0, vocabLength, logits);
+    return jLogits;
+  });
+}

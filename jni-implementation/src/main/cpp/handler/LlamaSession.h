@@ -14,6 +14,7 @@ class LlamaSession {
   jobject loadContextWithModel(jobject jModel, jobject jContextParams);
   jint tokenizeWithModel(jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos);
   jint eval(jobject jContext, jintArray jTokens, jint jnTokens, jint jnPast, jint jnThreads);
+  jfloatArray getLogits(jobject jContext);
 
   private:
   JNIEnv* env;
@@ -32,6 +33,5 @@ class LlamaSession {
     return ReturnType();
   }
 };
-
 
 #endif //JNI_IMPLEMENTATION_LLAMASESSION_H
