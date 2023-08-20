@@ -79,8 +79,11 @@ namespace jni {
   }
 
   void throwJNIException(JNIEnv *env, const JNIException &e) {
-    throwNativeException(env,
-                         "com/mangomelancholy/llama/cpp/java/bindings/exceptions/JNIException", e.what());
+    throwNativeException(env, "com/mangomelancholy/llama/cpp/java/bindings/exceptions/JNIException", e.what());
+  }
+
+  void throwLlamaCppException(JNIEnv* env, const LlamaCppException& e) {
+    throwNativeException(env, "com/mangomelancholy/llama/cpp/java/bindings/exceptions/LlamaCppException", e.what());
   }
 
   jobject constructLlamaOpaqueModel(JNIEnv *env, llama_model *modelPointer) {
@@ -172,7 +175,6 @@ namespace jni {
     if (pFieldId == nullptr) {
       throw JNIException("Unable to find LlamaTokenData field `\"p\"");
     }
-//    return static_cast<float>(env->GetFloatField(jInstance, fieldId));
 
     auto jDataArray = reinterpret_cast<jobjectArray>(env->GetObjectField(jTokenDataArray, jArrayFieldId));
     size_t size = jni::getSizeT(env, jTokenDataArrayClass, jTokenDataArray, "size");

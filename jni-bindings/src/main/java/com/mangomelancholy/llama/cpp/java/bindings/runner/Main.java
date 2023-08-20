@@ -11,8 +11,6 @@ import java.nio.charset.StandardCharsets;
 
 public class Main {
 
-  static final int GENERATED_TOKEN_COUNT = 50;
-
   static {
     final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
     final String pid = jvmName.split("@")[0];

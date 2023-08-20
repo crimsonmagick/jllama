@@ -2,6 +2,7 @@
 #define LLAMA_CPP_JAVA_BINDINGS_JNI_H
 #include "exceptions/DynamicLibraryException.h"
 #include "llama.h"
+#include "exceptions/LlamaCppException.h"
 
 struct llama_model;
 struct llama_context;
@@ -25,6 +26,7 @@ namespace jni {
   llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaOpaqueModel);
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);
   void throwJNIException(JNIEnv* env, const JNIException& e);
+  void throwLlamaCppException(JNIEnv* env, const LlamaCppException& e);
   jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer);
   llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext);
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray);

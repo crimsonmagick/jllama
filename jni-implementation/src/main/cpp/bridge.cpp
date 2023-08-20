@@ -5,6 +5,7 @@
 #include "llama.h"
 #include "LlamaContextParamsManager.h"
 #include "Utf8StringManager.h"
+#include "handler/LlamaSession.h"
 
 const int FAILURE = 1;
 
@@ -54,13 +55,7 @@ extern "C" {
       JNIEnv *env,
       jobject thisObject,
       jboolean useNuma) {
-    try {
-      llama_backend_init_pointer func =
-          (llama_backend_init_pointer) getFunctionAddress("llama_backend_init");
-      func(useNuma);
-    } catch (const DynamicLibraryException &e) {
-      jni::throwDLLException(env, e);
-    }
+    LlamaSession(env).backendInit(useNuma);
   }
 
   JNIEXPORT void
