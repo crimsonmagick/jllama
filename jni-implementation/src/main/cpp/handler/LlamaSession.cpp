@@ -139,3 +139,16 @@ jfloatArray LlamaSession::getLogits(jobject jContext) {
     return jLogits;
   });
 }
+
+typedef llama_token (* llama_sample_token_greedy_pointer)
+    (struct llama_context*, llama_token_data_array*);
+jint LlamaSession::sampleTokenGreedy(jobject jContext, jobject jCandidates) {
+  return withJniExceptions([this, &jContext, &jCandidates] {
+    auto sampleTokenGreedily = (llama_sample_token_greedy_pointer) getFunctionAddress("llama_sample_token_greedy");
+    auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    jint sampled = sampleTokenGreedily(llamaContext, &candidates);
+    delete[] candidates.data;
+    return sampled;
+  });
+}

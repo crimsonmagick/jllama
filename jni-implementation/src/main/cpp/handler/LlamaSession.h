@@ -15,6 +15,7 @@ class LlamaSession {
   jint tokenizeWithModel(jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos);
   jint eval(jobject jContext, jintArray jTokens, jint jnTokens, jint jnPast, jint jnThreads);
   jfloatArray getLogits(jobject jContext);
+  jint sampleTokenGreedy(jobject jContext, jobject jCandidates);
 
   private:
   JNIEnv* env;

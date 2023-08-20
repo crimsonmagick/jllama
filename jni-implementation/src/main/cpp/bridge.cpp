@@ -10,8 +10,6 @@
 const int FAILURE = 1;
 
 typedef const char* (* llama_token_to_str_pointer)(llama_context*, llama_token);
-typedef llama_token (* llama_sample_token_greedy_pointer)
-    (struct llama_context*, llama_token_data_array*);
 typedef llama_token (* get_special_token_pointer)();
 
 extern "C" {
@@ -87,19 +85,7 @@ extern "C" {
   }
 
   JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleTokenGreedy (JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates) {
-    try {
-      auto sampleTokenGreedily = (llama_sample_token_greedy_pointer) getFunctionAddress("llama_sample_token_greedy");
-      auto llamaContext = jni::getLlamaContextPointer(env, jContext);
-      llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
-      jint sampled = sampleTokenGreedily(llamaContext, &candidates);
-      delete[] candidates.data;
-      return sampled;
-    } catch (const DynamicLibraryException& e) {
-      jni::throwDLLException(env, e);
-    } catch (const jni::JNIException& e) {
-      jni::throwJNIException(env, e);
-    }
-    return FAILURE;
+    return LlamaSession(env).sampleTokenGreedy(jContext, jCandidates);
   }
 
   JNIEXPORT jbyteArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenToStr(JNIEnv* env, jobject thisObject, jobject jContext, jint jToken) {
