@@ -13,7 +13,7 @@ class LlamaSession {
   jobject loadModelFromFile(jbyteArray path, jobject javaParams);
   jobject loadContextWithModel(jobject jModel, jobject jContextParams);
   jint tokenizeWithModel(jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos);
-
+  jint eval(jobject jContext, jintArray jTokens, jint jnTokens, jint jnPast, jint jnThreads);
 
   private:
   JNIEnv* env;

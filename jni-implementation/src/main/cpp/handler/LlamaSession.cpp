@@ -98,4 +98,28 @@ jint LlamaSession::tokenizeWithModel(jobject jModel,
     }
     return result;
   });
+
+}
+
+
+typedef int(* llama_eval_pointer)(llama_context*, llama_token*, int, int, int);
+jint LlamaSession::eval(jobject jContext,
+                        jintArray jTokens,
+                        jint jnTokens,
+                        jint jnPast,
+                        jint jnThreads) {
+  return withJniExceptions([&jContext, &jTokens, &jnTokens, &jnPast, &jnThreads, this] {
+
+    llama_eval_pointer eval = (llama_eval_pointer) getFunctionAddress(
+        "llama_eval");
+    auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+    jint* tokens = env->GetIntArrayElements(jTokens, nullptr);
+    int result = eval(llamaContext,
+                      reinterpret_cast<int*>(tokens),
+                      jnTokens,
+                      jnPast,
+                      jnThreads);
+    env->ReleaseIntArrayElements(jTokens, tokens, JNI_ABORT);
+    return result;
+  });
 }
