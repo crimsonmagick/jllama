@@ -1,9 +1,11 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-misplaced-const"
 #include "LlamaSession.h"
 #include "../libloader.h"
 #include "../LlamaContextParamsManager.h"
 #include "../Utf8StringManager.h"
 
-const int FAILURE = 1;
+const jobject OBJECT_FAILURE = nullptr;
 
 typedef void (* llama_backend_init_pointer)(bool);
 void LlamaSession::backendInit(bool useNuma) {
@@ -42,6 +44,7 @@ jobject LlamaSession::loadModelFromFile(jbyteArray path, jobject javaParams) {
     jni::throwJNIException(env,
                            jni::JNIException(
                                "Unable to load llama model from file"));
+    return OBJECT_FAILURE;
   });
 }
 
@@ -65,6 +68,7 @@ LlamaSession::loadContextWithModel(jobject jModel, jobject jContextParams) {
     jni::throwJNIException(env,
                            jni::JNIException(
                                "Unable to create context from llama model"));
+    return OBJECT_FAILURE;
   });
 }
 
@@ -152,3 +156,44 @@ jint LlamaSession::sampleTokenGreedy(jobject jContext, jobject jCandidates) {
     return sampled;
   });
 }
+
+typedef const char* (* llama_token_to_str_pointer)(llama_context*, llama_token);
+jbyteArray LlamaSession::tokenToStr(jobject jContext, jint jToken) {
+  return withJniExceptions([&jContext, &jToken, this]{
+    auto detokenize = (llama_token_to_str_pointer) getFunctionAddress(
+        "llama_token_to_str");
+
+    auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+
+    const char * result = detokenize(llamaContext, jToken);
+    auto length = static_cast<jsize>(strlen(result));
+    jbyteArray detokenized = env->NewByteArray(length);
+    env->SetByteArrayRegion(detokenized, 0, length, reinterpret_cast<const jbyte*>(result));
+    return detokenized;
+  });
+}
+
+typedef llama_token (* get_special_token_pointer)();
+
+jint LlamaSession::tokenBos() {
+  return withJniExceptions([]{
+    auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_bos");
+    return getBos();
+  });
+}
+
+jint LlamaSession::tokenEos() {
+  return withJniExceptions([]{
+    auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_eos");
+    return getBos();
+  });
+}
+
+jint LlamaSession::tokenNl() {
+  return withJniExceptions([]{
+    auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_nl");
+    return getBos();
+  });
+}
+
+#pragma clang diagnostic pop

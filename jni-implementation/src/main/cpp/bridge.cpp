@@ -1,16 +1,8 @@
 #include "com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl.h"
 #include "exceptions/DynamicLibraryException.h"
 #include "jni.h"
-#include "libloader.h"
-#include "llama.h"
-#include "LlamaContextParamsManager.h"
-#include "Utf8StringManager.h"
 #include "handler/LlamaSession.h"
-
-const int FAILURE = 1;
-
-typedef const char* (* llama_token_to_str_pointer)(llama_context*, llama_token);
-typedef llama_token (* get_special_token_pointer)();
+#include "libloader.h"
 
 extern "C" {
 
@@ -89,59 +81,19 @@ extern "C" {
   }
 
   JNIEXPORT jbyteArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenToStr(JNIEnv* env, jobject thisObject, jobject jContext, jint jToken) {
-    try {
-      auto detokenize = (llama_token_to_str_pointer) getFunctionAddress(
-          "llama_token_to_str");
-
-      auto llamaContext = jni::getLlamaContextPointer(env, jContext);
-
-      const char * result = detokenize(llamaContext, jToken);
-      auto length = static_cast<jsize>(strlen(result));
-      jbyteArray detokenized = env->NewByteArray(length);
-      env->SetByteArrayRegion(detokenized, 0, length, reinterpret_cast<const jbyte*>(result));
-      return detokenized;
-    } catch (const DynamicLibraryException& e) {
-      jni::throwDLLException(env, e);
-    } catch (const jni::JNIException& e) {
-      jni::throwJNIException(env, e);
-    }
-    return nullptr;
+    return LlamaSession(env).tokenToStr(jContext, jToken);
   }
 
   JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenBos(JNIEnv* env, jobject thisObject) {
-    try {
-      auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_bos");
-      return getBos();
-    } catch (const DynamicLibraryException& e) {
-      jni::throwDLLException(env, e);
-    } catch (const jni::JNIException& e) {
-      jni::throwJNIException(env, e);
-    }
-    return FAILURE;
+    return LlamaSession(env).tokenBos();
   }
 
   JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenEos(JNIEnv* env, jobject thisObject) {
-    try {
-      auto getEos = (get_special_token_pointer) getFunctionAddress("llama_token_eos");
-      return getEos();
-    } catch (const DynamicLibraryException& e) {
-      jni::throwDLLException(env, e);
-    } catch (const jni::JNIException& e) {
-      jni::throwJNIException(env, e);
-    }
-    return FAILURE;
+    return LlamaSession(env).tokenEos();
   }
 
   JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenNl(JNIEnv* env, jobject thisObject) {
-    try {
-      auto getNl = (get_special_token_pointer) getFunctionAddress("llama_token_nl");
-      return getNl();
-    } catch (const DynamicLibraryException& e) {
-      jni::throwDLLException(env, e);
-    } catch (const jni::JNIException& e) {
-      jni::throwJNIException(env, e);
-    }
-    return FAILURE;
+    return LlamaSession(env).tokenNl();
   }
 
 }
