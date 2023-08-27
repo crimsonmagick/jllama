@@ -34,6 +34,6 @@ LlamaManager* LlamaManager::getLlamaManager(JNIEnv* env) {
   }
   return singleton;
 }
-LlamaSession LlamaManager::newSession(JNIEnv* env) {
+LlamaManager::LlamaSession LlamaManager::newSession(JNIEnv* env) {
   return LlamaSession(env);
 }

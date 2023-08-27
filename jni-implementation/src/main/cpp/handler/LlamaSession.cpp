@@ -1,4 +1,4 @@
-#include "LlamaSession.h"
+#include "LlamaManager.h"
 #include "../libloader.h"
 #include "../LlamaContextParamsManager.h"
 #include "../Utf8StringManager.h"
@@ -7,7 +7,7 @@
 const jobject OBJECT_FAILURE = nullptr;
 
 typedef void (* llama_backend_init_pointer)(bool);
-void LlamaSession::backendInit(bool useNuma) {
+void LlamaManager::LlamaSession::backendInit(bool useNuma) {
   withJniExceptions(env, [&useNuma] {
     llama_backend_init_pointer func =
         (llama_backend_init_pointer) getFunctionAddress("llama_backend_init");
@@ -16,7 +16,7 @@ void LlamaSession::backendInit(bool useNuma) {
 }
 
 typedef void (* llama_backend_free_pointer)();
-void LlamaSession::backendFree() {
+void LlamaManager::LlamaSession::backendFree() {
   withJniExceptions(env, [] {
     llama_backend_free_pointer func =
         (llama_backend_free_pointer) getFunctionAddress("llama_backend_init");
@@ -26,7 +26,7 @@ void LlamaSession::backendFree() {
 
 typedef llama_model* (* llama_load_model_from_file_pointer)
     (const char*, struct llama_context_params);
-jobject LlamaSession::loadModelFromFile(jbyteArray path, jobject javaParams) {
+jobject LlamaManager::LlamaSession::loadModelFromFile(jbyteArray path, jobject javaParams) {
   return withJniExceptions(env, [&javaParams, &path, this] {
     llama_load_model_from_file_pointer llamaLoadModel =
         (llama_load_model_from_file_pointer) getFunctionAddress(
@@ -51,7 +51,7 @@ jobject LlamaSession::loadModelFromFile(jbyteArray path, jobject javaParams) {
 
 typedef llama_context* (* llama_new_context_with_model_pointer)
     (llama_model*, llama_context_params);
-jobject LlamaSession::loadContextWithModel(jobject jModel, jobject jContextParams) {
+jobject LlamaManager::LlamaSession::loadContextWithModel(jobject jModel, jobject jContextParams) {
   return withJniExceptions(env, [&jModel, &jContextParams, this] {
     llama_new_context_with_model_pointer llamaCreateContext =
         (llama_new_context_with_model_pointer) getFunctionAddress(
@@ -76,7 +76,7 @@ jobject LlamaSession::loadContextWithModel(jobject jModel, jobject jContextParam
 
 typedef int(* llama_tokenize_with_model_pointer)
     (llama_model*, const char*, llama_token*, int, bool);
-jint LlamaSession::tokenizeWithModel(jobject jModel,
+jint LlamaManager::LlamaSession::tokenizeWithModel(jobject jModel,
                                      jbyteArray jToTokenize,
                                      jintArray jTokensOut,
                                      jint jmaxTokens,
@@ -108,7 +108,7 @@ jint LlamaSession::tokenizeWithModel(jobject jModel,
 
 
 typedef int(* llama_eval_pointer)(llama_context*, llama_token*, int, int, int);
-jint LlamaSession::eval(jobject jContext,
+jint LlamaManager::LlamaSession::eval(jobject jContext,
                         jintArray jTokens,
                         jint jnTokens,
                         jint jnPast,
@@ -131,7 +131,7 @@ jint LlamaSession::eval(jobject jContext,
 
 typedef int (* llama_n_vocab_pointer)(const struct llama_context*);
 typedef float* (* llama_get_logits_pointer)(llama_context*);
-jfloatArray LlamaSession::getLogits(jobject jContext) {
+jfloatArray LlamaManager::LlamaSession::getLogits(jobject jContext) {
   return withJniExceptions(env, [&jContext, this] {
     auto getLogits = (llama_get_logits_pointer) getFunctionAddress(
         "llama_get_logits");
@@ -147,7 +147,7 @@ jfloatArray LlamaSession::getLogits(jobject jContext) {
 
 typedef llama_token (* llama_sample_token_greedy_pointer)
     (struct llama_context*, llama_token_data_array*);
-jint LlamaSession::sampleTokenGreedy(jobject jContext, jobject jCandidates) {
+jint LlamaManager::LlamaSession::sampleTokenGreedy(jobject jContext, jobject jCandidates) {
   return withJniExceptions(env, [this, &jContext, &jCandidates] {
     auto sampleTokenGreedily = (llama_sample_token_greedy_pointer) getFunctionAddress("llama_sample_token_greedy");
     auto llamaContext = jni::getLlamaContextPointer(env, jContext);
@@ -159,7 +159,7 @@ jint LlamaSession::sampleTokenGreedy(jobject jContext, jobject jCandidates) {
 }
 
 typedef const char* (* llama_token_to_str_pointer)(llama_context*, llama_token);
-jbyteArray LlamaSession::tokenToStr(jobject jContext, jint jToken) {
+jbyteArray LlamaManager::LlamaSession::tokenToStr(jobject jContext, jint jToken) {
   return withJniExceptions(env, [&jContext, &jToken, this]{
     auto detokenize = (llama_token_to_str_pointer) getFunctionAddress(
         "llama_token_to_str");
@@ -176,21 +176,21 @@ jbyteArray LlamaSession::tokenToStr(jobject jContext, jint jToken) {
 
 typedef llama_token (* get_special_token_pointer)();
 
-jint LlamaSession::tokenBos() {
+jint LlamaManager::LlamaSession::tokenBos() {
   return withJniExceptions(env, []{
     auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_bos");
     return getBos();
   });
 }
 
-jint LlamaSession::tokenEos() {
+jint LlamaManager::LlamaSession::tokenEos() {
   return withJniExceptions(env, []{
     auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_eos");
     return getBos();
   });
 }
 
-jint LlamaSession::tokenNl() {
+jint LlamaManager::LlamaSession::tokenNl() {
   return withJniExceptions(env, []{
     auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_nl");
     return getBos();
