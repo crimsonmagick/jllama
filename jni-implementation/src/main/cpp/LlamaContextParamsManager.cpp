@@ -7,24 +7,8 @@ llama_context_params LlamaContextParamsManager::getParams() {
   return llamaContextParams;
 }
 
-LlamaContextParamsManager::LlamaContextParamsManager
-    (JNIEnv* env, jobject javaContextParams) :
-    LlamaContextParamsManager(env, nullptr, javaContextParams) {
-}
-
-LlamaContextParamsManager::LlamaContextParamsManager
-    (JNIEnv* env, jbyteArray jPath, jobject javaContextParams) : env(env) {
+LlamaContextParamsManager::LlamaContextParamsManager(JNIEnv* env, jobject javaContextParams) : env(env) {
   jclass javaParamsClass = env->GetObjectClass(javaContextParams);
-
-  if (jPath) {
-    jbyte* pathBytes = env->GetByteArrayElements(jPath, nullptr);
-    jsize length = env->GetArrayLength(jPath);
-    path = new char[length + 1];
-    memcpy(path, pathBytes, length);
-    path[length] = '\0';
-  } else {
-    path = nullptr;
-  }
 
   tensorSplitFloatArray = jni::getJFloatArray(env,
                                               javaParamsClass,
@@ -58,13 +42,9 @@ LlamaContextParamsManager::LlamaContextParamsManager
 }
 
 LlamaContextParamsManager::~LlamaContextParamsManager() {
-  delete[] path;
   if (tensorSplit) {
     env->ReleaseFloatArrayElements(tensorSplitFloatArray,
                                    (jfloat*) tensorSplit,
                                    JNI_ABORT);
   }
-}
-char* LlamaContextParamsManager::getPath() {
-  return path;
 }

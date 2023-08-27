@@ -32,10 +32,11 @@ jobject LlamaSession::loadModelFromFile(jbyteArray path, jobject javaParams) {
         (llama_load_model_from_file_pointer) getFunctionAddress(
             "llama_load_model_from_file");
 
-    auto paramsManager = LlamaContextParamsManager(env, path, javaParams);
+    auto stringManager = Utf8StringManager(env, path);
+    auto paramsManager = LlamaContextParamsManager(env, javaParams);
 
     llama_model* model =
-        llamaLoadModel(paramsManager.getPath(), paramsManager.getParams());
+        llamaLoadModel(stringManager.getUtf8String(), paramsManager.getParams());
 
     if (model) {
       return jni::constructLlamaOpaqueModel(env, model);
@@ -49,8 +50,7 @@ jobject LlamaSession::loadModelFromFile(jbyteArray path, jobject javaParams) {
 
 typedef llama_context* (* llama_new_context_with_model_pointer)
     (llama_model*, llama_context_params);
-jobject
-LlamaSession::loadContextWithModel(jobject jModel, jobject jContextParams) {
+jobject LlamaSession::loadContextWithModel(jobject jModel, jobject jContextParams) {
   return withJniExceptions(env, [&jModel, &jContextParams, this] {
     llama_new_context_with_model_pointer llamaCreateContext =
         (llama_new_context_with_model_pointer) getFunctionAddress(
