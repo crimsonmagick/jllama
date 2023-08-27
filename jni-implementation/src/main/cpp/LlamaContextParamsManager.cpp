@@ -1,4 +1,3 @@
-#include <cstring>
 #include <jni.h>
 #include "jni.h"
 #include "LlamaContextParamsManager.h"
@@ -7,7 +6,7 @@ llama_context_params LlamaContextParamsManager::getParams() {
   return llamaContextParams;
 }
 
-LlamaContextParamsManager::LlamaContextParamsManager(JNIEnv* env, jobject javaContextParams) : env(env) {
+LlamaContextParamsManager::LlamaContextParamsManager(JNIEnv* env, jobject javaContextParams, llama_progress_callback callback, void* callbackContext) : env(env) {
   jclass javaParamsClass = env->GetObjectClass(javaContextParams);
 
   tensorSplitFloatArray = jni::getJFloatArray(env,
@@ -28,8 +27,8 @@ LlamaContextParamsManager::LlamaContextParamsManager(JNIEnv* env, jobject javaCo
       tensorSplit,
       jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqBase"),
       jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqScale"),
-      nullptr,
-      nullptr,
+      callback,
+      callbackContext,
       jni::getBool(env, javaParamsClass, javaContextParams, "lowVram"),
       jni::getBool(env, javaParamsClass, javaContextParams, "mulMatQ"),
       jni::getBool(env, javaParamsClass, javaContextParams, "f16Kv"),
