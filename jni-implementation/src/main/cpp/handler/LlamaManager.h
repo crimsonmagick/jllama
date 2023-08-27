@@ -3,6 +3,7 @@
 #include <jni.h>
 #include "llama.h"
 #include "mutex"
+#include "LlamaSession.h"
 
 class LlamaManager {
 
@@ -10,6 +11,7 @@ class LlamaManager {
   static LlamaManager* getLlamaManager(JNIEnv* env);
   llama_progress_callback getProgressCallback();
   void* generateProgressCallbackContext();
+  LlamaSession newSession(JNIEnv* env);
 
   private:
   static LlamaManager* singleton;

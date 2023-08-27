@@ -1,4 +1,5 @@
 #include "LlamaManager.h"
+#include <iostream>
 #include "../exceptions/LlamaCppException.h"
 
 #include <mutex>
@@ -16,7 +17,7 @@ void* LlamaManager::generateProgressCallbackContext() {
 }
 
 void LlamaManager::progressCallback(float progress, void* ctx) {
-  // TODO call back into Java using JavaVM to attach a thread and invoke a method
+  std::cout << "Progress: " << progress << std::endl;
 }
 
 LlamaManager* LlamaManager::getLlamaManager(JNIEnv* env) {
@@ -32,4 +33,7 @@ LlamaManager* LlamaManager::getLlamaManager(JNIEnv* env) {
     throw LlamaCppException("JavaVM for provided JNIEnv does not match previously cached JavaVM. LlamaManager only supports one JavaVM per process.");
   }
   return singleton;
+}
+LlamaSession LlamaManager::newSession(JNIEnv* env) {
+  return LlamaSession(env);
 }

@@ -7,7 +7,6 @@
 
 class LlamaSession {
   public:
-  explicit LlamaSession(JNIEnv* env) : env(env) {}
 
   void backendInit(bool useNuma);
   void backendFree();
@@ -29,6 +28,8 @@ class LlamaSession {
   jint tokenNl();
 
   private:
+  friend class LlamaManager;
+  explicit LlamaSession(JNIEnv* env) : env(env) {}
   JNIEnv* env;
 };
 
