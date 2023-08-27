@@ -1,8 +1,12 @@
+#include <jni.h>
+#include <unordered_map>
 #include "com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl.h"
-#include "exceptions/DynamicLibraryException.h"
-#include "jni.h"
 #include "handler/LlamaSession.h"
 #include "libloader.h"
+#include "handler/LlamaManager.h"
+#include "exceptions/exceptions.h"
+
+LlamaManager* llamaManager = nullptr;
 
 extern "C" {
 
@@ -11,22 +15,21 @@ extern "C" {
       JNIEnv *env,
       jobject thisObject) {
 
-    try {
+    withJniExceptions(env, [env] {
       loadLibrary("llama");
-    } catch (const DynamicLibraryException &e) {
-      jni::throwDLLException(env, e);
-    }
+      if (!llamaManager) {
+        llamaManager = LlamaManager::getLlamaManager(env);
+      }
+    });
   }
 
   JNIEXPORT void
   JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_closeLibrary(
       JNIEnv *env,
       jobject thisObject) {
-    try {
-      closeLibrary();
-    } catch (const DynamicLibraryException &e) {
-      jni::throwDLLException(env, e);
-    }
+      withJniExceptions(env, [] {
+        closeLibrary();
+      });
   }
 
   JNIEXPORT void

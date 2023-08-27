@@ -1,6 +1,6 @@
 package com.mangomelancholy.llama.cpp.java.bindings;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class LlamaContextParams {
     private int seed; // unsigned
@@ -13,8 +13,7 @@ public class LlamaContextParams {
     private float[] tensorSplit;
     private float ropeFreqBase;
     private float ropeFreqScale;
-    private BiConsumer<Float, Object> progressCallback;
-    private Object progressCallbackUserData;
+    private Consumer<Float> progressCallback;
     private boolean lowVram;
     private boolean mulMatQ;
     private boolean f16Kv;
@@ -104,21 +103,12 @@ public class LlamaContextParams {
         this.ropeFreqScale = ropeFreqScale;
     }
 
-    public BiConsumer<Float, Object> getProgressCallback() {
+    public Consumer<Float> getProgressCallback() {
         return progressCallback;
     }
 
-    public void setProgressCallback(
-        BiConsumer<Float, Object> progressCallback) {
+    public void setProgressCallback(Consumer<Float> progressCallback) {
         this.progressCallback = progressCallback;
-    }
-
-    public Object getProgressCallbackUserData() {
-        return progressCallbackUserData;
-    }
-
-    public void setProgressCallbackUserData(Object progressCallbackUserData) {
-        this.progressCallbackUserData = progressCallbackUserData;
     }
 
     public boolean isLowVram() {

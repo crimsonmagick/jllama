@@ -7,38 +7,29 @@
 
 class LlamaSession {
   public:
-  LlamaSession(JNIEnv* env) : env(env) {}
+  explicit LlamaSession(JNIEnv* env) : env(env) {}
+
   void backendInit(bool useNuma);
   void backendFree();
+
   jobject loadModelFromFile(jbyteArray path, jobject javaParams);
-  jobject loadContextWithModel(jobject jModel, jobject jContextParams);
   jint tokenizeWithModel(jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos);
+
+  jobject loadContextWithModel(jobject jModel, jobject jContextParams);
   jint eval(jobject jContext, jintArray jTokens, jint jnTokens, jint jnPast, jint jnThreads);
+
   jfloatArray getLogits(jobject jContext);
+
   jint sampleTokenGreedy(jobject jContext, jobject jCandidates);
+
   jbyteArray tokenToStr(jobject jContext, jint jToken);
+
   jint tokenBos();
   jint tokenEos();
   jint tokenNl();
 
-
-
   private:
   JNIEnv* env;
-  template<typename Func>
-  auto withJniExceptions(Func&& func) -> decltype(func()) {
-    using ReturnType = decltype(func());
-    try {
-      return func();
-    } catch (const DynamicLibraryException &e) {
-      jni::throwDLLException(env, e);
-    } catch (const jni::JNIException &e) {
-      jni::throwJNIException(env, e);
-    } catch (const LlamaCppException &e) {
-      jni::throwLlamaCppException(env, e);
-    }
-    return ReturnType();
-  }
 };
 
 #endif //JNI_IMPLEMENTATION_LLAMASESSION_H

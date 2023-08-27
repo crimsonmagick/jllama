@@ -81,7 +81,6 @@ public class Main {
     contextParams.setRopeFreqBase(10000.0f);
     contextParams.setRopeFreqScale(1.0f);
     contextParams.setProgressCallback(null);
-    contextParams.setProgressCallbackUserData(null);
     contextParams.setLowVram(false);
     contextParams.setMulMatQ(false);
     contextParams.setF16Kv(true);
