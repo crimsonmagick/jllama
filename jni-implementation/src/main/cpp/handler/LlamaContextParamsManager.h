@@ -5,7 +5,7 @@
 
 class LlamaContextParamsManager {
   public:
-  LlamaContextParamsManager(JNIEnv* env, jobject javaContextParams, llama_progress_callback, void* callbackContext);
+  LlamaContextParamsManager(JNIEnv* env, jobject javaContextParams, llama_progress_callback callback, void* callbackContext);
   ~LlamaContextParamsManager();
   llama_context_params getParams();
 

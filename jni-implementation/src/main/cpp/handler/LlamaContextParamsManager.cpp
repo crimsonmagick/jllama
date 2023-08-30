@@ -1,5 +1,5 @@
 #include <jni.h>
-#include "jni.h"
+#include "../jni.h"
 #include "LlamaContextParamsManager.h"
 
 llama_context_params LlamaContextParamsManager::getParams() {
@@ -28,7 +28,7 @@ LlamaContextParamsManager::LlamaContextParamsManager(JNIEnv* env, jobject javaCo
       jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqBase"),
       jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqScale"),
       callback,
-      callbackContext,
+      nullptr,
       jni::getBool(env, javaParamsClass, javaContextParams, "lowVram"),
       jni::getBool(env, javaParamsClass, javaContextParams, "mulMatQ"),
       jni::getBool(env, javaParamsClass, javaContextParams, "f16Kv"),

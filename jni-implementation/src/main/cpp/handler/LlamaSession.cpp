@@ -1,10 +1,16 @@
+#include <iostream>
+#include <jni.h>
 #include "LlamaManager.h"
 #include "../libloader.h"
-#include "../LlamaContextParamsManager.h"
 #include "../Utf8StringManager.h"
 #include "../exceptions/exceptions.h"
+#include "LlamaContextParamsManager.h"
 
 const jobject OBJECT_FAILURE = nullptr;
+
+struct progressContext {
+  jobject callback;
+};
 
 typedef void (* llama_backend_init_pointer)(bool);
 void LlamaManager::LlamaSession::backendInit(bool useNuma) {
@@ -24,6 +30,10 @@ void LlamaManager::LlamaSession::backendFree() {
   });
 }
 
+void LlamaManager::progressCallback(float progress, void* ctx) {
+  std::cout << "Progress: " << progress << std::endl;
+}
+
 typedef llama_model* (* llama_load_model_from_file_pointer)
     (const char*, struct llama_context_params);
 jobject LlamaManager::LlamaSession::loadModelFromFile(jbyteArray path, jobject javaParams) {
@@ -33,7 +43,7 @@ jobject LlamaManager::LlamaSession::loadModelFromFile(jbyteArray path, jobject j
             "llama_load_model_from_file");
 
     auto stringManager = Utf8StringManager(env, path);
-    auto paramsManager = LlamaContextParamsManager(env, javaParams, nullptr,
+    auto paramsManager = LlamaContextParamsManager(env, javaParams, progressCallback,
                                                    nullptr);
 
     llama_model* model =
@@ -57,7 +67,7 @@ jobject LlamaManager::LlamaSession::loadContextWithModel(jobject jModel, jobject
         (llama_new_context_with_model_pointer) getFunctionAddress(
             "llama_new_context_with_model");
 
-    auto paramsManager = LlamaContextParamsManager(env, jContextParams, nullptr,
+    auto paramsManager = LlamaContextParamsManager(env, jContextParams, progressCallback,
                                                    nullptr);
     auto llamaModel = jni::getLlamaModelPointer(env, jModel);
     llama_context
