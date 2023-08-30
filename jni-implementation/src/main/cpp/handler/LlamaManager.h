@@ -36,8 +36,9 @@ class LlamaManager {
 
       private:
         friend class LlamaManager;
-        explicit LlamaSession(JNIEnv* env) : env(env) {}
+        explicit LlamaSession(JNIEnv* env, LlamaManager* outer) : env(env), manager(outer) {}
         JNIEnv* env;
+        LlamaManager* manager;
     };
 
   public:

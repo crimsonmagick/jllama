@@ -1,8 +1,7 @@
-#include "LlamaManager.h"
 #include <iostream>
-#include "../exceptions/LlamaCppException.h"
-
 #include <mutex>
+#include "../exceptions/LlamaCppException.h"
+#include "LlamaManager.h"
 
 LlamaManager* LlamaManager::singleton = nullptr;
 JavaVM* LlamaManager::javaVm = nullptr;
@@ -35,5 +34,5 @@ LlamaManager* LlamaManager::getLlamaManager(JNIEnv* env) {
   return singleton;
 }
 LlamaManager::LlamaSession LlamaManager::newSession(JNIEnv* env) {
-  return LlamaSession(env);
+  return LlamaSession(env, this);
 }
