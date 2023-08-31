@@ -1,20 +1,39 @@
 #include <jni.h>
 #include "../jni.h"
-#include "LlamaContextParamsManager.h"
+#include "LlamaManager.h"
 
-llama_context_params LlamaContextParamsManager::getParams() {
+llama_context_params
+LlamaManager::LlamaSession::LlamaContextParamsManager::getParams() {
   return llamaContextParams;
 }
 
-LlamaContextParamsManager::LlamaContextParamsManager(JNIEnv* env, jobject javaContextParams, llama_progress_callback callback, void* callbackContext) : env(env) {
+LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager(jobject javaContextParams, LlamaSession* session) : session(session) {
+
+  JNIEnv* env = session->env;
   jclass javaParamsClass = env->GetObjectClass(javaContextParams);
 
   tensorSplitFloatArray = jni::getJFloatArray(env,
                                               javaParamsClass,
                                               javaContextParams,
                                               "tensorSplit");
-  tensorSplit = tensorSplitFloatArray ?
-                env->GetFloatArrayElements(tensorSplitFloatArray, nullptr) : nullptr;
+  tensorSplit = tensorSplitFloatArray ? env->GetFloatArrayElements(tensorSplitFloatArray, nullptr) : nullptr;
+
+  jfieldID callbackFieldId = env->GetFieldID( javaParamsClass, "progressCallback", "Ljava/util/function/Consumer;");
+  if (callbackFieldId == nullptr) {
+    throw jni::JNIException("field \"progressCallback\" must exist on Java LlamaContextParams class");
+  }
+  jobject jprogressCallback = env->GetObjectField(javaContextParams, callbackFieldId);
+
+  ProgressContext* callbackContext;
+
+  if (jprogressCallback) {
+    callbackContext = new ProgressContext{
+      env->NewGlobalRef(jprogressCallback)
+    };
+    env->DeleteLocalRef(jprogressCallback);
+  } else {
+    callbackContext = nullptr;
+  }
 
   llamaContextParams = {
       jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "seed"),
@@ -27,8 +46,8 @@ LlamaContextParamsManager::LlamaContextParamsManager(JNIEnv* env, jobject javaCo
       tensorSplit,
       jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqBase"),
       jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqScale"),
-      callback,
-      nullptr,
+      progressCallback,
+      callbackContext,
       jni::getBool(env, javaParamsClass, javaContextParams, "lowVram"),
       jni::getBool(env, javaParamsClass, javaContextParams, "mulMatQ"),
       jni::getBool(env, javaParamsClass, javaContextParams, "f16Kv"),
@@ -40,9 +59,9 @@ LlamaContextParamsManager::LlamaContextParamsManager(JNIEnv* env, jobject javaCo
   };
 }
 
-LlamaContextParamsManager::~LlamaContextParamsManager() {
+LlamaManager::LlamaSession::LlamaContextParamsManager::~LlamaContextParamsManager() {
   if (tensorSplit) {
-    env->ReleaseFloatArrayElements(tensorSplitFloatArray,
+    session->env->ReleaseFloatArrayElements(tensorSplitFloatArray,
                                    (jfloat*) tensorSplit,
                                    JNI_ABORT);
   }

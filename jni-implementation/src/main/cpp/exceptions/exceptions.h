@@ -15,6 +15,8 @@ auto withJniExceptions(JNIEnv* env, Func&& func) -> decltype(func()) {
     jni::throwJNIException(env, e);
   } catch (const LlamaCppException &e) {
     jni::throwLlamaCppException(env, e);
+  } catch (const std::exception &e) {
+    jni::throwRuntimeException(env, e);
   }
   return ReturnType();
 }

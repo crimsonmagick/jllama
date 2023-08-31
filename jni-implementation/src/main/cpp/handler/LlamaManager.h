@@ -7,6 +7,9 @@
 class LlamaManager {
 
   private:
+    struct ProgressContext {
+      jobject callback;
+    };
     class LlamaSession {
       public:
         void backendInit(bool useNuma);
@@ -41,6 +44,19 @@ class LlamaManager {
             : env(env), manager(outer) {}
         JNIEnv* env;
         LlamaManager* manager;
+        class LlamaContextParamsManager {
+          public:
+            LlamaContextParamsManager(jobject javaContextParams, LlamaSession* session);
+            ~LlamaContextParamsManager();
+            llama_context_params getParams();
+
+          private:
+            llama_context_params llamaContextParams{};
+            jfloatArray tensorSplitFloatArray;
+            const float* tensorSplit;
+            LlamaSession* session;
+
+        };
     };
 
     static LlamaManager* singleton;

@@ -80,7 +80,7 @@ public class Main {
     contextParams.setTensorSplit(null);
     contextParams.setRopeFreqBase(10000.0f);
     contextParams.setRopeFreqScale(1.0f);
-    contextParams.setProgressCallback(null);
+    contextParams.setProgressCallback(progress -> System.out.println("jProgress: " + progress));
     contextParams.setLowVram(false);
     contextParams.setMulMatQ(false);
     contextParams.setF16Kv(true);

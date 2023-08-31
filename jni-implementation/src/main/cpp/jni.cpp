@@ -1,6 +1,5 @@
 #include <iostream>
 #include <jni.h>
-#include <memory>
 #include "jni.h"
 #include "exceptions/DynamicLibraryException.h"
 
@@ -84,6 +83,10 @@ namespace jni {
 
   void throwLlamaCppException(JNIEnv* env, const LlamaCppException& e) {
     throwNativeException(env, "com/mangomelancholy/llama/cpp/java/bindings/exceptions/LlamaCppException", e.what());
+  }
+
+  void throwRuntimeException(JNIEnv* env, const std::exception& e) {
+    throwNativeException(env, "java/lang/RuntimeException", e.what());
   }
 
   jobject constructLlamaOpaqueModel(JNIEnv *env, llama_model *modelPointer) {

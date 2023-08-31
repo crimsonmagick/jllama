@@ -1,16 +1,10 @@
-#include <iostream>
 #include <jni.h>
 #include "LlamaManager.h"
 #include "../libloader.h"
 #include "../Utf8StringManager.h"
 #include "../exceptions/exceptions.h"
-#include "LlamaContextParamsManager.h"
 
 const jobject OBJECT_FAILURE = nullptr;
-
-struct progressContext {
-  jobject callback;
-};
 
 typedef void (* llama_backend_init_pointer)(bool);
 void LlamaManager::LlamaSession::backendInit(bool useNuma) {
@@ -31,7 +25,33 @@ void LlamaManager::LlamaSession::backendFree() {
 }
 
 void LlamaManager::progressCallback(float progress, void* ctx) {
-  std::cout << "Progress: " << progress << std::endl;
+  if (ctx) {
+    JNIEnv* env;
+    jint jniStatus = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
+    jint attachResult;
+    if (jniStatus == JNI_EDETACHED) {
+      attachResult = javaVm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr);
+    } else if (jniStatus == JNI_OK) {
+      attachResult = JNI_OK;
+    } else {
+      attachResult = JNI_ERR;
+    }
+    if (attachResult == JNI_OK) {
+      jclass floatClass = env->FindClass("java/lang/Float");
+      jmethodID floatConstructor = env->GetMethodID(floatClass, "<init>", "(F)V");
+      jobject floatObj = env->NewObject(floatClass, floatConstructor, progress);
+
+      auto progressContext = reinterpret_cast<ProgressContext*>(ctx);
+      jclass callbackClass = env->GetObjectClass(progressContext->callback);
+      jmethodID acceptMethod = env->GetMethodID(callbackClass, "accept", "(Ljava/lang/Object;)V");
+      env->CallVoidMethod(callbackClass, acceptMethod, floatObj);
+      env->DeleteLocalRef(floatObj);
+
+      if (jniStatus == JNI_EDETACHED) {
+        javaVm->DetachCurrentThread();
+      }
+    }
+  }
 }
 
 typedef llama_model* (* llama_load_model_from_file_pointer)
@@ -43,11 +63,14 @@ jobject LlamaManager::LlamaSession::loadModelFromFile(jbyteArray path, jobject j
             "llama_load_model_from_file");
 
     auto stringManager = Utf8StringManager(env, path);
-    auto paramsManager = LlamaContextParamsManager(env, javaParams, progressCallback,
-                                                   nullptr);
+    auto paramsManager = LlamaContextParamsManager(javaParams, this);
+    auto params = paramsManager.getParams();
 
     llama_model* model =
-        llamaLoadModel(stringManager.getUtf8String(), paramsManager.getParams());
+        llamaLoadModel(stringManager.getUtf8String(), params);
+    auto progressContext = reinterpret_cast<ProgressContext*>(params.progress_callback_user_data);
+    env->DeleteGlobalRef(progressContext->callback);
+    delete reinterpret_cast<ProgressContext*>(params.progress_callback_user_data);
 
     if (model) {
       return jni::constructLlamaOpaqueModel(env, model);
@@ -67,8 +90,7 @@ jobject LlamaManager::LlamaSession::loadContextWithModel(jobject jModel, jobject
         (llama_new_context_with_model_pointer) getFunctionAddress(
             "llama_new_context_with_model");
 
-    auto paramsManager = LlamaContextParamsManager(env, jContextParams, progressCallback,
-                                                   nullptr);
+    auto paramsManager = LlamaContextParamsManager(jContextParams, this);
     auto llamaModel = jni::getLlamaModelPointer(env, jModel);
     llama_context
         * context = llamaCreateContext(llamaModel, paramsManager.getParams());

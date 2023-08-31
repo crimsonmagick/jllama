@@ -27,6 +27,7 @@ namespace jni {
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);
   void throwJNIException(JNIEnv* env, const JNIException& e);
   void throwLlamaCppException(JNIEnv* env, const LlamaCppException& e);
+  void throwRuntimeException(JNIEnv* env, const std::exception& e);
   jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer);
   llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext);
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray);
