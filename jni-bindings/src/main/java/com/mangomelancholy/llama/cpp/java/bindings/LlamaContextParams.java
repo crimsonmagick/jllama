@@ -6,8 +6,6 @@ public class LlamaContextParams {
     private int seed; // unsigned
     private int nCtx;
     private int nBatch;
-    private int nGqa;
-    private float rmsNormEps;
     private int nGpuLayers;
     private int mainGpu;
     private float[] tensorSplit;
@@ -45,22 +43,6 @@ public class LlamaContextParams {
 
     public void setnBatch(int nBatch) {
         this.nBatch = nBatch;
-    }
-
-    public int getnGqa() {
-        return nGqa;
-    }
-
-    public void setnGqa(int nGqa) {
-        this.nGqa = nGqa;
-    }
-
-    public float getRmsNormEps() {
-        return rmsNormEps;
-    }
-
-    public void setRmsNormEps(float rmsNormEps) {
-        this.rmsNormEps = rmsNormEps;
     }
 
     public int getnGpuLayers() {

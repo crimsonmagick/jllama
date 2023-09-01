@@ -15,15 +15,23 @@ public class Detokenizer {
   private final LlamaCpp llamaManager;
 
   public String detokenize(List<Integer> tokens, LlamaOpaqueContext llamaOpaqueContext) {
-     return tokens.stream()
-        .map(token -> new String(llamaManager.llamaTokenToStr(llamaOpaqueContext, token),
-            StandardCharsets.UTF_8))
+    return tokens.stream()
+        .map(token -> detokenize(token, llamaOpaqueContext))
         .collect(Collectors.joining());
   }
 
   public String detokenize(int token, LlamaOpaqueContext llamaOpaqueContext) {
-    return new String(llamaManager.llamaTokenToStr(llamaOpaqueContext, token),
-        StandardCharsets.UTF_8);
+    byte[] buf = new byte[8];
+    int length = llamaManager.llamaTokenToPiece(llamaOpaqueContext, token, buf);
+    if (length < 0) {
+      final int size = Math.abs(length);
+      buf = new byte[size];
+      length = llamaManager.llamaTokenToPiece(llamaOpaqueContext, token, buf);
+    }
+    if (length < 0) {
+      throw new RuntimeException("Unable to allocate a large enough buffer for detokenization length.");
+    }
+    return new String(buf, 0, length, StandardCharsets.UTF_8);
   }
 
 }

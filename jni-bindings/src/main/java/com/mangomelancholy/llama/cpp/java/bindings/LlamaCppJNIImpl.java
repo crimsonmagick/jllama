@@ -33,15 +33,15 @@ class LlamaCppJNIImpl implements LlamaCpp {
   public native int llamaSampleTokenGreedy(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
 
   @Override
-  public native byte[] llamaTokenToStr(LlamaOpaqueContext context, int llamaToken);
+  public native int llamaTokenToPiece(LlamaOpaqueContext context, int llamaToken, byte[] buf);
 
   @Override
-  public native int llamaTokenBos();
+  public native int llamaTokenBos(LlamaOpaqueContext context);
 
   @Override
-  public native int llamaTokenEos();
+  public native int llamaTokenEos(LlamaOpaqueContext context);
 
   @Override
-  public native int llamaTokenNl();
+  public native int llamaTokenNl(LlamaOpaqueContext context);
 
 }

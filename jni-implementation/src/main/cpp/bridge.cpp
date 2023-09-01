@@ -83,20 +83,21 @@ extern "C" {
     return llamaManager->newSession(env).sampleTokenGreedy(jContext, jCandidates);
   }
 
-  JNIEXPORT jbyteArray JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenToStr(JNIEnv* env, jobject thisObject, jobject jContext, jint jToken) {
-    return llamaManager->newSession(env).tokenToStr(jContext, jToken);
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenToPiece
+    (JNIEnv* env, jobject thisObject, jobject jContext, jint jToken, jbyteArray output) {
+    return llamaManager->newSession(env).tokenToPiece(jContext, jToken, output);
   }
 
-  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenBos(JNIEnv* env, jobject thisObject) {
-    return llamaManager->newSession(env).tokenBos();
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenBos(JNIEnv* env, jobject thisObject, jobject jContext) {
+    return llamaManager->newSession(env).tokenBos(jContext);
   }
 
-  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenEos(JNIEnv* env, jobject thisObject) {
-    return llamaManager->newSession(env).tokenEos();
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenEos(JNIEnv* env, jobject thisObject, jobject jContext) {
+    return llamaManager->newSession(env).tokenEos(jContext);
   }
 
-  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenNl(JNIEnv* env, jobject thisObject) {
-    return llamaManager->newSession(env).tokenNl();
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenNl(JNIEnv* env, jobject thisObject, jobject jContext) {
+    return llamaManager->newSession(env).tokenNl(jContext);
   }
 
 }

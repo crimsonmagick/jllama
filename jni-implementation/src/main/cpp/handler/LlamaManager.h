@@ -32,11 +32,11 @@ class LlamaManager {
 
         jint sampleTokenGreedy(jobject jContext, jobject jCandidates);
 
-        jbyteArray tokenToStr(jobject jContext, jint jToken);
+        jint tokenToPiece(jobject jContext, jint jToken, jbyteArray output);
 
-        jint tokenBos();
-        jint tokenEos();
-        jint tokenNl();
+        jint tokenBos(jobject jContext);
+        jint tokenEos(jobject jContext);
+        jint tokenNl(jobject jContext);
 
       private:
         friend class LlamaManager;

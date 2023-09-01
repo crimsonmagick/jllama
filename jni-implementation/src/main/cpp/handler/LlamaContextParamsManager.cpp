@@ -18,36 +18,36 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                                               "tensorSplit");
   tensorSplit = tensorSplitFloatArray ? env->GetFloatArrayElements(tensorSplitFloatArray, nullptr) : nullptr;
 
-  jfieldID callbackFieldId = env->GetFieldID( javaParamsClass, "progressCallback", "Ljava/util/function/Consumer;");
-  if (callbackFieldId == nullptr) {
-    throw jni::JNIException("field \"progressCallback\" must exist on Java LlamaContextParams class");
-  }
-  jobject jprogressCallback = env->GetObjectField(javaContextParams, callbackFieldId);
+//  jfieldID callbackFieldId = env->GetFieldID( javaParamsClass, "progressCallback", "Ljava/util/function/Consumer;");
+//  if (callbackFieldId == nullptr) {
+//    throw jni::JNIException("field \"progressCallback\" must exist on Java LlamaContextParams class");
+//  }
+//  jobject jprogressCallback = env->GetObjectField(javaContextParams, callbackFieldId);
 
-  ProgressContext* callbackContext;
-
-  if (jprogressCallback) {
-    callbackContext = new ProgressContext{
-      env->NewGlobalRef(jprogressCallback)
-    };
-    env->DeleteLocalRef(jprogressCallback);
-  } else {
-    callbackContext = nullptr;
-  }
+//  ProgressContext* callbackContext;
+//
+//  if (jprogressCallback) {
+//    callbackContext = new ProgressContext{
+//      env->NewGlobalRef(jprogressCallback)
+//    };
+//    env->DeleteLocalRef(jprogressCallback);
+//  } else {
+//    callbackContext = nullptr;
+//  }
 
   llamaContextParams = {
       jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "seed"),
       jni::getInt32(env, javaParamsClass, javaContextParams, "nCtx"),
       jni::getInt32(env, javaParamsClass, javaContextParams, "nBatch"),
-      jni::getInt32(env, javaParamsClass, javaContextParams, "nGqa"),
-      jni::getFloat(env, javaParamsClass, javaContextParams, "rmsNormEps"),
       jni::getInt32(env, javaParamsClass, javaContextParams, "nGpuLayers"),
       jni::getInt32(env, javaParamsClass, javaContextParams, "mainGpu"),
       tensorSplit,
       jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqBase"),
       jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqScale"),
-      progressCallback,
-      callbackContext,
+//      progressCallback,
+//      callbackContext,
+      nullptr,
+      nullptr,
       jni::getBool(env, javaParamsClass, javaContextParams, "lowVram"),
       jni::getBool(env, javaParamsClass, javaContextParams, "mulMatQ"),
       jni::getBool(env, javaParamsClass, javaContextParams, "f16Kv"),

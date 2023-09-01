@@ -3,6 +3,7 @@
 #include "../libloader.h"
 #include "../Utf8StringManager.h"
 #include "../exceptions/exceptions.h"
+#include <iostream>
 
 const jobject OBJECT_FAILURE = nullptr;
 
@@ -25,33 +26,34 @@ void LlamaManager::LlamaSession::backendFree() {
 }
 
 void LlamaManager::progressCallback(float progress, void* ctx) {
-  if (ctx) {
-    JNIEnv* env;
-    jint jniStatus = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
-    jint attachResult;
-    if (jniStatus == JNI_EDETACHED) {
-      attachResult = javaVm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr);
-    } else if (jniStatus == JNI_OK) {
-      attachResult = JNI_OK;
-    } else {
-      attachResult = JNI_ERR;
-    }
-    if (attachResult == JNI_OK) {
-      jclass floatClass = env->FindClass("java/lang/Float");
-      jmethodID floatConstructor = env->GetMethodID(floatClass, "<init>", "(F)V");
-      jobject floatObj = env->NewObject(floatClass, floatConstructor, progress);
-
-      auto progressContext = reinterpret_cast<ProgressContext*>(ctx);
-      jclass callbackClass = env->GetObjectClass(progressContext->callback);
-      jmethodID acceptMethod = env->GetMethodID(callbackClass, "accept", "(Ljava/lang/Object;)V");
-      env->CallVoidMethod(callbackClass, acceptMethod, floatObj);
-      env->DeleteLocalRef(floatObj);
-
-      if (jniStatus == JNI_EDETACHED) {
-        javaVm->DetachCurrentThread();
-      }
-    }
-  }
+  std::cout << "cProgress: " << progress << std::endl;
+//  if (ctx) {
+//    JNIEnv* env;
+//    jint jniStatus = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
+//    jint attachResult;
+//    if (jniStatus == JNI_EDETACHED) {
+//      attachResult = javaVm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr);
+//    } else if (jniStatus == JNI_OK) {
+//      attachResult = JNI_OK;
+//    } else {
+//      attachResult = JNI_ERR;
+//    }
+//    if (attachResult == JNI_OK) {
+//      jclass floatClass = env->FindClass("java/lang/Float");
+//      jmethodID floatConstructor = env->GetMethodID(floatClass, "<init>", "(F)V");
+//      jobject floatObj = env->NewObject(floatClass, floatConstructor, progress);
+//
+//      auto progressContext = reinterpret_cast<ProgressContext*>(ctx);
+//      jclass callbackClass = env->GetObjectClass(progressContext->callback);
+//      jmethodID acceptMethod = env->GetMethodID(callbackClass, "accept", "(Ljava/lang/Object;)V");
+//      env->CallVoidMethod(callbackClass, acceptMethod, floatObj);
+//      env->DeleteLocalRef(floatObj);
+//
+//      if (jniStatus == JNI_EDETACHED) {
+//        javaVm->DetachCurrentThread();
+//      }
+//    }
+//  }
 }
 
 typedef llama_model* (* llama_load_model_from_file_pointer)
@@ -68,9 +70,12 @@ jobject LlamaManager::LlamaSession::loadModelFromFile(jbyteArray path, jobject j
 
     llama_model* model =
         llamaLoadModel(stringManager.getUtf8String(), params);
-    auto progressContext = reinterpret_cast<ProgressContext*>(params.progress_callback_user_data);
-    env->DeleteGlobalRef(progressContext->callback);
-    delete reinterpret_cast<ProgressContext*>(params.progress_callback_user_data);
+
+    if (params.progress_callback_user_data) {
+      auto progressContext = reinterpret_cast<ProgressContext*>(params.progress_callback_user_data);
+      env->DeleteGlobalRef(progressContext->callback);
+      delete progressContext;
+    }
 
     if (model) {
       return jni::constructLlamaOpaqueModel(env, model);
@@ -91,9 +96,16 @@ jobject LlamaManager::LlamaSession::loadContextWithModel(jobject jModel, jobject
             "llama_new_context_with_model");
 
     auto paramsManager = LlamaContextParamsManager(jContextParams, this);
+    auto params = paramsManager.getParams();
     auto llamaModel = jni::getLlamaModelPointer(env, jModel);
     llama_context
         * context = llamaCreateContext(llamaModel, paramsManager.getParams());
+
+    if (params.progress_callback_user_data) {
+      auto progressContext = reinterpret_cast<ProgressContext*>(params.progress_callback_user_data);
+      env->DeleteGlobalRef(progressContext->callback);
+      delete progressContext;
+    }
 
     if (context) {
       return jni::constructLlamaOpaqueContext(env, context);
@@ -190,41 +202,45 @@ jint LlamaManager::LlamaSession::sampleTokenGreedy(jobject jContext, jobject jCa
   });
 }
 
-typedef const char* (* llama_token_to_str_pointer)(llama_context*, llama_token);
-jbyteArray LlamaManager::LlamaSession::tokenToStr(jobject jContext, jint jToken) {
-  return withJniExceptions(env, [&jContext, &jToken, this]{
-    auto detokenize = (llama_token_to_str_pointer) getFunctionAddress(
-        "llama_token_to_str");
+typedef int (* llama_token_to_piece_pointer)(llama_context*, llama_token, char*, int);
+jint LlamaManager::LlamaSession::tokenToPiece(jobject jContext, jint jToken, jbyteArray joutput) {
+  return withJniExceptions(env, [&jContext, jToken, this, joutput]{
+    auto detokenize = (llama_token_to_piece_pointer) getFunctionAddress(
+        "llama_token_to_piece");
 
+    auto joutputPointer = env->GetByteArrayElements(joutput, nullptr);
+    char* outputPointer = reinterpret_cast<char*>(joutputPointer);
+    jsize length = env->GetArrayLength(joutput);
     auto llamaContext = jni::getLlamaContextPointer(env, jContext);
 
-    const char * result = detokenize(llamaContext, jToken);
-    auto length = static_cast<jsize>(strlen(result));
-    jbyteArray detokenized = env->NewByteArray(length);
-    env->SetByteArrayRegion(detokenized, 0, length, reinterpret_cast<const jbyte*>(result));
-    return detokenized;
+    int result = detokenize(llamaContext, jToken, outputPointer, length);
+    env->ReleaseByteArrayElements(joutput, joutputPointer, 0);
+    return result;
   });
 }
 
-typedef llama_token (* get_special_token_pointer)();
+typedef llama_token (* get_special_token_pointer)(llama_context*);
 
-jint LlamaManager::LlamaSession::tokenBos() {
-  return withJniExceptions(env, []{
+jint LlamaManager::LlamaSession::tokenBos(jobject jContext) {
+  return withJniExceptions(env, [this, jContext]{
+    auto context = jni::getLlamaContextPointer(env, jContext);
     auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_bos");
-    return getBos();
+    return getBos(context);
   });
 }
 
-jint LlamaManager::LlamaSession::tokenEos() {
-  return withJniExceptions(env, []{
-    auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_eos");
-    return getBos();
+jint LlamaManager::LlamaSession::tokenEos(jobject jContext) {
+  return withJniExceptions(env, [this, jContext]{
+    auto context = jni::getLlamaContextPointer(env, jContext);
+    auto getEos = (get_special_token_pointer) getFunctionAddress("llama_token_eos");
+    return getEos(context);
   });
 }
 
-jint LlamaManager::LlamaSession::tokenNl() {
-  return withJniExceptions(env, []{
-    auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_nl");
-    return getBos();
+jint LlamaManager::LlamaSession::tokenNl(jobject jContext) {
+  return withJniExceptions(env, [this, jContext]{
+    auto context = jni::getLlamaContextPointer(env, jContext);
+    auto getNl = (get_special_token_pointer) getFunctionAddress("llama_token_nl");
+    return getNl(context);
   });
 }
