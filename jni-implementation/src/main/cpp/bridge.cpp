@@ -56,11 +56,8 @@ extern "C" {
     return llamaManager->newSession(env).loadContextWithModel(jModel, jContextParams);
   }
 
-[[maybe_unused]] JNIEXPORT jint
-  JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenizeWithModel
-      (JNIEnv* env, jobject thisObject, jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens,
-       jboolean jBos) {
-  return llamaManager->newSession(env)
+  JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenizeWithModel(JNIEnv* env, jobject thisObject, jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos) {
+    return llamaManager->newSession(env)
       .tokenizeWithModel(jModel, jToTokenize, jTokensOut, jmaxTokens, jBos);
   }
 
@@ -99,5 +96,11 @@ extern "C" {
   JNIEXPORT jint JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenNl(JNIEnv* env, jobject thisObject, jobject jContext) {
     return llamaManager->newSession(env).tokenNl(jContext);
   }
+
+
+  JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaLogSet(JNIEnv* env, jobject thisObject, jobject llamaLogCallback) {
+    return llamaManager->newSession(env).setLogger(llamaLogCallback);
+  }
+
 
 }

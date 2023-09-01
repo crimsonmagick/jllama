@@ -7,7 +7,7 @@
 class LlamaManager {
 
   private:
-    struct ProgressContext {
+    struct CallbackContext {
       jobject callback;
     };
     class LlamaSession {
@@ -38,6 +38,8 @@ class LlamaManager {
         jint tokenEos(jobject jContext);
         jint tokenNl(jobject jContext);
 
+        void setLogger(jobject logger);
+
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
@@ -58,12 +60,13 @@ class LlamaManager {
 
         };
     };
-
     static LlamaManager* singleton;
     static JavaVM* javaVm;
+    static jobject jloggerCallback;
     static inline std::once_flag initFlag;
     explicit LlamaManager();
     static void progressCallback(float progress, void* ctx);
+    static void loggerCallback(enum llama_log_level level, const char * text, void * user_data);
 
   public:
     static LlamaManager* getLlamaManager(JNIEnv* env);

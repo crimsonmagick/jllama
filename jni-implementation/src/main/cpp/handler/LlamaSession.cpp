@@ -27,33 +27,33 @@ void LlamaManager::LlamaSession::backendFree() {
 
 void LlamaManager::progressCallback(float progress, void* ctx) {
   std::cout << "cProgress: " << progress << std::endl;
-//  if (ctx) {
-//    JNIEnv* env;
-//    jint jniStatus = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
-//    jint attachResult;
-//    if (jniStatus == JNI_EDETACHED) {
-//      attachResult = javaVm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr);
-//    } else if (jniStatus == JNI_OK) {
-//      attachResult = JNI_OK;
-//    } else {
-//      attachResult = JNI_ERR;
-//    }
-//    if (attachResult == JNI_OK) {
-//      jclass floatClass = env->FindClass("java/lang/Float");
-//      jmethodID floatConstructor = env->GetMethodID(floatClass, "<init>", "(F)V");
-//      jobject floatObj = env->NewObject(floatClass, floatConstructor, progress);
-//
-//      auto progressContext = reinterpret_cast<ProgressContext*>(ctx);
-//      jclass callbackClass = env->GetObjectClass(progressContext->callback);
-//      jmethodID acceptMethod = env->GetMethodID(callbackClass, "accept", "(Ljava/lang/Object;)V");
-//      env->CallVoidMethod(callbackClass, acceptMethod, floatObj);
-//      env->DeleteLocalRef(floatObj);
-//
-//      if (jniStatus == JNI_EDETACHED) {
-//        javaVm->DetachCurrentThread();
-//      }
-//    }
-//  }
+  if (ctx) {
+    JNIEnv* env;
+    jint jniStatus = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
+    jint attachResult;
+    if (jniStatus == JNI_EDETACHED) {
+      attachResult = javaVm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr);
+    } else if (jniStatus == JNI_OK) {
+      attachResult = JNI_OK;
+    } else {
+      attachResult = JNI_ERR;
+    }
+    if (attachResult == JNI_OK) {
+      jclass floatClass = env->FindClass("java/lang/Float");
+      jmethodID floatConstructor = env->GetMethodID(floatClass, "<init>", "(F)V");
+      jobject floatObj = env->NewObject(floatClass, floatConstructor, progress);
+
+      auto progressContext = reinterpret_cast<CallbackContext*>(ctx);
+      jclass callbackClass = env->GetObjectClass(progressContext->callback);
+      jmethodID acceptMethod = env->GetMethodID(callbackClass, "accept", "(Ljava/lang/Object;)V");
+      env->CallVoidMethod(callbackClass, acceptMethod, floatObj);
+      env->DeleteLocalRef(floatObj);
+
+      if (jniStatus == JNI_EDETACHED) {
+        javaVm->DetachCurrentThread();
+      }
+    }
+  }
 }
 
 typedef llama_model* (* llama_load_model_from_file_pointer)
@@ -72,7 +72,7 @@ jobject LlamaManager::LlamaSession::loadModelFromFile(jbyteArray path, jobject j
         llamaLoadModel(stringManager.getUtf8String(), params);
 
     if (params.progress_callback_user_data) {
-      auto progressContext = reinterpret_cast<ProgressContext*>(params.progress_callback_user_data);
+      auto progressContext = reinterpret_cast<CallbackContext*>(params.progress_callback_user_data);
       env->DeleteGlobalRef(progressContext->callback);
       delete progressContext;
     }
@@ -102,7 +102,7 @@ jobject LlamaManager::LlamaSession::loadContextWithModel(jobject jModel, jobject
         * context = llamaCreateContext(llamaModel, paramsManager.getParams());
 
     if (params.progress_callback_user_data) {
-      auto progressContext = reinterpret_cast<ProgressContext*>(params.progress_callback_user_data);
+      auto progressContext = reinterpret_cast<CallbackContext*>(params.progress_callback_user_data);
       env->DeleteGlobalRef(progressContext->callback);
       delete progressContext;
     }
@@ -242,5 +242,24 @@ jint LlamaManager::LlamaSession::tokenNl(jobject jContext) {
     auto context = jni::getLlamaContextPointer(env, jContext);
     auto getNl = (get_special_token_pointer) getFunctionAddress("llama_token_nl");
     return getNl(context);
+  });
+}
+
+#include <iostream>
+void LlamaManager::loggerCallback(enum llama_log_level level, const char* text, void* user_data) {
+  std::cout << text << std::endl;
+}
+
+typedef void (* llama_log_set_pointer)(llama_log_callback, void*);
+void LlamaManager::LlamaSession::setLogger(jobject logger) {
+  withJniExceptions(env, [this, logger] {
+    if (jloggerCallback) {
+      env->DeleteGlobalRef(jloggerCallback);
+    }
+    jloggerCallback = env->NewGlobalRef(logger);
+    auto logSet = reinterpret_cast<llama_log_set_pointer>(getFunctionAddress(
+        "llama_log_set"));
+    logSet(loggerCallback, nullptr);
+    env->DeleteLocalRef(logger);
   });
 }

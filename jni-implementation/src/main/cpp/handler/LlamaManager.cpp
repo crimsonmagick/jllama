@@ -4,6 +4,7 @@
 
 LlamaManager* LlamaManager::singleton = nullptr;
 JavaVM* LlamaManager::javaVm = nullptr;
+jobject LlamaManager::jloggerCallback = nullptr;
 
 LlamaManager::LlamaManager() = default;
 

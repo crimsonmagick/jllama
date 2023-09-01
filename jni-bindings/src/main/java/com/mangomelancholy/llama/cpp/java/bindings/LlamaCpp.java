@@ -1,6 +1,9 @@
 package com.mangomelancholy.llama.cpp.java.bindings;
 
+import java.util.function.BiConsumer;
+
 public interface LlamaCpp {
+
   void loadLibrary();
 
   void closeLibrary();
@@ -26,6 +29,10 @@ public interface LlamaCpp {
   int llamaTokenToPiece(LlamaOpaqueContext context, int llamaToken, byte[] buf);
 
   int llamaTokenBos(LlamaOpaqueContext context);
+
   int llamaTokenEos(LlamaOpaqueContext context);
+
   int llamaTokenNl(LlamaOpaqueContext context);
+
+  void llamaLogSet(BiConsumer<LlamaLogLevel, byte[]> llamaLogCallback);
 }

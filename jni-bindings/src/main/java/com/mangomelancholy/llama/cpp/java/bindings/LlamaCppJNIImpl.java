@@ -1,6 +1,9 @@
 package com.mangomelancholy.llama.cpp.java.bindings;
 
+import java.util.function.BiConsumer;
+
 class LlamaCppJNIImpl implements LlamaCpp {
+
   @Override
   public native void loadLibrary();
 
@@ -18,19 +21,23 @@ class LlamaCppJNIImpl implements LlamaCpp {
       LlamaContextParams params);
 
   @Override
-  public native LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams params);
+  public native LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel,
+      LlamaContextParams params);
 
   @Override
-  public native int llamaTokenizeWithModel(LlamaOpaqueModel model, byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
+  public native int llamaTokenizeWithModel(LlamaOpaqueModel model, byte[] text, int[] tokens,
+      int nMaxTokens, boolean addBos);
 
   @Override
-  public native int llamaEval(LlamaOpaqueContext context, int[] tokens, int nTokens, int nPast, int nThreads);
+  public native int llamaEval(LlamaOpaqueContext context, int[] tokens, int nTokens, int nPast,
+      int nThreads);
 
   @Override
   public native float[] llamaGetLogits(LlamaOpaqueContext context);
 
   @Override
-  public native int llamaSampleTokenGreedy(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
+  public native int llamaSampleTokenGreedy(LlamaOpaqueContext context,
+      LlamaTokenDataArray candidates);
 
   @Override
   public native int llamaTokenToPiece(LlamaOpaqueContext context, int llamaToken, byte[] buf);
@@ -43,5 +50,8 @@ class LlamaCppJNIImpl implements LlamaCpp {
 
   @Override
   public native int llamaTokenNl(LlamaOpaqueContext context);
+
+  @Override
+  public native void llamaLogSet(BiConsumer<LlamaLogLevel, byte[]> llamaLogCallback);
 
 }

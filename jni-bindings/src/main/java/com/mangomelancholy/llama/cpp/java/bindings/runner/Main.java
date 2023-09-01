@@ -29,6 +29,8 @@ public class Main {
           "C:\\Users\\welby\\workspace\\ai\\llama-cpp-java-bindings\\models\\llama-2-7b\\ggml-model-q4_0.gguf";
       llamaCpp.loadLibrary();
       llamaCpp.llamaBackendInit(true);
+      llamaCpp.llamaLogSet((logLevel, message) -> System.out.println(
+          "logLevel=" + logLevel + ", message=" + new String(message, StandardCharsets.UTF_8)));
       final LlamaContextParams llamaContextParams = generateContextParams();
       final LlamaOpaqueModel llamaOpaqueModel = llamaCpp.llamaLoadModelFromFile(
           modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
