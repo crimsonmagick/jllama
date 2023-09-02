@@ -111,5 +111,8 @@ extern "C" {
     llamaManager->newSession(env).freeContext(jContext);
   }
 
+  JNIEXPORT jlong JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTimeUs(JNIEnv* env, jobject thisObject) {
+    return llamaManager->newSession(env).getTimestampInMicroseconds();
+  }
 
 }

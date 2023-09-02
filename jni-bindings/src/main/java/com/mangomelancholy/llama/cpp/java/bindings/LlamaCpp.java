@@ -39,4 +39,6 @@ public interface LlamaCpp {
   int llamaTokenNl(LlamaOpaqueContext context);
 
   void llamaLogSet(BiConsumer<LlamaLogLevel, byte[]> llamaLogCallback);
+
+  long llamaTimeUs();
 }

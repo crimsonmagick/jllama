@@ -326,3 +326,12 @@ void LlamaManager::LlamaSession::freeContext(jobject jContext) {
     freeContext(context);
   });
 }
+
+typedef uint64_t (* llama_time_us_pointer)(void);
+jlong LlamaManager::LlamaSession::getTimestampInMicroseconds() {
+  return withJniExceptions(env, [] {
+    auto getTimestamp =
+        reinterpret_cast<llama_time_us_pointer>(getFunctionAddress("llama_time_us"));
+    return getTimestamp();
+  });
+}

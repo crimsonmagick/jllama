@@ -40,11 +40,17 @@ public class Main {
           System.out.print("ERR: " + messageText);
         }
       });
+      long timestamp1 = llamaCpp.llamaTimeUs();
+
       final LlamaContextParams llamaContextParams = generateContextParams();
       final LlamaOpaqueModel llamaOpaqueModel = llamaCpp.llamaLoadModelFromFile(
           modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
       final LlamaOpaqueContext llamaOpaqueContext =
           llamaCpp.llamaLoadContextWithModel(llamaOpaqueModel, llamaContextParams);
+
+      long timestamp2 = llamaCpp.llamaTimeUs();
+
+      System.out.printf("timestamp1=%s, timestamp2=%s, initialization time=%s%n", timestamp1, timestamp2, timestamp2 - timestamp1);
 
       final String prompt = "I love the Java programming language, allow me to explain why entirely in English: ";
       final byte[] toTokenize = prompt.getBytes(StandardCharsets.UTF_8);

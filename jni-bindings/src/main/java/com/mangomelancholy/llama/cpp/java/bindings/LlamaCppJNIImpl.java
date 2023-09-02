@@ -60,4 +60,7 @@ class LlamaCppJNIImpl implements LlamaCpp {
   @Override
   public native void llamaLogSet(BiConsumer<LlamaLogLevel, byte[]> llamaLogCallback);
 
+  @Override
+  public native long llamaTimeUs();
+
 }

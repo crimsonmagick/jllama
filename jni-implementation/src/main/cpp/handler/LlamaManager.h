@@ -42,6 +42,7 @@ class LlamaManager {
 
         void setLogger(jobject logger);
 
+        jlong getTimestampInMicroseconds();
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
