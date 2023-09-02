@@ -26,7 +26,6 @@ void LlamaManager::LlamaSession::backendFree() {
 }
 
 void LlamaManager::progressCallback(float progress, void* ctx) {
-  std::cout << "cProgress: " << progress << std::endl;
   if (ctx) {
     JNIEnv* env;
     jint jniStatus = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
@@ -245,9 +244,50 @@ jint LlamaManager::LlamaSession::tokenNl(jobject jContext) {
   });
 }
 
-#include <iostream>
 void LlamaManager::loggerCallback(enum llama_log_level level, const char* text, void* user_data) {
-  std::cout << text << std::endl;
+  JNIEnv* env;
+  jint jniStatus = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
+  jint attachResult;
+  if (jniStatus == JNI_EDETACHED) {
+    attachResult = javaVm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr);
+  } else if (jniStatus == JNI_OK) {
+    attachResult = JNI_OK;
+  } else {
+    attachResult = JNI_ERR;
+  }
+  if (attachResult == JNI_OK) {
+
+    jclass jlogLevelClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel");
+
+    jfieldID fieldID;
+    switch(level) {
+      case 2: fieldID = env->GetStaticFieldID(jlogLevelClass, "ERROR", "Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel;"); break;
+      case 3:
+        fieldID = env->GetStaticFieldID(jlogLevelClass, "WARN", "Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel;");
+        break;
+      case 4:
+        fieldID = env->GetStaticFieldID(jlogLevelClass, "INFO", "Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel;");
+        break;
+      default:
+        fieldID = env->GetStaticFieldID(jlogLevelClass, "WARN", "Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel;");
+    }
+    jobject jLogLevel = env->GetStaticObjectField(jlogLevelClass, fieldID);
+
+    int textLength = static_cast<jint>(strlen(text));
+    jbyteArray jtext = env->NewByteArray(textLength);
+    jbyte* jtextPointer = env->GetByteArrayElements(jtext, nullptr);
+    memcpy(jtextPointer, text, textLength);
+    env->ReleaseByteArrayElements(jtext, jtextPointer, 0);
+
+    jclass callbackClass = env->GetObjectClass(jloggerCallback);
+    jmethodID acceptMethod = env->GetMethodID(callbackClass, "accept", "(Ljava/lang/Object;Ljava/lang/Object;)V");
+    env->CallVoidMethod(callbackClass, acceptMethod, jLogLevel, jtext);
+
+    if (jniStatus == JNI_EDETACHED) {
+      javaVm->DetachCurrentThread();
+    }
+
+  }
 }
 
 typedef void (* llama_log_set_pointer)(llama_log_callback, void*);
@@ -257,8 +297,7 @@ void LlamaManager::LlamaSession::setLogger(jobject logger) {
       env->DeleteGlobalRef(jloggerCallback);
     }
     jloggerCallback = env->NewGlobalRef(logger);
-    auto logSet = reinterpret_cast<llama_log_set_pointer>(getFunctionAddress(
-        "llama_log_set"));
+    auto logSet = reinterpret_cast<llama_log_set_pointer>(getFunctionAddress("llama_log_set"));
     logSet(loggerCallback, nullptr);
     env->DeleteLocalRef(logger);
   });

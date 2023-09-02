@@ -11,6 +11,8 @@ task runProgram(type: JavaExec) {
     mainClass = 'com.mangomelancholy.llama.cpp.java.bindings.runner.Main'
 //    systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
     systemProperty 'java.library.path', 'jni-implementation/build/cmake/main/cpp/Debug'
+    systemProperty "modelpath", System.getProperty("modelpath")
+    systemProperty "loglevel", System.getProperty("loglevel")
 
     final llamaRelativePath = current().isWindows() ? '/jni-implementation/build/cmake/bin/Release'
             : '/jni-implementation/build/cmake/release'
