@@ -63,4 +63,7 @@ class LlamaCppJNIImpl implements LlamaCpp {
   @Override
   public native long llamaTimeUs();
 
+  @Override
+  public native LlamaContextParams llamaContextDefaultParams();
+
 }

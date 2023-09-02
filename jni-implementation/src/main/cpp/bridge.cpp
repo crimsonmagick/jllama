@@ -115,4 +115,17 @@ extern "C" {
     return llamaManager->newSession(env).getTimestampInMicroseconds();
   }
 
+  JNIEXPORT jobject
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaContextDefaultParams(
+      JNIEnv* env,
+      jobject thisObject) {
+    try {
+      jobject ret = llamaManager->newSession(env).defaultContextParams();
+      return ret;
+    } catch (std::exception& e){
+      return nullptr;
+    }
+  }
+
+
 }

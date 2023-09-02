@@ -327,11 +327,24 @@ void LlamaManager::LlamaSession::freeContext(jobject jContext) {
   });
 }
 
-typedef uint64_t (* llama_time_us_pointer)(void);
-jlong LlamaManager::LlamaSession::getTimestampInMicroseconds() {
+typedef uint64_t (* llama_time_us_pointer)();
+jlong LlamaManager::LlamaSession::getTimestampInMicroseconds(void) {
   return withJniExceptions(env, [] {
     auto getTimestamp =
         reinterpret_cast<llama_time_us_pointer>(getFunctionAddress("llama_time_us"));
     return getTimestamp();
+  });
+}
+
+typedef llama_context_params (* llama_context_default_params_pointer)(void);
+jobject LlamaManager::LlamaSession::defaultContextParams() {
+  return withJniExceptions(env, [this] {
+    auto getDefaultParams =
+        reinterpret_cast<llama_context_default_params_pointer>(getFunctionAddress(
+            "llama_context_default_params"));
+    llama_context_params params = getDefaultParams();
+    auto paramsManager = LlamaContextParamsManager(params, this);
+    jobject jParams = paramsManager.getJavaPrams();
+    return jParams;
   });
 }

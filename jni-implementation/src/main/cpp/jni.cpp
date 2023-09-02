@@ -110,7 +110,6 @@ namespace jni {
   }
 
   jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer) {
-    auto jContextPointer = reinterpret_cast<jlong>(jcontextPointer);
 
     jclass llamaOpaqueContextClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaOpaqueContext");
     if (llamaOpaqueContextClass == nullptr) {

@@ -43,6 +43,7 @@ class LlamaManager {
         void setLogger(jobject logger);
 
         jlong getTimestampInMicroseconds();
+        jobject defaultContextParams();
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
@@ -51,16 +52,18 @@ class LlamaManager {
         LlamaManager* manager;
         class LlamaContextParamsManager {
           public:
+            LlamaContextParamsManager(llama_context_params contextParams, LlamaSession* session);
             LlamaContextParamsManager(jobject javaContextParams, LlamaSession* session);
             ~LlamaContextParamsManager();
             llama_context_params getParams();
+            jobject getJavaPrams();
 
           private:
             llama_context_params llamaContextParams{};
+            jobject jLlamaContextParams;
             jfloatArray tensorSplitFloatArray;
             const float* tensorSplit;
             LlamaSession* session;
-
         };
     };
     static LlamaManager* singleton;

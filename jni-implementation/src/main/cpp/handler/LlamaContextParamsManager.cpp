@@ -1,5 +1,6 @@
 #include <jni.h>
 #include "../jni.h"
+#include "../j_classes_consts.h"
 #include "LlamaManager.h"
 
 llama_context_params
@@ -7,7 +8,26 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::getParams() {
   return llamaContextParams;
 }
 
-LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager(jobject javaContextParams, LlamaSession* session) : session(session) {
+jobject LlamaManager::LlamaSession::LlamaContextParamsManager::getJavaPrams() {
+  return jLlamaContextParams;
+}
+
+LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager(
+    llama_context_params contextParams,
+    LlamaManager::LlamaSession* session)
+    : llamaContextParams(contextParams), session(session) {
+
+  JNIEnv* env = session->env;
+  jclass jParamsClass = env->FindClass(JAVA_CONTEXT_PARAMS_NAME);
+  jmethodID constructor = env->GetMethodID(jParamsClass, "<init>", "()V");
+  jLlamaContextParams = env->NewObject(jParamsClass, constructor);
+  tensorSplit = nullptr;
+}
+
+LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager(
+    jobject javaContextParams,
+    LlamaSession* session)
+    : jLlamaContextParams(javaContextParams), session(session) {
 
   JNIEnv* env = session->env;
   jclass javaParamsClass = env->GetObjectClass(javaContextParams);
@@ -63,4 +83,5 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::~LlamaContextParamsManage
                                    (jfloat*) tensorSplit,
                                    JNI_ABORT);
   }
+//  session->env->DeleteLocalRef(jLlamaContextParams);
 }

@@ -41,4 +41,6 @@ public interface LlamaCpp {
   void llamaLogSet(BiConsumer<LlamaLogLevel, byte[]> llamaLogCallback);
 
   long llamaTimeUs();
+
+  LlamaContextParams llamaContextDefaultParams();
 }
