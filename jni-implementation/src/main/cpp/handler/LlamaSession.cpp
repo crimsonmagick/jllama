@@ -3,7 +3,6 @@
 #include "../libloader.h"
 #include "../Utf8StringManager.h"
 #include "../exceptions/exceptions.h"
-#include <iostream>
 
 const jobject OBJECT_FAILURE = nullptr;
 
@@ -300,5 +299,30 @@ void LlamaManager::LlamaSession::setLogger(jobject logger) {
     auto logSet = reinterpret_cast<llama_log_set_pointer>(getFunctionAddress("llama_log_set"));
     logSet(loggerCallback, nullptr);
     env->DeleteLocalRef(logger);
+  });
+}
+
+
+typedef void (* llama_free_model_pointer)(struct llama_model*);
+void LlamaManager::LlamaSession::freeModel(jobject jModel) {
+  withJniExceptions(env, [this, jModel] {
+    auto freeModel =
+        reinterpret_cast<llama_free_model_pointer>(getFunctionAddress(
+            "llama_free_model"));
+
+    llama_model* model = jni::getLlamaModelPointer(env, jModel);
+    freeModel(model);
+  });
+}
+
+typedef void (* llama_free_pointer)(struct llama_context*);
+void LlamaManager::LlamaSession::freeContext(jobject jContext) {
+  withJniExceptions(env, [this, jContext] {
+    auto freeContext =
+        reinterpret_cast<llama_free_pointer>(getFunctionAddress(
+            "llama_free"));
+
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    freeContext(context);
   });
 }

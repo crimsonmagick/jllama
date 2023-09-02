@@ -75,6 +75,8 @@ public class Main {
         System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
       }
 
+      llamaCpp.llamaFree(llamaOpaqueContext);
+      llamaCpp.llamaFreeModel(llamaOpaqueModel);
       llamaCpp.llamaBackendFree();
       llamaCpp.closeLibrary();
     } catch (RuntimeException e) {

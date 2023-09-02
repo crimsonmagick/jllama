@@ -21,8 +21,14 @@ class LlamaCppJNIImpl implements LlamaCpp {
       LlamaContextParams params);
 
   @Override
+  public native void llamaFreeModel(LlamaOpaqueModel model);
+
+  @Override
   public native LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel,
       LlamaContextParams params);
+
+  @Override
+  public native void llamaFree(LlamaOpaqueContext context);
 
   @Override
   public native int llamaTokenizeWithModel(LlamaOpaqueModel model, byte[] text, int[] tokens,

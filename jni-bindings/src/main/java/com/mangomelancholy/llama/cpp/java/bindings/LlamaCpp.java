@@ -14,8 +14,12 @@ public interface LlamaCpp {
 
   LlamaOpaqueModel llamaLoadModelFromFile(byte[] pathModel, LlamaContextParams params);
 
-  LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel,
-      LlamaContextParams llamaContextParams);
+  void llamaFreeModel(LlamaOpaqueModel model);
+
+  LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams llamaContextParams);
+
+  // free Context
+  void llamaFree(LlamaOpaqueContext context);
 
   int llamaTokenizeWithModel(LlamaOpaqueModel model, byte[] text, int[] tokens, int nMaxTokens,
       boolean addBos);

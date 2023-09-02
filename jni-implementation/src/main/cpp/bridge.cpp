@@ -102,5 +102,14 @@ extern "C" {
     return llamaManager->newSession(env).setLogger(llamaLogCallback);
   }
 
+  JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaFreeModel(JNIEnv* env, jobject thisObject, jobject jModel) {
+    llamaManager->newSession(env).freeModel(jModel);
+  }
+
+  JNIEXPORT void JNICALL Java_com_mangomelancholy_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaFree
+  (JNIEnv* env, jobject thisObject, jobject jContext) {
+    llamaManager->newSession(env).freeContext(jContext);
+  }
+
 
 }

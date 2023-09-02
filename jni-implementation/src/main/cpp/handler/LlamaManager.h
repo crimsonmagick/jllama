@@ -15,6 +15,7 @@ class LlamaManager {
         void backendInit(bool useNuma);
         void backendFree();
         jobject loadModelFromFile(jbyteArray path, jobject javaParams);
+        void freeModel(jobject jModel);
         jint tokenizeWithModel(jobject jModel,
                                jbyteArray jToTokenize,
                                jintArray jTokensOut,
@@ -22,6 +23,7 @@ class LlamaManager {
                                jboolean jBos);
 
         jobject loadContextWithModel(jobject jModel, jobject jContextParams);
+        void freeContext(jobject pJobject);
         jint eval(jobject jContext,
                   jintArray jTokens,
                   jint jnTokens,
