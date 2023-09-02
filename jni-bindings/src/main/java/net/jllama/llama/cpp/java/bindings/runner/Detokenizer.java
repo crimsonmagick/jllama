@@ -1,7 +1,7 @@
-package com.mangomelancholy.llama.cpp.java.bindings.runner;
+package net.jllama.llama.cpp.java.bindings.runner;
 
-import com.mangomelancholy.llama.cpp.java.bindings.LlamaCpp;
-import com.mangomelancholy.llama.cpp.java.bindings.LlamaOpaqueContext;
+import net.jllama.llama.cpp.java.bindings.LlamaCpp;
+import net.jllama.llama.cpp.java.bindings.LlamaOpaqueContext;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;

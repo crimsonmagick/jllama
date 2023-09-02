@@ -1,4 +1,4 @@
-package com.mangomelancholy.llama.cpp.java.bindings;
+package net.jllama.llama.cpp.java.bindings;
 
 public enum LlamaLogLevel {
   ERROR(2), WARN(3), INFO(4);

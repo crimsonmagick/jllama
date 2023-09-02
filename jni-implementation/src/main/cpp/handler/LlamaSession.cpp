@@ -256,19 +256,19 @@ void LlamaManager::loggerCallback(enum llama_log_level level, const char* text, 
   }
   if (attachResult == JNI_OK) {
 
-    jclass jlogLevelClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel");
+    jclass jlogLevelClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaLogLevel");
 
     jfieldID fieldID;
     switch(level) {
-      case 2: fieldID = env->GetStaticFieldID(jlogLevelClass, "ERROR", "Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel;"); break;
+      case 2: fieldID = env->GetStaticFieldID(jlogLevelClass, "ERROR", "Lnet/jllama/llama/cpp/java/bindings/LlamaLogLevel;"); break;
       case 3:
-        fieldID = env->GetStaticFieldID(jlogLevelClass, "WARN", "Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel;");
+        fieldID = env->GetStaticFieldID(jlogLevelClass, "WARN", "Lnet/jllama/llama/cpp/java/bindings/LlamaLogLevel;");
         break;
       case 4:
-        fieldID = env->GetStaticFieldID(jlogLevelClass, "INFO", "Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel;");
+        fieldID = env->GetStaticFieldID(jlogLevelClass, "INFO", "Lnet/jllama/llama/cpp/java/bindings/LlamaLogLevel;");
         break;
       default:
-        fieldID = env->GetStaticFieldID(jlogLevelClass, "WARN", "Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaLogLevel;");
+        fieldID = env->GetStaticFieldID(jlogLevelClass, "WARN", "Lnet/jllama/llama/cpp/java/bindings/LlamaLogLevel;");
     }
     jobject jLogLevel = env->GetStaticObjectField(jlogLevelClass, fieldID);
 

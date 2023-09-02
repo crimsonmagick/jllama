@@ -1,4 +1,4 @@
-package com.mangomelancholy.llama.cpp.java.bindings.exceptions;
+package net.jllama.llama.cpp.java.bindings.exceptions;
 
 public class LlamaCppException extends RuntimeException {
 

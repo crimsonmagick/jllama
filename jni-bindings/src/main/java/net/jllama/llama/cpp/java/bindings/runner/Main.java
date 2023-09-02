@@ -1,12 +1,12 @@
-package com.mangomelancholy.llama.cpp.java.bindings.runner;
+package net.jllama.llama.cpp.java.bindings.runner;
 
-import com.mangomelancholy.llama.cpp.java.bindings.LlamaContextParams;
-import com.mangomelancholy.llama.cpp.java.bindings.LlamaCpp;
-import com.mangomelancholy.llama.cpp.java.bindings.LlamaCppManager;
-import com.mangomelancholy.llama.cpp.java.bindings.LlamaLogLevel;
-import com.mangomelancholy.llama.cpp.java.bindings.LlamaOpaqueContext;
-import com.mangomelancholy.llama.cpp.java.bindings.LlamaOpaqueModel;
-import com.mangomelancholy.llama.cpp.java.bindings.LlamaTokenDataArray;
+import net.jllama.llama.cpp.java.bindings.LlamaContextParams;
+import net.jllama.llama.cpp.java.bindings.LlamaCpp;
+import net.jllama.llama.cpp.java.bindings.LlamaCppManager;
+import net.jllama.llama.cpp.java.bindings.LlamaLogLevel;
+import net.jllama.llama.cpp.java.bindings.LlamaOpaqueContext;
+import net.jllama.llama.cpp.java.bindings.LlamaOpaqueModel;
+import net.jllama.llama.cpp.java.bindings.LlamaTokenDataArray;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 

@@ -74,15 +74,15 @@ namespace jni {
 
   void throwDLLException(JNIEnv * env, const DynamicLibraryException& e) {
     throwNativeException(env,
-                         "com/mangomelancholy/llama/cpp/java/bindings/exceptions/LlamaCppException", e.what());
+                         "net/jllama/llama/cpp/java/bindings/exceptions/LlamaCppException", e.what());
   }
 
   void throwJNIException(JNIEnv *env, const JNIException &e) {
-    throwNativeException(env, "com/mangomelancholy/llama/cpp/java/bindings/exceptions/JNIException", e.what());
+    throwNativeException(env, "net/jllama/llama/cpp/java/bindings/exceptions/JNIException", e.what());
   }
 
   void throwLlamaCppException(JNIEnv* env, const LlamaCppException& e) {
-    throwNativeException(env, "com/mangomelancholy/llama/cpp/java/bindings/exceptions/LlamaCppException", e.what());
+    throwNativeException(env, "net/jllama/llama/cpp/java/bindings/exceptions/LlamaCppException", e.what());
   }
 
   void throwRuntimeException(JNIEnv* env, const std::exception& e) {
@@ -92,7 +92,7 @@ namespace jni {
   jobject constructLlamaOpaqueModel(JNIEnv *env, llama_model *modelPointer) {
     auto jmodelPointer = reinterpret_cast<jlong>(modelPointer);
 
-    jclass llamaOpaqueModelClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaOpaqueModel");
+    jclass llamaOpaqueModelClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaOpaqueModel");
     if (llamaOpaqueModelClass == nullptr) {
       throw JNIException("Unable to find LlamaOpaqueModel class");
     }
@@ -112,7 +112,7 @@ namespace jni {
   jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer) {
     auto jContextPointer = reinterpret_cast<jlong>(jcontextPointer);
 
-    jclass llamaOpaqueContextClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaOpaqueContext");
+    jclass llamaOpaqueContextClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaOpaqueContext");
     if (llamaOpaqueContextClass == nullptr) {
       throw JNIException("Unable to find LlamaOpaqueContext class");
     }
@@ -130,7 +130,7 @@ namespace jni {
   }
 
   llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaOpaqueModel) {
-    jclass llamaOpaqueModelClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaOpaqueModel");
+    jclass llamaOpaqueModelClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaOpaqueModel");
     if (llamaOpaqueModelClass == nullptr) {
       throw JNIException("Unable to find LlamaOpaqueModel class");
     }
@@ -141,7 +141,7 @@ namespace jni {
     return reinterpret_cast<llama_model*>(env->GetLongField(llamaOpaqueModel, fieldId));
   }
   llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext) {
-    jclass llamaOpaqueContextClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaOpaqueContext");
+    jclass llamaOpaqueContextClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaOpaqueContext");
     if (llamaOpaqueContextClass == nullptr) {
       throw JNIException("Unable to find LlamaOpaqueContext class");
     }
@@ -153,16 +153,16 @@ namespace jni {
   }
 
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray) {
-    jclass jTokenDataArrayClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaTokenDataArray");
+    jclass jTokenDataArrayClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaTokenDataArray");
     if (jTokenDataArrayClass == nullptr) {
       throw JNIException("Unable to find LlamaTokenDataArray class");
     }
-    jfieldID jArrayFieldId = env->GetFieldID(jTokenDataArrayClass, "data", "[Lcom/mangomelancholy/llama/cpp/java/bindings/LlamaTokenData;");
+    jfieldID jArrayFieldId = env->GetFieldID(jTokenDataArrayClass, "data", "[Lnet/jllama/llama/cpp/java/bindings/LlamaTokenData;");
     if (jArrayFieldId == nullptr) {
       throw JNIException("Unable to find LlamaTokenData array \"data\"");
     }
 
-    jclass jTokenDataClass = env->FindClass("com/mangomelancholy/llama/cpp/java/bindings/LlamaTokenData");
+    jclass jTokenDataClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaTokenData");
     if (jTokenDataClass == nullptr) {
       throw JNIException("Unable to find jTokenDataClass class");
     }
