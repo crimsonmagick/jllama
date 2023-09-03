@@ -1,5 +1,8 @@
 package net.jllama.llama.cpp.java.bindings.runner;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.jllama.llama.cpp.java.bindings.LlamaContextParams;
 import net.jllama.llama.cpp.java.bindings.LlamaCpp;
 import net.jllama.llama.cpp.java.bindings.LlamaCppManager;
@@ -12,6 +15,13 @@ import java.nio.charset.StandardCharsets;
 
 public class Main {
 
+  private static final String SYSTEM_PROMPT = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible.";
+
+  private static final String B_INST = "[INST]";
+  private static final String E_INST = "[/INST]";
+  private static final String B_SYS = "<<SYS>>\n";
+  private static final String E_SYS = "\n<</SYS>>\n\n";
+
   static {
     final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
     final String pid = jvmName.split("@")[0];
@@ -19,10 +29,13 @@ public class Main {
     System.loadLibrary("jni-implementation");
   }
   private static volatile String appLogLevel = System.getProperty("loglevel");
+  private static LlamaCpp llamaCpp;
+  private static LlamaOpaqueModel llamaOpaqueModel;
+  private static LlamaOpaqueContext llamaOpaqueContext;
 
   public static void main(final String[] args) {
     try {
-      final LlamaCpp llamaCpp = LlamaCppManager.getLlamaCpp();
+      llamaCpp = LlamaCppManager.getLlamaCpp();
       final Detokenizer detokenizer = new Detokenizer(llamaCpp);
       final String modelPath = System.getProperty("modelpath");
       llamaCpp.loadLibrary();
@@ -42,35 +55,30 @@ public class Main {
       });
       long timestamp1 = llamaCpp.llamaTimeUs();
 
-      final LlamaContextParams llamaContextParams = llamaCpp.llamaContextDefaultParams();
-      final LlamaOpaqueModel llamaOpaqueModel = llamaCpp.llamaLoadModelFromFile(
+      final LlamaContextParams llamaContextParams = generateContextParams();
+      llamaOpaqueModel = llamaCpp.llamaLoadModelFromFile(
           modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
-      final LlamaOpaqueContext llamaOpaqueContext =
+      llamaOpaqueContext =
           llamaCpp.llamaLoadContextWithModel(llamaOpaqueModel, llamaContextParams);
 
       long timestamp2 = llamaCpp.llamaTimeUs();
 
       System.out.printf("timestamp1=%s, timestamp2=%s, initialization time=%s%n", timestamp1, timestamp2, timestamp2 - timestamp1);
 
-      final String prompt = "I love the Java programming language, allow me to explain why entirely in English: ";
-      final byte[] toTokenize = prompt.getBytes(StandardCharsets.UTF_8);
-      final int maxTokenCount = prompt.length();
-      final int[] tokensTemp = new int[maxTokenCount];
-      final int tokenCount = llamaCpp.llamaTokenizeWithModel(llamaOpaqueModel, toTokenize, tokensTemp, maxTokenCount, true);
-      final int[] tokens = new int[tokenCount];
-      System.arraycopy(tokensTemp, 0, tokens, 0, tokenCount);
+      final String prompt = B_INST + B_SYS + SYSTEM_PROMPT + E_SYS + "Write a \"Hello World!\" program in the Java programming language." + E_INST;
+      final int[] tokens = tokenize(prompt, true);
 
       // availableProcessors is the number of logical cores - we want physical cores as our basis for thread allocation
       final int threads = Runtime.getRuntime().availableProcessors() / 2 - 1;
 
-      llamaCpp.llamaEval(llamaOpaqueContext, tokens, tokenCount, 0, threads);
+      llamaCpp.llamaEval(llamaOpaqueContext, tokens, tokens.length, 0, threads);
       float[] logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
       LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
       int previousToken = llamaCpp.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
       int newline = llamaCpp.llamaTokenNl(llamaOpaqueContext);
-      System.out.print(prompt);
+      System.out.print(detokenizer.detokenize(toList(tokens), llamaOpaqueContext));
       System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
-      for (int i = tokenCount + 1; i < 100; i++) {
+      for (int i = tokens.length + 1; previousToken != llamaCpp.llamaTokenEos(llamaOpaqueContext); i++) {
         final int res = llamaCpp.llamaEval(llamaOpaqueContext, new int[]{previousToken}, 1, i, threads);
         if (res != 0) {
           throw new RuntimeException("Non zero response from eval");
@@ -110,6 +118,19 @@ public class Main {
     contextParams.setUseMlock(false);
     contextParams.setEmbedding(false);
     return contextParams;
+  }
+
+  private static int[] tokenize(final String text, boolean addBos) {
+    final int maxLength = text.length();
+    final int[] temp = new int[maxLength];
+    int length = llamaCpp.llamaTokenizeWithModel(llamaOpaqueModel, text.getBytes(StandardCharsets.UTF_8), temp, maxLength, addBos);
+    final int[] ret = new int[length];
+    System.arraycopy(temp, 0, ret, 0, length);
+    return ret;
+  }
+
+  private static List<Integer> toList(int[] tokens) {
+    return Arrays.stream(tokens).boxed().collect(Collectors.toList());
   }
 
 }
