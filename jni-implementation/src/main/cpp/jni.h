@@ -18,9 +18,13 @@ namespace jni {
   };
 
   int32_t getInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  void setSignedInt32(int32_t value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   uint32_t getUnsignedInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  void setUnsignedInt32(uint32_t value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   float getFloat(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  void setFloat(float value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   bool getBool(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  void setBoolean(bool value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   jfloatArray getJFloatArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
   jobject constructLlamaOpaqueModel(JNIEnv* env, llama_model* modelPointer);
   llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaOpaqueModel);

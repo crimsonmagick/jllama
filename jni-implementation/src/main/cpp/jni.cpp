@@ -1,30 +1,59 @@
+#include <cstdio>
 #include <iostream>
 #include <jni.h>
 #include "jni.h"
 #include "exceptions/DynamicLibraryException.h"
+
+std::string fieldNotFound(const char* fieldName) {
+  return "Unable to set field with fieldName=" + std::string(fieldName);
+}
 
 namespace jni {
 
   int32_t getInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "I");
     if (!fieldId) {
-      return 0;
+      throw JNIException(fieldNotFound(fieldName).c_str());
     }
     return static_cast<int32_t>(env->GetIntField(jInstance, fieldId));
+  }
+
+  void setSignedInt32(int32_t value,
+                        JNIEnv* env,
+                        jclass jType,
+                        jobject jInstance,
+                        const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "I");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    env->SetIntField(jInstance, fieldId, value);
   }
 
   uint32_t getUnsignedInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "I");
     if (!fieldId) {
-      return 0;
+      throw JNIException(fieldNotFound(fieldName).c_str());
     }
     return static_cast<uint32_t>(env->GetIntField(jInstance, fieldId));
+  }
+
+  void setUnsignedInt32(uint32_t value,
+                        JNIEnv* env,
+                        jclass jType,
+                        jobject jInstance,
+                        const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "I");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    env->SetIntField(jInstance, fieldId, value);
   }
 
   size_t getSizeT(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "J");
     if (!fieldId) {
-      return 0;
+      throw JNIException(fieldNotFound(fieldName).c_str());
     }
     return static_cast<size_t>(env->GetIntField(jInstance, fieldId));
   }
@@ -32,22 +61,49 @@ namespace jni {
   float getFloat(JNIEnv *env, jclass jType, jobject jInstance, const char *fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "F");
     if (!fieldId) {
-      return 0;
+      throw JNIException(fieldNotFound(fieldName).c_str());
     }
     return static_cast<float>(env->GetFloatField(jInstance, fieldId));
+  }
+
+  void setFloat(float value,
+                 JNIEnv* env,
+                 jclass jType,
+                 jobject jInstance,
+                 const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "F");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    env->SetFloatField(jInstance, fieldId, value);
   }
 
   bool getBool(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "Z");
     if (!fieldId) {
-      return false;
+      throw JNIException(fieldNotFound(fieldName).c_str());
     }
     return static_cast<bool>(env->GetBooleanField(jInstance, fieldId));
+  }
+
+  void setBoolean(bool value,
+                JNIEnv* env,
+                jclass jType,
+                jobject jInstance,
+                const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "Z");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    env->SetBooleanField(jInstance, fieldId, value);
   }
 
   // WARNING must release const float * with ReleaseFloatArrayElements()
   jfloatArray getJFloatArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "[F");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
     return (jfloatArray) env->GetObjectField(jInstance, fieldId);
   }
 
@@ -55,16 +111,16 @@ namespace jni {
                             const char* message) {
     jclass jExceptionClass = env->FindClass(className);
     if (jExceptionClass == nullptr) {
-      std::cerr << "ERROR - Unable to lookup Java Exception class " << className
-                << std::endl;
-      return;
+      std::string errorMessage = "ERROR - Unable to lookup Java Exception class " + std::string(className);
+      std::cerr << errorMessage << std::endl;
+      throw JNIException(errorMessage.c_str());
     }
     jmethodID constructor =
         env->GetMethodID(jExceptionClass, "<init>", "(Ljava/lang/String;)V");
     if (constructor == nullptr) {
-      std::cerr << "ERROR - Unable to lookup constructor for class "
-                << className << std::endl;
-      return;
+      std::string errorMessage = "ERROR - Unable to lookup constructor for class " + std::string(className);
+      std::cerr << errorMessage << std::endl;
+      throw JNIException(errorMessage.c_str());
     }
     jstring jmsg = env->NewStringUTF(message);
     auto jException =

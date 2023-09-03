@@ -42,8 +42,7 @@ public class Main {
       });
       long timestamp1 = llamaCpp.llamaTimeUs();
 
-      final LlamaContextParams defaultContextParams = llamaCpp.llamaContextDefaultParams();
-      final LlamaContextParams llamaContextParams = generateContextParams();
+      final LlamaContextParams llamaContextParams = llamaCpp.llamaContextDefaultParams();
       final LlamaOpaqueModel llamaOpaqueModel = llamaCpp.llamaLoadModelFromFile(
           modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
       final LlamaOpaqueContext llamaOpaqueContext =

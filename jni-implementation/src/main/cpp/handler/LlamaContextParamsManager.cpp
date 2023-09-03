@@ -21,6 +21,89 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
   jclass jParamsClass = env->FindClass(JAVA_CONTEXT_PARAMS_NAME);
   jmethodID constructor = env->GetMethodID(jParamsClass, "<init>", "()V");
   jLlamaContextParams = env->NewObject(jParamsClass, constructor);
+
+  jni::setUnsignedInt32(llamaContextParams.seed,
+                        env,
+                        jParamsClass,
+                        jLlamaContextParams,
+                        "seed");
+  jni::setSignedInt32(llamaContextParams.n_ctx,
+                        env,
+                        jParamsClass,
+                        jLlamaContextParams,
+                        "nCtx");
+  jni::setSignedInt32(llamaContextParams.n_batch,
+                        env,
+                        jParamsClass,
+                        jLlamaContextParams,
+                        "nBatch");
+  jni::setSignedInt32(llamaContextParams.n_gpu_layers,
+                        env,
+                        jParamsClass,
+                        jLlamaContextParams,
+                        "nGpuLayers");
+  jni::setSignedInt32(llamaContextParams.main_gpu,
+                        env,
+                        jParamsClass,
+                        jLlamaContextParams,
+                        "mainGpu");
+
+  jni::setFloat(llamaContextParams.rope_freq_base,
+                env,
+                jParamsClass,
+                jLlamaContextParams,
+                "ropeFreqBase");
+
+  jni::setBoolean(llamaContextParams.low_vram,
+                env,
+                jParamsClass,
+                jLlamaContextParams,
+                "lowVram");
+
+  jni::setBoolean(llamaContextParams.mul_mat_q,
+                env,
+                jParamsClass,
+                jLlamaContextParams,
+                "mulMatQ");
+
+  jni::setBoolean(llamaContextParams.f16_kv,
+                  env,
+                  jParamsClass,
+                  jLlamaContextParams,
+                  "f16Kv");
+
+  jni::setBoolean(llamaContextParams.logits_all,
+                  env,
+                  jParamsClass,
+                  jLlamaContextParams,
+                  "logitsAll");
+
+  jni::setBoolean(llamaContextParams.vocab_only,
+                  env,
+                  jParamsClass,
+                  jLlamaContextParams,
+                  "vocabOnly");
+
+  jni::setBoolean(llamaContextParams.use_mmap,
+                  env,
+                  jParamsClass,
+                  jLlamaContextParams,
+                  "useMmap");
+
+
+  jni::setBoolean(llamaContextParams.use_mlock,
+                  env,
+                  jParamsClass,
+                  jLlamaContextParams,
+                  "useMlock");
+
+  jni::setBoolean(llamaContextParams.embedding,
+                  env,
+                  jParamsClass,
+                  jLlamaContextParams,
+                  "embedding");
+
+  // IMPORTANT - not currently bothering to map any of the pointer fields
   tensorSplit = nullptr;
 }
 
@@ -83,5 +166,4 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::~LlamaContextParamsManage
                                    (jfloat*) tensorSplit,
                                    JNI_ABORT);
   }
-//  session->env->DeleteLocalRef(jLlamaContextParams);
 }
