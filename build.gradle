@@ -9,8 +9,8 @@ task runProgram(type: JavaExec) {
 
     dependsOn ':jni-bindings:build', ':jni-implementation:build'
     mainClass = 'net.jllama.llama.cpp.java.bindings.runner.Main'
-//    systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
-    systemProperty 'java.library.path', 'jni-implementation/build/cmake/main/cpp/Debug'
+    systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
+//    systemProperty 'java.library.path', 'jni-implementation/build/cmake/main/cpp/Debug'
     systemProperty "modelpath", System.getProperty("modelpath")
     systemProperty "loglevel", System.getProperty("loglevel")
 
