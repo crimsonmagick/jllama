@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 public class Main {
 
   private static final String SYSTEM_PROMPT = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible.";
+  private static final String COMPLETION_PROMPT = "I love my Cat Winnie, he is such a great cat! Let me tell you more about ";
 
   private static final String B_INST = "[INST]";
   private static final String E_INST = "[/INST]";
@@ -55,7 +56,8 @@ public class Main {
       });
       long timestamp1 = llamaCpp.llamaTimeUs();
 
-      final LlamaContextParams llamaContextParams = generateContextParams();
+//      final LlamaContextParams llamaContextParams = generateContextParams();
+      final LlamaContextParams llamaContextParams = llamaCpp.llamaContextDefaultParams();
       llamaOpaqueModel = llamaCpp.llamaLoadModelFromFile(
           modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
       llamaOpaqueContext =
@@ -65,8 +67,9 @@ public class Main {
 
       System.out.printf("timestamp1=%s, timestamp2=%s, initialization time=%s%n", timestamp1, timestamp2, timestamp2 - timestamp1);
 
-      final String prompt = B_INST + B_SYS + SYSTEM_PROMPT + E_SYS + "Write a \"Hello World!\" program in the Java programming language." + E_INST;
-      final int[] tokens = tokenize(prompt, true);
+      final String prompt = B_INST + B_SYS + SYSTEM_PROMPT + E_SYS + "Where can I buy lemons in Adrian, Michigan?" + E_INST;
+//      final int[] tokens = tokenize(prompt, true);
+      final int[] tokens = tokenize(COMPLETION_PROMPT, true);
 
       // availableProcessors is the number of logical cores - we want physical cores as our basis for thread allocation
       final int threads = Runtime.getRuntime().availableProcessors() / 2 - 1;
