@@ -15,7 +15,7 @@ task runProgram(type: JavaExec) {
     systemProperty "loglevel", System.getProperty("loglevel")
 
     final llamaRelativePath = current().isWindows() ? '/jni-implementation/build/cmake/bin/Release'
-            : '/jni-implementation/build/cmake/release'
+            : '/jni-implementation/build/cmake/Release'
     final String llamaAbsolutePath = projectDir as String + llamaRelativePath
 
     final envVariableName = current().isWindows() ? 'PATH' :
