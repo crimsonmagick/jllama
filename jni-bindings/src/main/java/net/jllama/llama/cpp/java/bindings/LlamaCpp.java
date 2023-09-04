@@ -28,6 +28,7 @@ public interface LlamaCpp {
 
   float[] llamaGetLogits(LlamaOpaqueContext context);
 
+  int llamaSampleToken(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
   int llamaSampleTokenGreedy(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
 
   int llamaTokenToPiece(LlamaOpaqueContext context, int llamaToken, byte[] buf);

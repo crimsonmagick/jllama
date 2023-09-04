@@ -42,6 +42,9 @@ class LlamaCppJNIImpl implements LlamaCpp {
   public native float[] llamaGetLogits(LlamaOpaqueContext context);
 
   @Override
+  public native int llamaSampleToken(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
+
+  @Override
   public native int llamaSampleTokenGreedy(LlamaOpaqueContext context,
       LlamaTokenDataArray candidates);
 

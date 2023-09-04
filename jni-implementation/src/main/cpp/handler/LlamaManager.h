@@ -44,6 +44,7 @@ class LlamaManager {
 
         jlong getTimestampInMicroseconds();
         jobject defaultContextParams();
+        jint sampleToken(jobject jContext, jobject jCandidates);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

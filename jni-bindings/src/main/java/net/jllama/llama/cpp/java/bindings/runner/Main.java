@@ -56,8 +56,8 @@ public class Main {
       });
       long timestamp1 = llamaCpp.llamaTimeUs();
 
-//      final LlamaContextParams llamaContextParams = generateContextParams();
-      final LlamaContextParams llamaContextParams = llamaCpp.llamaContextDefaultParams();
+      final LlamaContextParams defaultContextParams = llamaCpp.llamaContextDefaultParams();
+      final LlamaContextParams llamaContextParams = generateContextParams();
       llamaOpaqueModel = llamaCpp.llamaLoadModelFromFile(
           modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
       llamaOpaqueContext =
@@ -67,9 +67,9 @@ public class Main {
 
       System.out.printf("timestamp1=%s, timestamp2=%s, initialization time=%s%n", timestamp1, timestamp2, timestamp2 - timestamp1);
 
-      final String prompt = B_INST + B_SYS + SYSTEM_PROMPT + E_SYS + "Where can I buy lemons in Adrian, Michigan?" + E_INST;
-//      final int[] tokens = tokenize(prompt, true);
-      final int[] tokens = tokenize(COMPLETION_PROMPT, true);
+      final String prompt = B_INST + B_SYS + SYSTEM_PROMPT + E_SYS + "Write \"Hello World\" in x86 assembly for Windows." + E_INST;
+      final int[] tokens = tokenize(prompt, true);
+//      final int[] tokens = tokenize(COMPLETION_PROMPT, true);
 
       // availableProcessors is the number of logical cores - we want physical cores as our basis for thread allocation
       final int threads = Runtime.getRuntime().availableProcessors() / 2 - 1;
@@ -77,7 +77,7 @@ public class Main {
       llamaCpp.llamaEval(llamaOpaqueContext, tokens, tokens.length, 0, threads);
       float[] logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
       LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
-      int previousToken = llamaCpp.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
+      int previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, tokenDataArray);
       int newline = llamaCpp.llamaTokenNl(llamaOpaqueContext);
       System.out.print(detokenizer.detokenize(toList(tokens), llamaOpaqueContext));
       System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
@@ -88,7 +88,7 @@ public class Main {
         }
         logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
         tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
-        previousToken = llamaCpp.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
+        previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, tokenDataArray);
         System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
       }
 
@@ -104,7 +104,7 @@ public class Main {
   private static LlamaContextParams generateContextParams() {
     final LlamaContextParams contextParams = new LlamaContextParams();
     contextParams.setSeed(0xFFFFFFFF);
-    contextParams.setnCtx(512);
+    contextParams.setnCtx(2048);
     contextParams.setnBatch(512);
     contextParams.setnGpuLayers(0);
     contextParams.setMainGpu(0);

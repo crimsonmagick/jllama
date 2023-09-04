@@ -187,14 +187,25 @@ jfloatArray LlamaManager::LlamaSession::getLogits(jobject jContext) {
   });
 }
 
-typedef llama_token (* llama_sample_token_greedy_pointer)
+typedef llama_token (* llama_sample_token_pointer)
     (struct llama_context*, llama_token_data_array*);
 jint LlamaManager::LlamaSession::sampleTokenGreedy(jobject jContext, jobject jCandidates) {
-  return withJniExceptions(env, [this, &jContext, &jCandidates] {
-    auto sampleTokenGreedily = (llama_sample_token_greedy_pointer) getFunctionAddress("llama_sample_token_greedy");
+  return withJniExceptions(env, [this, jContext, jCandidates] {
+    auto sampleTokenGreedily = (llama_sample_token_pointer) getFunctionAddress("llama_sample_token_greedy");
     auto llamaContext = jni::getLlamaContextPointer(env, jContext);
     llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
     jint sampled = sampleTokenGreedily(llamaContext, &candidates);
+    delete[] candidates.data;
+    return sampled;
+  });
+}
+
+jint LlamaManager::LlamaSession::sampleToken(jobject jContext, jobject jCandidates) {
+  return withJniExceptions(env, [this, jContext, jCandidates] {
+    auto sampleToken = (llama_sample_token_pointer) getFunctionAddress("llama_sample_token");
+    auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    jint sampled = sampleToken(llamaContext, &candidates);
     delete[] candidates.data;
     return sampled;
   });

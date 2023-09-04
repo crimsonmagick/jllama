@@ -76,6 +76,10 @@ extern "C" {
     return llamaManager->newSession(env).getLogits(jContext);
   }
 
+  JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleToken(JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandiates) {
+    return llamaManager->newSession(env).sampleToken(jContext, jCandiates);
+  }
+
   JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleTokenGreedy (JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates) {
     return llamaManager->newSession(env).sampleTokenGreedy(jContext, jCandidates);
   }
@@ -126,6 +130,7 @@ extern "C" {
       return nullptr;
     }
   }
+
 
 
 }
