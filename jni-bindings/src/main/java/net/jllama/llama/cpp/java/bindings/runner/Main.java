@@ -56,8 +56,7 @@ public class Main {
       });
       long timestamp1 = llamaCpp.llamaTimeUs();
 
-      final LlamaContextParams defaultContextParams = llamaCpp.llamaContextDefaultParams();
-      final LlamaContextParams llamaContextParams = generateContextParams();
+      final LlamaContextParams llamaContextParams = llamaCpp.llamaContextDefaultParams();
       llamaOpaqueModel = llamaCpp.llamaLoadModelFromFile(
           modelPath.getBytes(StandardCharsets.UTF_8), llamaContextParams);
       llamaOpaqueContext =
@@ -99,28 +98,6 @@ public class Main {
     } catch (RuntimeException e) {
       System.out.println("Fatal exception occurred, exceptionMessage=" + e.getMessage());
     }
-  }
-
-  private static LlamaContextParams generateContextParams() {
-    final LlamaContextParams contextParams = new LlamaContextParams();
-    contextParams.setSeed(0xFFFFFFFF);
-    contextParams.setnCtx(2048);
-    contextParams.setnBatch(512);
-    contextParams.setnGpuLayers(0);
-    contextParams.setMainGpu(0);
-    contextParams.setTensorSplit(null);
-    contextParams.setRopeFreqBase(10000.0f);
-    contextParams.setRopeFreqScale(1.0f);
-//    contextParams.setProgressCallback(progress -> System.out.println("jProgress: " + progress));
-    contextParams.setLowVram(false);
-    contextParams.setMulMatQ(false);
-    contextParams.setF16Kv(true);
-    contextParams.setLogitsAll(false);
-    contextParams.setVocabOnly(false);
-    contextParams.setUseMmap(true);
-    contextParams.setUseMlock(false);
-    contextParams.setEmbedding(false);
-    return contextParams;
   }
 
   private static int[] tokenize(final String text, boolean addBos) {

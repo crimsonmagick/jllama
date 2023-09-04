@@ -52,6 +52,11 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                 jParamsClass,
                 jLlamaContextParams,
                 "ropeFreqBase");
+  jni::setFloat(llamaContextParams.rope_freq_scale,
+                env,
+                jParamsClass,
+                jLlamaContextParams,
+                "ropeFreqScale");
   jni::setBoolean(llamaContextParams.low_vram,
                 env,
                 jParamsClass,
