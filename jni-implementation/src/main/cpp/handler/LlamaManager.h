@@ -50,6 +50,11 @@ class LlamaManager {
                                     jintArray jPreviousTokens,
                                     jfloat penalty);
 
+        void applyFrequencyAndPresencePenalties(jobject jContext,
+                                                jobject jCandidates,
+                                                jintArray jLastTokens,
+                                                jfloat jAlphaFrequency,
+                                                jfloat jPresence);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

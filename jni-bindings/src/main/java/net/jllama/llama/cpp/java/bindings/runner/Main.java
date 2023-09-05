@@ -92,7 +92,8 @@ public class Main {
         }
         logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
         tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
-        llamaCpp.llamaSampleRepetitionPenalty(llamaOpaqueContext, tokenDataArray, toArray(previousTokenList), 1.2f);
+//        llamaCpp.llamaSampleRepetitionPenalty(llamaOpaqueContext, tokenDataArray, toArray(previousTokenList), 1.2f);
+        llamaCpp.llamaSampleFrequencyAndPresencePenalties(llamaOpaqueContext, tokenDataArray, toArray(previousTokenList), -0.2f, -0.2f);
 //        previousToken = llamaCpp.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
         previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, tokenDataArray);
         previousTokenList.add(previousToken);

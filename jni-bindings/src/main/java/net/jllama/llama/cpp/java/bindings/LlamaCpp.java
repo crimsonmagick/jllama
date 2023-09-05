@@ -35,6 +35,8 @@ public interface LlamaCpp {
 
   void llamaSampleRepetitionPenalty(LlamaOpaqueContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
 
+  void llamaSampleFrequencyAndPresencePenalties(LlamaOpaqueContext context, LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency, float alphaPresence);
+
   int llamaTokenBos(LlamaOpaqueContext context);
 
   int llamaTokenEos(LlamaOpaqueContext context);
@@ -46,4 +48,5 @@ public interface LlamaCpp {
   long llamaTimeUs();
 
   LlamaContextParams llamaContextDefaultParams();
+
 }

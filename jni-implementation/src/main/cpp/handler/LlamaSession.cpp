@@ -386,3 +386,25 @@ void LlamaManager::LlamaSession::applyRepetitionPenalty(jobject jContext,
     jni::updateTokenDateArray(env, jCandidates, &candidates);
   });
 }
+
+typedef void (* llama_sample_frequency_and_presence_penalties_pointer) (struct llama_context * ctx, llama_token_data_array * candidates, const llama_token * last_tokens, size_t last_tokens_size, float alpha_frequency, float penalty);
+
+void LlamaManager::LlamaSession::applyFrequencyAndPresencePenalties(jobject jContext, jobject jCandidates, jintArray jLastTokens, jfloat jAlphaFrequency, jfloat jPresence) {
+    withJniExceptions(env, [jContext, this, jCandidates, jLastTokens, jAlphaFrequency, jPresence] {
+        auto applyPenalty = reinterpret_cast<llama_sample_frequency_and_presence_penalties_pointer>(
+        getFunctionAddress("llama_sample_frequency_and_presence_penalties"));
+        llama_context* context = jni::getLlamaContextPointer(env, jContext);
+
+        llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+        jsize jLastTokensLength = env->GetArrayLength(jLastTokens);
+        jint* jLastTokensPointer = env->GetIntArrayElements(jLastTokens, nullptr);
+        int* lastTokens = reinterpret_cast<int*>(jLastTokensPointer);
+        if (!jLastTokensPointer) {
+        throw jni::JNIException("Unable to get jLastTokens/jLastTokensPointer.");
+        }
+        applyPenalty(context, &candidates, lastTokens, jLastTokensLength, jAlphaFrequency, jPresence);
+
+        env->ReleaseIntArrayElements(jLastTokens, jLastTokensPointer, JNI_ABORT);
+        jni::updateTokenDateArray(env, jCandidates, &candidates);
+    });
+}
