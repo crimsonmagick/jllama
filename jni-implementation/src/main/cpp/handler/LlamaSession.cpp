@@ -359,3 +359,30 @@ jobject LlamaManager::LlamaSession::defaultContextParams() {
     return jParams;
   });
 }
+
+
+typedef void (* llama_sample_repetition_penalty_pointer) (struct llama_context * ctx,
+    llama_token_data_array * candidates, const llama_token * last_tokens,
+    size_t last_tokens_size, float penalty);
+
+void LlamaManager::LlamaSession::applyRepetitionPenalty(jobject jContext,
+  jobject jCandidates, jintArray jPreviousTokens, jfloat jPenalty) {
+
+    withJniExceptions(env, [jContext, this, jCandidates, jPreviousTokens, jPenalty] {
+    auto applyPenalty = reinterpret_cast<llama_sample_repetition_penalty_pointer>(
+      getFunctionAddress("llama_sample_repetition_penalty"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    jsize jPreviousTokensLength = env->GetArrayLength(jPreviousTokens);
+    jint* jPreviousTokensPointer = env->GetIntArrayElements(jPreviousTokens, nullptr);
+    int* previousTokens = reinterpret_cast<int*>(jPreviousTokensPointer);
+    if (!jPreviousTokensPointer) {
+      throw jni::JNIException("Unable to get jPreviousTokens/jPreviousTokensPointer.");
+    }
+    applyPenalty(context, &candidates, previousTokens, jPreviousTokensLength, jPenalty);
+
+    env->ReleaseIntArrayElements(jPreviousTokens, jPreviousTokensPointer, JNI_ABORT);
+    jni::updateTokenDateArray(env, jCandidates, &candidates);
+  });
+}

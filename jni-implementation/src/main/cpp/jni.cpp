@@ -254,5 +254,49 @@ namespace jni {
       dataArray, size, sorted
     };
   }
+  void updateTokenDateArray(JNIEnv* env,
+                            jobject destination,
+                            llama_token_data_array* src) {
+    jclass jTokenDataArrayClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaTokenDataArray");
+    if (jTokenDataArrayClass == nullptr) {
+      throw JNIException("Unable to find LlamaTokenDataArray class");
+    }
+    jfieldID jArrayFieldId = env->GetFieldID(jTokenDataArrayClass, "data", "[Lnet/jllama/llama/cpp/java/bindings/LlamaTokenData;");
+    if (jArrayFieldId == nullptr) {
+      throw JNIException("Unable to find LlamaTokenData array \"data\"");
+    }
+
+    jclass jTokenDataClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaTokenData");
+    if (jTokenDataClass == nullptr) {
+      throw JNIException("Unable to find jTokenDataClass class");
+    }
+    jfieldID tokenFieldId = env->GetFieldID(jTokenDataClass, "llamaToken", "I");
+    if (tokenFieldId == nullptr) {
+      throw JNIException("Unable to find LlamaTokenData field `\"llamaToken\"");
+    }
+    jfieldID logitFieldId = env->GetFieldID(jTokenDataClass, "logit", "F");
+    if (logitFieldId == nullptr) {
+      throw JNIException("Unable to find LlamaTokenData field `\"logit\"");
+    }
+    jfieldID pFieldId = env->GetFieldID(jTokenDataClass, "p", "F");
+    if (pFieldId == nullptr) {
+      throw JNIException("Unable to find LlamaTokenData field `\"p\"");
+    }
+
+    auto jDataArray = reinterpret_cast<jobjectArray>(env->GetObjectField(destination, jArrayFieldId));
+    jsize jSize = env->GetArrayLength(jDataArray);
+    if (jSize != src->size) {
+      throw JNIException("TokenDataArray data.length must match llama_token_data_array.size");
+    }
+    jni::setBoolean(src->sorted, env, jTokenDataArrayClass, destination, "sorted");
+
+    for (int i = 0; i < src->size; i++) {
+      jobject jTokenData = env->GetObjectArrayElement(jDataArray, i);
+      env->SetFloatField(jTokenData, logitFieldId, src->data[i].logit);
+      env->SetFloatField(jTokenData, pFieldId, src->data[i].p);
+
+      env->DeleteLocalRef(jTokenData);
+    }
+  }
 
 }

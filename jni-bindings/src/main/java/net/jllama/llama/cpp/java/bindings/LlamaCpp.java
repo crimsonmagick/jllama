@@ -33,6 +33,8 @@ public interface LlamaCpp {
 
   int llamaTokenToPiece(LlamaOpaqueContext context, int llamaToken, byte[] buf);
 
+  void llamaSampleRepetitionPenalty(LlamaOpaqueContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
+
   int llamaTokenBos(LlamaOpaqueContext context);
 
   int llamaTokenEos(LlamaOpaqueContext context);

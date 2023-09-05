@@ -1,5 +1,6 @@
 package net.jllama.llama.cpp.java.bindings.runner;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,10 +16,10 @@ import java.nio.charset.StandardCharsets;
 
 public class Main {
 
-  private static final String SYSTEM_PROMPT = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible.";
+  private static final String SYSTEM_PROMPT = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. If you don't know something, answer that you do not know. Take your time and be accurate.";
   private static final String COMPLETION_PROMPT = "I love my Cat Winnie, he is such a great cat! Let me tell you more about ";
 
-  private static final String B_INST = "[INST]";
+  private static final String B_INST = "<s>[INST]";
   private static final String E_INST = "[/INST]";
   private static final String B_SYS = "<<SYS>>\n";
   private static final String E_SYS = "\n<</SYS>>\n\n";
@@ -66,20 +67,24 @@ public class Main {
 
       System.out.printf("timestamp1=%s, timestamp2=%s, initialization time=%s%n", timestamp1, timestamp2, timestamp2 - timestamp1);
 
-      final String prompt = B_INST + B_SYS + SYSTEM_PROMPT + E_SYS + "Write \"Hello World\" in x86 assembly for Windows." + E_INST;
+      final String prompt = B_INST + B_SYS + SYSTEM_PROMPT + E_SYS + "Suggest a Keto-friendly meal for dinner." + E_INST;
       final int[] tokens = tokenize(prompt, true);
-//      final int[] tokens = tokenize(COMPLETION_PROMPT, true);
 
       // availableProcessors is the number of logical cores - we want physical cores as our basis for thread allocation
       final int threads = Runtime.getRuntime().availableProcessors() / 2 - 1;
+
+      System.out.print(detokenizer.detokenize(toList(tokens), llamaOpaqueContext));
 
       llamaCpp.llamaEval(llamaOpaqueContext, tokens, tokens.length, 0, threads);
       float[] logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
       LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
       int previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, tokenDataArray);
-      int newline = llamaCpp.llamaTokenNl(llamaOpaqueContext);
-      System.out.print(detokenizer.detokenize(toList(tokens), llamaOpaqueContext));
+
       System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
+
+      final List<Integer> previousTokenList = new ArrayList<>();
+      previousTokenList.add(previousToken);
+
       for (int i = tokens.length + 1; previousToken != llamaCpp.llamaTokenEos(llamaOpaqueContext); i++) {
         final int res = llamaCpp.llamaEval(llamaOpaqueContext, new int[]{previousToken}, 1, i, threads);
         if (res != 0) {
@@ -87,7 +92,10 @@ public class Main {
         }
         logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
         tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
+        llamaCpp.llamaSampleRepetitionPenalty(llamaOpaqueContext, tokenDataArray, toArray(previousTokenList), 1.2f);
+//        previousToken = llamaCpp.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
         previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, tokenDataArray);
+        previousTokenList.add(previousToken);
         System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
       }
 
@@ -111,6 +119,12 @@ public class Main {
 
   private static List<Integer> toList(int[] tokens) {
     return Arrays.stream(tokens).boxed().collect(Collectors.toList());
+  }
+
+  private static int[] toArray(List<Integer> tokenList) {
+    int[] tokens = new int[tokenList.size()];
+    Arrays.setAll(tokens, tokenList::get);
+    return tokens;
   }
 
 }

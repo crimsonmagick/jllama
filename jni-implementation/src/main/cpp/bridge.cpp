@@ -131,6 +131,8 @@ extern "C" {
     }
   }
 
-
+  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleRepetitionPenalty(JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates, jintArray lastTokens, jfloat penalty) {
+    llamaManager->newSession(env).applyRepetitionPenalty(jContext, jCandidates, lastTokens, penalty);
+  }
 
 }

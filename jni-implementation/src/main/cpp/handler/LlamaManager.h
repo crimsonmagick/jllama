@@ -45,6 +45,11 @@ class LlamaManager {
         jlong getTimestampInMicroseconds();
         jobject defaultContextParams();
         jint sampleToken(jobject jContext, jobject jCandidates);
+        void applyRepetitionPenalty(jobject jContext,
+                                    jobject jCandidates,
+                                    jintArray jPreviousTokens,
+                                    jfloat penalty);
+
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

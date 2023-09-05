@@ -35,5 +35,6 @@ namespace jni {
   jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer);
   llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext);
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray);
+  void updateTokenDateArray(JNIEnv* env, jobject destination, llama_token_data_array* src);
 }
 #endif //LLAMA_CPP_JAVA_BINDINGS_JNI_H
