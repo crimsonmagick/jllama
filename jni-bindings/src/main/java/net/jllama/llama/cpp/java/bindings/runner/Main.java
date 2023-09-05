@@ -85,7 +85,7 @@ public class Main {
       final List<Integer> previousTokenList = new ArrayList<>();
       previousTokenList.add(previousToken);
 
-      for (int i = tokens.length + 1; previousToken != llamaCpp.llamaTokenEos(llamaOpaqueContext); i++) {
+      for (int i = tokens.length + 1; previousToken != llamaCpp.llamaTokenEos(llamaOpaqueContext) && i < llamaContextParams.getnCtx(); i++) {
         final int res = llamaCpp.llamaEval(llamaOpaqueContext, new int[]{previousToken}, 1, i, threads);
         if (res != 0) {
           throw new RuntimeException("Non zero response from eval");
