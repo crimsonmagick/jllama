@@ -37,6 +37,10 @@ public interface LlamaCpp {
 
   void llamaSampleFrequencyAndPresencePenalties(LlamaOpaqueContext context, LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency, float alphaPresence);
 
+  void llamaSampleSoftMax(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
+
+  void llamaSampleTopK(LlamaOpaqueContext context, LlamaTokenDataArray candidates, int k, long minKeep);
+
   int llamaTokenBos(LlamaOpaqueContext context);
 
   int llamaTokenEos(LlamaOpaqueContext context);

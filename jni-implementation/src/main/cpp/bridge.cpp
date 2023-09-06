@@ -139,4 +139,15 @@ extern "C" {
     llamaManager->newSession(env).applyFrequencyAndPresencePenalties(jContext, jCandidates, jLastTokens, jAlphaFrequency, jPenalty);
   }
 
+  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleSoftMax
+      (JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates) {
+    llamaManager->newSession(env).llamaSampleSoftMax(jContext, jCandidates);
+  }
+
+  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleTopK
+      (JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates, jint k, jlong minKeep) {
+    llamaManager->newSession(env).llamaSampleTopK(jContext, jCandidates, k, minKeep);
+  }
+
+
 }

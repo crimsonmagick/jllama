@@ -58,6 +58,12 @@ class LlamaCppJNIImpl implements LlamaCpp {
   public native void llamaSampleFrequencyAndPresencePenalties(LlamaOpaqueContext context, LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency, float alphaPresence);
 
   @Override
+  public native void llamaSampleSoftMax(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
+
+  @Override
+  public native void llamaSampleTopK(LlamaOpaqueContext context, LlamaTokenDataArray candidates, int k, long minKeep);
+
+  @Override
   public native int llamaTokenBos(LlamaOpaqueContext context);
 
   @Override

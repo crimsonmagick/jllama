@@ -55,6 +55,12 @@ class LlamaManager {
                                                 jintArray jLastTokens,
                                                 jfloat jAlphaFrequency,
                                                 jfloat jPresence);
+        void llamaSampleSoftMax(jobject jContext, jobject jCandidates);
+        void
+        llamaSampleTopK(jobject jContext,
+                        jobject jCandidates,
+                        jint k,
+                        jlong minkKeep);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

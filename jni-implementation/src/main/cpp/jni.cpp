@@ -235,7 +235,7 @@ namespace jni {
     }
 
     auto jDataArray = reinterpret_cast<jobjectArray>(env->GetObjectField(jTokenDataArray, jArrayFieldId));
-    size_t size = jni::getSizeT(env, jTokenDataArrayClass, jTokenDataArray, "size");
+    size_t size = env->GetArrayLength(jDataArray);
     bool sorted = jni::getBool(env, jTokenDataArrayClass, jTokenDataArray, "sorted");
 
     auto dataArray = new llama_token_data[size];
@@ -283,20 +283,26 @@ namespace jni {
       throw JNIException("Unable to find LlamaTokenData field `\"p\"");
     }
 
-    auto jDataArray = reinterpret_cast<jobjectArray>(env->GetObjectField(destination, jArrayFieldId));
-    jsize jSize = env->GetArrayLength(jDataArray);
-    if (jSize != src->size) {
-      throw JNIException("TokenDataArray data.length must match llama_token_data_array.size");
-    }
     jni::setBoolean(src->sorted, env, jTokenDataArrayClass, destination, "sorted");
 
+    jobjectArray jNewDataArray = env->NewObjectArray(src->size, jTokenDataClass, nullptr);
+
+    if (!jNewDataArray) {
+      throw JNIException("Unable to create new LlamaTokenData array");
+    }
+
     for (int i = 0; i < src->size; i++) {
-      jobject jTokenData = env->GetObjectArrayElement(jDataArray, i);
+      jobject jTokenData = env->AllocObject(jTokenDataClass);
+      if (!jTokenData) {
+          throw JNIException("Unable to allocate new LlamaTokenData");
+      }
+      env->SetIntField(jTokenData, tokenFieldId, src->data[i].id);
       env->SetFloatField(jTokenData, logitFieldId, src->data[i].logit);
       env->SetFloatField(jTokenData, pFieldId, src->data[i].p);
-
+      env->SetObjectArrayElement(jNewDataArray, i, jTokenData);
       env->DeleteLocalRef(jTokenData);
     }
+    env->SetObjectField(destination, jArrayFieldId, jNewDataArray);
   }
 
 }

@@ -408,3 +408,32 @@ void LlamaManager::LlamaSession::applyFrequencyAndPresencePenalties(jobject jCon
         jni::updateTokenDateArray(env, jCandidates, &candidates);
     });
 }
+
+typedef void (* llama_sample_softmax_pointer) (struct llama_context * ctx, llama_token_data_array * candidates);
+void LlamaManager::LlamaSession::llamaSampleSoftMax(jobject jContext,
+                                                    jobject jCandidates) {
+  withJniExceptions(env, [jContext, this, jCandidates] {
+    auto sampleSoftMax = reinterpret_cast<llama_sample_softmax_pointer>(getFunctionAddress(
+        "llama_sample_softmax"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    sampleSoftMax(context, &candidates);
+    jni::updateTokenDateArray(env, jCandidates, &candidates);
+  });
+}
+
+typedef void (* llama_sample_top_k_pointer)
+(struct llama_context * ctx, llama_token_data_array * candidates, int k, size_t min_keep);
+void LlamaManager::LlamaSession::llamaSampleTopK(jobject jContext,
+                                                 jobject jCandidates,
+                                                 jint k,
+                                                 jlong minkKeep) {
+  withJniExceptions(env, [jContext, this, jCandidates, k, minkKeep] {
+    auto sampleTopK = reinterpret_cast<llama_sample_top_k_pointer>(getFunctionAddress(
+        "llama_sample_top_k"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    sampleTopK(context, &candidates, k, minkKeep);
+    jni::updateTokenDateArray(env, jCandidates, &candidates);
+  });
+}

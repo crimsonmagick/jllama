@@ -77,8 +77,8 @@ public class Main {
 
       llamaCpp.llamaEval(llamaOpaqueContext, tokens, tokens.length, 0, threads);
       float[] logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
-      LlamaTokenDataArray tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
-      int previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, tokenDataArray);
+      LlamaTokenDataArray candidates = LlamaTokenDataArray.logitsToTokenDataArray(logits);
+      int previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, candidates);
 
       System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
 
@@ -91,11 +91,13 @@ public class Main {
           throw new RuntimeException("Non zero response from eval");
         }
         logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
-        tokenDataArray = LlamaTokenDataArray.logitsToTokenDataArray(logits);
+        candidates = LlamaTokenDataArray.logitsToTokenDataArray(logits);
 //        llamaCpp.llamaSampleRepetitionPenalty(llamaOpaqueContext, tokenDataArray, toArray(previousTokenList), 1.2f);
-        llamaCpp.llamaSampleFrequencyAndPresencePenalties(llamaOpaqueContext, tokenDataArray, toArray(previousTokenList), -0.2f, -0.2f);
+//        llamaCpp.llamaSampleFrequencyAndPresencePenalties(llamaOpaqueContext, tokenDataArray, toArray(previousTokenList), -0.2f, -0.2f);
+        llamaCpp.llamaSampleTopK(llamaOpaqueContext, candidates, 10, 1);
+//        llamaCpp.llamaSampleSoftMax(llamaOpaqueContext, candidates);
 //        previousToken = llamaCpp.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
-        previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, tokenDataArray);
+        previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, candidates);
         previousTokenList.add(previousToken);
         System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
       }
