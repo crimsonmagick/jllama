@@ -12,8 +12,14 @@ model {
   }
 }
 
-def javaHome = System.getProperty("java.home")
-def includeDir = new File(javaHome, "../include")
+final javaHome = System.getProperty("java.home")
+final includeDir
+if (javaHome.endsWith("jre")) {
+   includeDir = new File(javaHome, "../include")
+} else {
+  includeDir = new File(javaHome, "./include")
+}
+
 
 if (!includeDir.exists()) {
   throw new GradleException("Failed to locate the JDK include directory.")
