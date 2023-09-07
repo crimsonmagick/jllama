@@ -87,4 +87,8 @@ class LlamaCppJNIImpl implements LlamaCpp {
   @Override
   public native LlamaContextParams llamaContextDefaultParams();
 
+  @Override
+  public native void llamaSampleTypical(LlamaOpaqueContext llamaOpaqueContext,
+      LlamaTokenDataArray candidates, float p, int minKeep);
+
 }

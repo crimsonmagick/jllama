@@ -57,4 +57,5 @@ public interface LlamaCpp {
 
   LlamaContextParams llamaContextDefaultParams();
 
+  void llamaSampleTypical(LlamaOpaqueContext llamaOpaqueContext, LlamaTokenDataArray candidates, float p, int minKeep);
 }

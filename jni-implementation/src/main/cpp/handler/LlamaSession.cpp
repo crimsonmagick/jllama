@@ -467,3 +467,18 @@ void LlamaManager::LlamaSession::llamaSampleTailFree(jobject jContext,
     jni::updateTokenDateArray(env, jCandidates, &candidates);
   });
 }
+
+typedef void (* llama_sample_typical_pointer) (struct llama_context * ctx, llama_token_data_array * candidates, float p, size_t min_keep);
+void LlamaManager::LlamaSession::llamaSampleTypical(jobject jContext,
+                                                    jobject jCandidates,
+                                                    jfloat p,
+                                                    jint minKeep) {
+  withJniExceptions(env, [jContext, this, jCandidates, p, minKeep] {
+    auto sampleTypical = reinterpret_cast<llama_sample_typical_pointer>(getFunctionAddress(
+        "llama_sample_typical"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    sampleTypical(context, &candidates, p, minKeep);
+    jni::updateTokenDateArray(env, jCandidates, &candidates);
+  });
+}

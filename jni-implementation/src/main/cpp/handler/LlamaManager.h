@@ -70,6 +70,10 @@ class LlamaManager {
                                  jobject jCandidates,
                                  jfloat z,
                                  jlong minkeep);
+        void llamaSampleTypical(jobject jContext,
+                                jobject jCandidates,
+                                jfloat p,
+                                jint minKeep);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
