@@ -149,5 +149,15 @@ extern "C" {
     llamaManager->newSession(env).llamaSampleTopK(jContext, jCandidates, k, minKeep);
   }
 
+  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleTopP(JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates, jfloat p, jlong minKeep) {
+      llamaManager->newSession(env).llamaSampleTopP(jContext, jCandidates, p, minKeep);
+  }
+
+//  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleTailFree(JNIEnv* env, jobject jcontext, jobject jCandidates, jfloat z, jlong minKeep) { //    llamaManager->newSession(env).llamaSampleTailFree(jcontext, jCandidates, z, minKeep);
+//  }
+
+  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleTailFree(JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates, jfloat z, jlong minKeep) {
+    llamaManager->newSession(env).llamaSampleTailFree(jContext, jCandidates, z, minKeep);
+  }
 
 }

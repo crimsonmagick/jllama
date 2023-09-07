@@ -41,6 +41,10 @@ public interface LlamaCpp {
 
   void llamaSampleTopK(LlamaOpaqueContext context, LlamaTokenDataArray candidates, int k, long minKeep);
 
+  void llamaSampleTopP(LlamaOpaqueContext context, LlamaTokenDataArray candidates, float p, long minKeep);
+
+  void llamaSampleTailFree(LlamaOpaqueContext context, LlamaTokenDataArray candidates, float z, long minKeep);
+
   int llamaTokenBos(LlamaOpaqueContext context);
 
   int llamaTokenEos(LlamaOpaqueContext context);

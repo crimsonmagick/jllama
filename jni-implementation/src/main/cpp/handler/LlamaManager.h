@@ -61,6 +61,15 @@ class LlamaManager {
                         jobject jCandidates,
                         jint k,
                         jlong minkKeep);
+        void
+        llamaSampleTopP(jobject jContext,
+                        jobject jCandidates,
+                        jfloat p,
+                        jlong minKeep);
+        void llamaSampleTailFree(jobject jContext,
+                                 jobject jCandidates,
+                                 jfloat z,
+                                 jlong minkeep);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

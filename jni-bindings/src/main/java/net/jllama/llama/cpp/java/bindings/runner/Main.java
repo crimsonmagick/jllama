@@ -92,11 +92,12 @@ public class Main {
         }
         logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
         candidates = LlamaTokenDataArray.logitsToTokenDataArray(logits);
-//        llamaCpp.llamaSampleRepetitionPenalty(llamaOpaqueContext, tokenDataArray, toArray(previousTokenList), 1.2f);
-//        llamaCpp.llamaSampleFrequencyAndPresencePenalties(llamaOpaqueContext, tokenDataArray, toArray(previousTokenList), -0.2f, -0.2f);
+        llamaCpp.llamaSampleRepetitionPenalty(llamaOpaqueContext, candidates, toArray(previousTokenList), 1.2f);
+        llamaCpp.llamaSampleFrequencyAndPresencePenalties(llamaOpaqueContext, candidates, toArray(previousTokenList), -0.2f, -0.2f);
         llamaCpp.llamaSampleTopK(llamaOpaqueContext, candidates, 10, 1);
-//        llamaCpp.llamaSampleSoftMax(llamaOpaqueContext, candidates);
-//        previousToken = llamaCpp.llamaSampleTokenGreedy(llamaOpaqueContext, tokenDataArray);
+        llamaCpp.llamaSampleSoftMax(llamaOpaqueContext, candidates);
+        llamaCpp.llamaSampleTopP(llamaOpaqueContext, candidates, 0.1f, 1);
+        llamaCpp.llamaSampleTailFree(llamaOpaqueContext, candidates, 0.5f, 1);
         previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, candidates);
         previousTokenList.add(previousToken);
         System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));

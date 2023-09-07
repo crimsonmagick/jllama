@@ -437,3 +437,33 @@ void LlamaManager::LlamaSession::llamaSampleTopK(jobject jContext,
     jni::updateTokenDateArray(env, jCandidates, &candidates);
   });
 }
+
+typedef void (* llama_sample_top_p_pointer) (struct llama_context * ctx, llama_token_data_array * candidates, float p, size_t min_keep);
+void LlamaManager::LlamaSession::llamaSampleTopP(jobject jContext,
+                                                 jobject jCandidates,
+                                                 jfloat p,
+                                                 jlong minKeep) {
+  withJniExceptions(env, [jContext, this, jCandidates, p, minKeep] {
+    auto sampleTopP = reinterpret_cast<llama_sample_top_p_pointer>(getFunctionAddress(
+        "llama_sample_top_p"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    sampleTopP(context, &candidates, p, minKeep);
+    jni::updateTokenDateArray(env, jCandidates, &candidates);
+  });
+}
+
+typedef void (* llama_sample_tail_free_pointer) (struct llama_context * ctx, llama_token_data_array * candidates, float z, size_t min_keep);
+void LlamaManager::LlamaSession::llamaSampleTailFree(jobject jContext,
+                                                     jobject jCandidates,
+                                                     jfloat z,
+                                                     jlong minkeep) {
+  withJniExceptions(env, [jContext, this, jCandidates, z, minkeep] {
+    auto sampleTailFree = reinterpret_cast<llama_sample_tail_free_pointer>(getFunctionAddress(
+        "llama_sample_tail_free"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    sampleTailFree(context, &candidates, z, minkeep);
+    jni::updateTokenDateArray(env, jCandidates, &candidates);
+  });
+}
