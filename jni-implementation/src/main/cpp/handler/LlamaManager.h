@@ -74,6 +74,9 @@ class LlamaManager {
                                 jobject jCandidates,
                                 jfloat p,
                                 jint minKeep);
+        void llamaSampleTemperature(jobject jContext,
+                                    jobject jCandidates,
+                                    jfloat temp);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

@@ -482,3 +482,17 @@ void LlamaManager::LlamaSession::llamaSampleTypical(jobject jContext,
     jni::updateTokenDateArray(env, jCandidates, &candidates);
   });
 }
+
+typedef void (* llama_sample_temperature_pointer) (struct llama_context * ctx, llama_token_data_array * candidates, float temp);
+void LlamaManager::LlamaSession::llamaSampleTemperature(jobject jContext,
+                                                        jobject jCandidates,
+                                                        jfloat temp) {
+  withJniExceptions(env, [jContext, this, jCandidates, temp] {
+    auto sampleTemperature = reinterpret_cast<llama_sample_temperature_pointer>(getFunctionAddress(
+        "llama_sample_temperature"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    sampleTemperature(context, &candidates, temp);
+    jni::updateTokenDateArray(env, jCandidates, &candidates);
+  });
+}

@@ -78,6 +78,8 @@ public class Main {
       llamaCpp.llamaEval(llamaOpaqueContext, tokens, tokens.length, 0, threads);
       float[] logits = llamaCpp.llamaGetLogits(llamaOpaqueContext);
       LlamaTokenDataArray candidates = LlamaTokenDataArray.logitsToTokenDataArray(logits);
+      final float temp = 0.35f;
+      llamaCpp.llamaSampleTemperature(llamaOpaqueContext, candidates, temp);
       int previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, candidates);
 
       System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));
@@ -94,11 +96,12 @@ public class Main {
         candidates = LlamaTokenDataArray.logitsToTokenDataArray(logits);
 //        llamaCpp.llamaSampleRepetitionPenalty(llamaOpaqueContext, candidates, toArray(previousTokenList), 1.2f);
 //        llamaCpp.llamaSampleFrequencyAndPresencePenalties(llamaOpaqueContext, candidates, toArray(previousTokenList), -0.2f, -0.2f);
-//        llamaCpp.llamaSampleTopK(llamaOpaqueContext, candidates, 10, 1);
+//        llamaCpp.llamaSampleTopK(llamaOpaqueContext, candidates, 100, 1);
 //        llamaCpp.llamaSampleSoftMax(llamaOpaqueContext, candidates);
-//        llamaCpp.llamaSampleTopP(llamaOpaqueContext, candidates, 0.1f, 1);
+//        llamaCpp.llamaSampleTopP(llamaOpaqueContext, candidates, 0.001f, 1);
 //        llamaCpp.llamaSampleTailFree(llamaOpaqueContext, candidates, 0.5f, 1);
-        llamaCpp.llamaSampleTypical(llamaOpaqueContext, candidates, 0.5f, 1);
+//        llamaCpp.llamaSampleTypical(llamaOpaqueContext, candidates, 0.5f, 1);
+        llamaCpp.llamaSampleTemperature(llamaOpaqueContext, candidates, temp);
         previousToken = llamaCpp.llamaSampleToken(llamaOpaqueContext, candidates);
         previousTokenList.add(previousToken);
         System.out.print(detokenizer.detokenize(previousToken, llamaOpaqueContext));

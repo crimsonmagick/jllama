@@ -160,4 +160,10 @@ extern "C" {
   JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleTypical(JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates, jfloat p, jint minKeep) {
     llamaManager->newSession(env).llamaSampleTypical(jContext, jCandidates, p, minKeep);
   }
+
+  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleTemperature(JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates, jfloat temp) {
+    llamaManager->newSession(env).llamaSampleTemperature(jContext, jCandidates, temp);
+  }
+
+
 }
