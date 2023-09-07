@@ -4,7 +4,22 @@ plugins {
   id 'cpp-library'
 }
 
-def javaHome = System.getenv("JAVA8_HOME")
+model {
+  platforms {
+    create("windows_x64")
+    create("linux_x64")
+    create("macos_arm64")
+  }
+}
+
+def javaHome = System.getProperty("java.home")
+def includeDir = new File(javaHome, "../include")
+
+if (!includeDir.exists()) {
+  throw new GradleException("Failed to locate the JDK include directory.")
+}
+
+def includeDirPath = includeDir.canonicalPath
 
 library {
   binaries.configureEach {
@@ -17,8 +32,8 @@ library {
   }
   source.from 'src/main/cpp', '../jni-bindings/build/generated/sources/headers/java/main'
   privateHeaders.from '../jni-bindings/build/generated/sources/headers/java/main',
-    'src/external/llama.cpp', "$javaHome/include", "$javaHome/include/linux",
-    "$javaHome/include/win32", "$javaHome/include/darwin"
+    'src/external/llama.cpp', "$includeDirPath", "$includeDirPath/linux",
+    "$includeDirPath/win32", "$includeDirPath/darwin"
 }
 
 tasks.withType(CppCompile) {
