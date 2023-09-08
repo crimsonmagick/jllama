@@ -27,3 +27,48 @@ task runProgram(type: JavaExec) {
         classpath = files(project(':jni-bindings').sourceSets.main.runtimeClasspath)
     }
 }
+
+subprojects { project ->
+    apply plugin: 'maven-publish'
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                if (project.plugins.hasPlugin('java')) {
+                    from components.java
+                } else if (project.plugins.hasPlugin('cpp-library')) {
+                    from components.main
+                }
+
+                // Your shared POM configuration goes here
+                pom {
+                    name = 'Jllama CPP Bindings'
+                    description = 'Provides Java bindings to the Llama CPP library'
+                    url = 'https://github.com/crimsonmagick/llama-cpp-java-bindings'
+                    licenses {
+                        license {
+                            name = 'The MIT License'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'crimsonmagick'
+                            name = 'Welby Seely'
+                            email = 'welbyseely@email.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:https://github.com/crimsonmagick/llama-cpp-java-bindings.git'
+                        developerConnection = 'scm:git:ssh://github.com/crimsonmagick/llama-cpp-java-bindings.git'
+                        url = 'https://github.com/username/crimsonmagick'
+                    }
+                }
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
+}
+
