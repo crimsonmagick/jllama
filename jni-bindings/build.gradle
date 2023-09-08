@@ -1,17 +1,14 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
+    mavenLocal()
     mavenCentral()
-}
-
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
 
 test {
@@ -20,4 +17,39 @@ test {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            pom {
+                name = 'Jllama CPP Bindings'
+                description = 'Provides Java bindings to the Llama CPP library'
+                url = 'https://github.com/crimsonmagick/llama-cpp-java-bindings'
+                licenses {
+                    license {
+                        name = 'The MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'crimsonmagick'
+                        name = 'Welby Seely'
+                        email = 'welbyseely@email.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/crimsonmagick/llama-cpp-java-bindings.git'
+                    developerConnection = 'scm:git:ssh://github.com/crimsonmagick/llama-cpp-java-bindings.git'
+                    url = 'https://github.com/username/crimsonmagick'
+                }
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
 }
