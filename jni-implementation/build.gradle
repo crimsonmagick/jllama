@@ -1,47 +1,26 @@
-import static org.gradle.internal.os.OperatingSystem.current
-
-plugins {
-  id 'cpp-library'
-}
-
-model {
-  platforms {
-    create("windows_x64")
-    create("linux_x64")
-    create("macos_arm64")
-  }
-}
-
-final javaHome = System.getProperty("java.home")
-final includeDir
-if (javaHome.endsWith("jre")) {
-   includeDir = new File(javaHome, "../include")
-} else {
-  includeDir = new File(javaHome, "./include")
-}
-
-
-if (!includeDir.exists()) {
-  throw new GradleException("Failed to locate the JDK include directory.")
-}
-
-def includeDirPath = includeDir.canonicalPath
-
-library {
-  binaries.configureEach {
-    if (current().isWindows()) { {
-      compileTask.get().compilerArgs.add('/std:c++latest')
-      }
-    } else {
-        compileTask.get().compilerArgs.add('-std=c++20')
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
     }
   }
-  source.from 'src/main/cpp', '../jni-bindings/build/generated/sources/headers/java/main'
-  privateHeaders.from '../jni-bindings/build/generated/sources/headers/java/main',
-    'src/external/llama.cpp', "$includeDirPath", "$includeDirPath/linux",
-    "$includeDirPath/win32", "$includeDirPath/darwin"
+  dependencies {
+    classpath 'net.freudasoft:gradle-cmake-plugin:0.0.2'
+  }
+  repositories {
+    mavenCentral()
+  }
 }
 
-tasks.withType(CppCompile) {
-  dependsOn ':jni-bindings:compileJava'
+apply plugin: "net.freudasoft.gradle-cmake-plugin"
+
+cmake {
+  generator = 'Visual Studio 17 2022'
+  platform = 'x64'
+  sourceFolder=file("$projectDir/src")
+  buildSharedLibs = true
+  setDef(['BUILD_LLAMA_CPP': 'ON', 'BUILD_SHARED_LIBS': 'ON', 'LLAMA_BUILD_EXAMPLES': 'OFF'])
+  buildConfig = 'Release'
+  buildClean = true
+  buildTarget = ''
 }
