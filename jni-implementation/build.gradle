@@ -1,26 +1,21 @@
 buildscript {
   repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
+    mavenLocal()
+    gradlePluginPortal()
   }
   dependencies {
-    classpath 'net.freudasoft:gradle-cmake-plugin:0.0.2'
-  }
-  repositories {
-    mavenCentral()
+    classpath 'dev.welbyseely:gradle-cmake-plugin:0.0.3'
   }
 }
 
-apply plugin: "net.freudasoft.gradle-cmake-plugin"
+apply plugin: 'dev.welbyseely.gradle-cmake-plugin'
 
 cmake {
   generator = 'Visual Studio 17 2022'
   platform = 'x64'
-  sourceFolder=file("$projectDir/src")
+  sourceFolder = file("$projectDir/src")
   buildSharedLibs = true
   setDef(['BUILD_LLAMA_CPP': 'ON', 'BUILD_SHARED_LIBS': 'ON', 'LLAMA_BUILD_EXAMPLES': 'OFF'])
   buildConfig = 'Release'
   buildClean = true
-  buildTarget = ''
 }
