@@ -1,3 +1,4 @@
+#include <cstring>
 #include <jni.h>
 #include "LlamaManager.h"
 #include "../libloader.h"

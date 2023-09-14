@@ -7,15 +7,19 @@ task runProgram(type: JavaExec) {
     description = 'Runs the main program'
     group = 'application'
 
-    dependsOn ':jni-bindings:build', ':jni-implementation:build'
+    dependsOn ':test-runner:build'
     mainClass = 'net.jllama.llama.cpp.java.bindings.runner.Main'
-    systemProperty 'java.library.path', 'jni-implementation/build/lib/main/debug'
-//    systemProperty 'java.library.path', 'jni-implementation/build/cmake/main/cpp/Debug'
+    final bridgeRelativePath = current().isWindows()
+            ? '\\jni-implementation\\build\\cmake\\main\\cpp\\Release' : '/jni-implementation/build/cmake/main/cpp'
+    final bridgeAbsolutePath = projectDir as String + bridgeRelativePath
+    systemProperty 'java.library.path', bridgeAbsolutePath
     systemProperty "modelpath", System.getProperty("modelpath")
     systemProperty "loglevel", System.getProperty("loglevel")
 
-    final llamaRelativePath = current().isWindows() ? '/jni-implementation/build/cmake/bin/Release'
-            : '/jni-implementation/build/cmake/Release'
+    final llamaRelativePath = current().isWindows() ? '\\jni-implementation\\build\\cmake\\bin\\Release'
+            : '/jni-implementation/build/cmake/external/llama.cpp'
+
+
     final String llamaAbsolutePath = projectDir as String + llamaRelativePath
 
     final envVariableName = current().isWindows() ? 'PATH' :
@@ -24,6 +28,6 @@ task runProgram(type: JavaExec) {
     environment envVariableName, "${envVariableValue}${File.pathSeparator}${llamaAbsolutePath}"
 
     doFirst {
-        classpath = files(project(':jni-bindings').sourceSets.main.runtimeClasspath)
+        classpath = files(project(':test-runner').sourceSets.main.runtimeClasspath)
     }
 }

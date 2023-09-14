@@ -1,47 +1,19 @@
 import static org.gradle.internal.os.OperatingSystem.current
 
 plugins {
-  id 'cpp-library'
+  id("dev.welbyseely.gradle-cmake-plugin") version "0.0.3"
 }
 
-model {
-  platforms {
-    create("windows_x64")
-    create("linux_x64")
-    create("macos_arm64")
+final implGenerator = current().isWindows() ? "Visual Studio 17 2022" : "Unix Makefiles"
+
+cmake {
+  generator = implGenerator
+  sourceFolder = file("$projectDir/src")
+  buildSharedLibs = true
+  setDef(['BUILD_LLAMA_CPP': 'ON', 'BUILD_SHARED_LIBS': 'ON', 'LLAMA_BUILD_EXAMPLES': 'OFF'])
+  buildConfig = 'Release'
+  buildClean = true
+  if (current().isWindows()) {
+    platform = 'x64'
   }
-}
-
-final javaHome = System.getProperty("java.home")
-final includeDir
-if (javaHome.endsWith("jre")) {
-   includeDir = new File(javaHome, "../include")
-} else {
-  includeDir = new File(javaHome, "./include")
-}
-
-
-if (!includeDir.exists()) {
-  throw new GradleException("Failed to locate the JDK include directory.")
-}
-
-def includeDirPath = includeDir.canonicalPath
-
-library {
-  binaries.configureEach {
-    if (current().isWindows()) { {
-      compileTask.get().compilerArgs.add('/std:c++latest')
-      }
-    } else {
-        compileTask.get().compilerArgs.add('-std=c++20')
-    }
-  }
-  source.from 'src/main/cpp', '../jni-bindings/build/generated/sources/headers/java/main'
-  privateHeaders.from '../jni-bindings/build/generated/sources/headers/java/main',
-    'src/external/llama.cpp', "$includeDirPath", "$includeDirPath/linux",
-    "$includeDirPath/win32", "$includeDirPath/darwin"
-}
-
-tasks.withType(CppCompile) {
-  dependsOn ':jni-bindings:compileJava'
 }

@@ -28,7 +28,6 @@ public class Main {
     final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
     final String pid = jvmName.split("@")[0];
     System.out.printf("pid=%s%n", pid);
-    System.loadLibrary("jni-implementation");
   }
   private static volatile String appLogLevel = System.getProperty("loglevel");
   private static LlamaCpp llamaCpp;

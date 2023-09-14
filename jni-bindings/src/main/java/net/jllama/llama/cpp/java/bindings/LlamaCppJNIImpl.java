@@ -4,6 +4,9 @@ import java.util.function.BiConsumer;
 
 class LlamaCppJNIImpl implements LlamaCpp {
 
+  static {
+    System.loadLibrary("jni-implementation");
+  }
   @Override
   public native void loadLibrary();
 
