@@ -9,11 +9,14 @@ task runProgram(type: JavaExec) {
 
     dependsOn ':test-runner:build'
     mainClass = 'net.jllama.llama.cpp.java.bindings.runner.Main'
-    systemProperty 'java.library.path', projectDir as String + '/jni-implementation/build/cmake/main/cpp'
+    final bridgeRelativePath = current().isWindows()
+            ? '\\jni-implementation\\build\\cmake\\main\\cpp\\Release' : '/jni-implementation/build/cmake/main/cpp'
+    final bridgeAbsolutePath = projectDir as String + bridgeRelativePath
+    systemProperty 'java.library.path', bridgeAbsolutePath
     systemProperty "modelpath", System.getProperty("modelpath")
     systemProperty "loglevel", System.getProperty("loglevel")
 
-    final llamaRelativePath = current().isWindows() ? '/jni-implementation/build/cmake/bin/Release'
+    final llamaRelativePath = current().isWindows() ? '\\jni-implementation\\build\\cmake\\bin\\Release'
             : '/jni-implementation/build/cmake/external/llama.cpp'
 
 

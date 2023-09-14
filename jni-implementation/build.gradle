@@ -1,20 +1,19 @@
-buildscript {
-  repositories {
-    mavenLocal()
-    gradlePluginPortal()
-  }
-  dependencies {
-    classpath 'dev.welbyseely:gradle-cmake-plugin:0.0.3'
-  }
+import static org.gradle.internal.os.OperatingSystem.current
+
+plugins {
+  id("dev.welbyseely.gradle-cmake-plugin") version "0.0.3"
 }
 
-apply plugin: 'dev.welbyseely.gradle-cmake-plugin'
+final implGenerator = current().isWindows() ? "Visual Studio 17 2022" : "Unix Makefiles"
 
 cmake {
-  generator = 'Unix Makefiles'
+  generator = implGenerator
   sourceFolder = file("$projectDir/src")
   buildSharedLibs = true
   setDef(['BUILD_LLAMA_CPP': 'ON', 'BUILD_SHARED_LIBS': 'ON', 'LLAMA_BUILD_EXAMPLES': 'OFF'])
   buildConfig = 'Release'
   buildClean = true
+  if (current().isWindows()) {
+    platform = 'x64'
+  }
 }
