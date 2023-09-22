@@ -21,7 +21,10 @@ if (BUILD_LLAMA_CPP)
     set_target_properties(llama PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/llama"
             RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/llama/debug"
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/llama/release")
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/llama/release"
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/llama"
+            LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/llama/debug"
+            LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/llama/release")
     if(USING_MINGW_TOOLCHAIN)
         set_target_properties(llama PROPERTIES PREFIX "")
     endif()

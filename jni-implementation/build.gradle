@@ -5,12 +5,15 @@ plugins {
   id("maven-publish")
 }
 
+logger.warn "osName=${current().getName()}"
+logger.warn "archName=" + System.getProperty("os.arch")
+
 final compiler = current().isWindows() ? compiler = getWindowsCompiler() : getUnixLikeCompiler()
 
 if (!compiler || compiler == Compilers.NONE_FOUND) {
   final errorMessage = "No supported compilers found. Build cannot continue."
   logger.error errorMessage
-  throw new GradleScriptException(errorMessage)
+  throw new GradleScriptException(errorMessage, null)
 }
 
 cmake {
@@ -56,39 +59,22 @@ tasks.withType(PublishToMavenLocal) {
   dependsOn prepareDllForPublish
 }
 
-
 def getWindowsCompiler() {
-  try {
-    def msvcOutput = 'cl'.execute().text
-    if (msvcOutput.contains('Microsoft')) {
-      return Compilers.MSVC
-    }
-  } catch (Exception ignored) {
-    logger.info 'MSVC is not installed on Windows'
+  if (Compilers.MSVC.isPresent()) {
+    return Compilers.MSVC
+  } else if (Compilers.MINGW.isPresent()) {
+    return Compilers.MINGW
+  } else {
+    return Compilers.NONE_FOUND
   }
-
-  try {
-    def mingwOutput = 'gcc --version'.execute().text
-    if (mingwOutput.contains('MinGW')) {
-      return Compilers.MINGW
-    }
-  } catch (Exception ignored) {
-    logger.info 'MinGW is not installed on Windows'
-  }
-  return Compilers.NONE_FOUND
 }
 
 def getUnixLikeCompiler() {
-  def compilers = ['gcc', 'clang']
-  for (compiler in compilers) {
-    try {
-      def output = "${compiler} --version".execute().text
-      if (output.contains(compiler)) {
-        return Compilers.valueOf(compiler.toUpperCase())
-      }
-    } catch (Exception ignored) {
-      logger.info("${compiler} is not installed on ${os}")
-    }
+  if (Compilers.GCC.isPresent()) {
+    return Compilers.GCC
+  } else if (Compilers.CLANG.isPresent()) {
+    return Compilers.CLANG
+  } else {
+    return Compilers.NONE_FOUND
   }
-  return Compilers.NONE_FOUND
 }

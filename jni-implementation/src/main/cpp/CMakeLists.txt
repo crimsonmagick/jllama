@@ -3,7 +3,10 @@ add_library(jni-implementation SHARED bridge.cpp jni.cpp libloader_unixlike.cpp 
 set_target_properties(jni-implementation PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/jni-implementation"
         RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/jni-implementation/debug"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/jni-implementation/release")
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/jni-implementation/release"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/jni-implementation"
+        LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/jni-implementation/debug"
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/jni-implementation/release")
 
 if(USING_MINGW_TOOLCHAIN)
     set_target_properties(jni-implementation PROPERTIES PREFIX "")
