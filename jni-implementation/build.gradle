@@ -5,24 +5,30 @@ plugins {
   id("maven-publish")
 }
 
-//final implGenerator = current().isWindows() ? "Visual Studio 17 2022" : "Unix Makefiles"
-final implGenerator = current().isWindows() ? "MinGW Makefiles" : "Unix Makefiles"
+final compiler = current().isWindows() ? compiler = getWindowsCompiler() : getUnixLikeCompiler()
+
+if (!compiler || compiler == Compilers.NONE_FOUND) {
+  final errorMessage = "No supported compilers found. Build cannot continue."
+  logger.error errorMessage
+  throw new GradleScriptException(errorMessage)
+}
 
 cmake {
-  generator = implGenerator
+  generator = compiler.generator
   sourceFolder = file("$projectDir/src")
   buildSharedLibs = true
   setDef(['BUILD_LLAMA_CPP'     : 'ON',
           'BUILD_SHARED_LIBS'   : 'ON',
-          'LLAMA_BUILD_EXAMPLES': 'OFF',
-          'CMAKE_TOOLCHAIN_FILE': "$projectDir/src/windows-gcc-toolchain.cmake"
-//          'CMAKE_TOOLCHAIN_FILE': "$projectDir/src/windows-msvc-toolchain.cmake"
-])
+          'LLAMA_BUILD_EXAMPLES': 'OFF'
+  ])
+  if (compiler.toolchain) {
+    getDef()['CMAKE_TOOLCHAIN_FILE'] = projectDir as String + compiler.toolchain
+  }
   buildConfig = 'Release'
   buildClean = true
 }
 
-def getOSAndArch() {
+static def getOSAndArch() {
   def os = current()
   def arch = System.getProperty('os.arch')
   return "${os.getFamilyName()}_${arch}"
@@ -50,66 +56,39 @@ tasks.withType(PublishToMavenLocal) {
   dependsOn prepareDllForPublish
 }
 
-def resolveToolchain() {
- 
-}
-
-enum COMPILERS {
-
-  CLANG("Unix Makefiles"),
-  GCC("Unix Makefiles"),
-  MINGW("MinGW Makefiles"),
-  MSVC("Visual Studio 17 2022"),
-  NONE_FOUND("NONE")
-
-  final generator;
-
-  COMPILERS(final String generator) {
-    this.generator = generator;
-  }
-
-}
-
-def resolveGenerator() {
-  if (current().isWindows()) {
-    final compiler = getWindowsCompiler()
-    if (!compiler || compiler == COMPILERS.NONE_FOUND) {
-        final errorMessage = "No supported compilers for Windows found. Build cannot continue."
-        logger.error errorMessage
-        throw new GradleScriptException(errorMessage)
-    }
-    return compiler.generator
-  } else {
-    return "Unix Makefiles"
-  }
-}
 
 def getWindowsCompiler() {
   try {
-    def mingwOutput = 'gcc --version'.execute().text
-    if (mingwOutput.contains('MinGW')) {
-      return COMPILERS.MINGW
-    }
-  } catch (Exception ignored) {
-    logger.info 'MinGW is not installed'
-  }
-
-  // Check for MSVC
-  try {
     def msvcOutput = 'cl'.execute().text
     if (msvcOutput.contains('Microsoft')) {
-      return COMPILERS.MSVC
+      return Compilers.MSVC
     }
   } catch (Exception ignored) {
-    logger.info 'MSVC is not installed'
+    logger.info 'MSVC is not installed on Windows'
   }
-  return COMPILERS.NONE_FOUND
+
+  try {
+    def mingwOutput = 'gcc --version'.execute().text
+    if (mingwOutput.contains('MinGW')) {
+      return Compilers.MINGW
+    }
+  } catch (Exception ignored) {
+    logger.info 'MinGW is not installed on Windows'
+  }
+  return Compilers.NONE_FOUND
 }
 
-def getMacCompiler() {
-
-}
-
-def getLinuxCompiler() {
-
+def getUnixLikeCompiler() {
+  def compilers = ['gcc', 'clang']
+  for (compiler in compilers) {
+    try {
+      def output = "${compiler} --version".execute().text
+      if (output.contains(compiler)) {
+        return Compilers.valueOf(compiler.toUpperCase())
+      }
+    } catch (Exception ignored) {
+      logger.info("${compiler} is not installed on ${os}")
+    }
+  }
+  return Compilers.NONE_FOUND
 }
