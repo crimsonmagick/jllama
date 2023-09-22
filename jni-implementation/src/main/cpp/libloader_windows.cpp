@@ -36,7 +36,7 @@ void closeLibrary() {
 }
 
 void *getFunctionAddress(const std::string functionName) {
-  void *func = GetProcAddress(llamaHandle, functionName.c_str());
+  void* func = reinterpret_cast<void*>(GetProcAddress(llamaHandle, functionName.c_str()));
 
   if (!func) {
     std::stringstream errorMessageStream;
