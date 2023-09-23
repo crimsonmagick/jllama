@@ -8,12 +8,19 @@ plugins {
 logger.warn "osName=${current().getName()}"
 logger.warn "archName=" + System.getProperty("os.arch")
 
-final compiler = current().isWindows() ? compiler = getWindowsCompiler() : getUnixLikeCompiler()
+final operatingSystem = current().isWindows() ? CompilerOs.WINDOWS : current().isLinux() ? CompilerOs.LINUX : current().isMacOsX() ? CompilerOs.MACOS : CompilerOs.OTHER
+final compiler = operatingSystem == CompilerOs.WINDOWS ? getWindowsCompiler() : getUnixLikeCompiler()
+final arch = Architectures.getHostArch()
 
 if (!compiler || compiler == Compilers.NONE_FOUND) {
   final errorMessage = "No supported compilers found. Build cannot continue."
   logger.error errorMessage
   throw new GradleScriptException(errorMessage, null)
+}
+
+final toolChain = Toolchains.getToolchain(operatingSystem, arch, compiler)
+if (!toolChain) {
+  logger.warn "No toolchain found for architecture=${arch.name()}, operatingSystem=${operatingSystem.name()}, compiler=${compiler.name()}"
 }
 
 cmake {
@@ -24,8 +31,8 @@ cmake {
           'BUILD_SHARED_LIBS'   : 'ON',
           'LLAMA_BUILD_EXAMPLES': 'OFF'
   ])
-  if (compiler.toolchain) {
-    getDef()['CMAKE_TOOLCHAIN_FILE'] = projectDir as String + compiler.toolchain
+  if (toolChain) {
+    getDef()['CMAKE_TOOLCHAIN_FILE'] = projectDir as String + "/src/" + toolChain
   }
   buildConfig = 'Release'
   buildClean = true
@@ -59,7 +66,7 @@ tasks.withType(PublishToMavenLocal) {
   dependsOn prepareDllForPublish
 }
 
-def getWindowsCompiler() {
+static def getWindowsCompiler() {
   if (Compilers.MSVC.isPresent()) {
     return Compilers.MSVC
   } else if (Compilers.MINGW.isPresent()) {
@@ -69,7 +76,7 @@ def getWindowsCompiler() {
   }
 }
 
-def getUnixLikeCompiler() {
+static def getUnixLikeCompiler() {
   if (Compilers.GCC.isPresent()) {
     return Compilers.GCC
   } else if (Compilers.CLANG.isPresent()) {

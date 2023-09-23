@@ -1,18 +1,16 @@
 enum Compilers {
 
-  CLANG("Unix Makefiles", null, "clang --version"),
-  GCC("Unix Makefiles", null, 'gcc --version'),
-  MINGW("MinGW Makefiles", "/src/windows-gcc-toolchain.cmake", "gcc --version"),
-  MSVC("Visual Studio 17 2022", "/src/windows-msvc-toolchain.cmake", "cl"),
-  NONE_FOUND(null, null, null)
+  CLANG("Unix Makefiles", "clang --version"),
+  GCC("Unix Makefiles",  'gcc --version'),
+  MINGW("MinGW Makefiles", "gcc --version"),
+  MSVC("Visual Studio 17 2022", "cl"),
+  NONE_FOUND(null,  null)
 
   final generator
-  final toolchain
-  final checkCommand;
+  final checkCommand
 
-  Compilers(final String generator, final String toolchain, final String checkCommand) {
+  Compilers(final String generator, final String checkCommand) {
     this.generator = generator
-    this.toolchain = toolchain
     this.checkCommand = checkCommand
   }
 
