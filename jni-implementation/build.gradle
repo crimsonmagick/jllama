@@ -5,12 +5,26 @@ plugins {
   id("maven-publish")
 }
 
-logger.warn "osName=${current().getName()}"
-logger.warn "archName=" + System.getProperty("os.arch")
+def operatingSystem
+if (project.hasProperty("operatingSystem")) {
+  operatingSystem = CompilerOs.valueOf(project.findProperty("operatingSystem") as String)
+} else {
+  operatingSystem = getHostOS()
+}
 
-final operatingSystem = current().isWindows() ? CompilerOs.WINDOWS : current().isLinux() ? CompilerOs.LINUX : current().isMacOsX() ? CompilerOs.MACOS : CompilerOs.OTHER
-final compiler = operatingSystem == CompilerOs.WINDOWS ? getWindowsCompiler() : getUnixLikeCompiler()
-final arch = Architectures.getHostArch()
+def compiler
+if (project.hasProperty("compiler")) {
+  compiler = Compilers.valueOf(project.findProperty("compiler") as String)
+} else {
+  compiler = operatingSystem == CompilerOs.WINDOWS ? getWindowsCompiler() : getUnixLikeCompiler()
+}
+
+def arch
+if (project.hasProperty("arch")) {
+  arch = Architectures.valueOf(project.findProperty("arch") as String)
+} else {
+  arch = Architectures.getHostArch()
+}
 
 if (!compiler || compiler == Compilers.NONE_FOUND) {
   final errorMessage = "No supported compilers found. Build cannot continue."
@@ -18,21 +32,25 @@ if (!compiler || compiler == Compilers.NONE_FOUND) {
   throw new GradleScriptException(errorMessage, null)
 }
 
-final toolChain = Toolchains.getToolchain(operatingSystem, arch, compiler)
+final toolChain = Toolchains.getToolchain(operatingSystem, getHostOS(), arch, compiler)
 if (!toolChain) {
-  logger.warn "No toolchain found for architecture=${arch.name()}, operatingSystem=${operatingSystem.name()}, compiler=${compiler.name()}"
+  logger.warn "No toolchain found for architecture=${arch.name()}, hostOs=${getHostOS().name()}, operatingSystem=${operatingSystem.name()}, compiler=${compiler.name()}"
 }
 
 cmake {
-  generator = compiler.generator
+  generator = toolChain.generator
   sourceFolder = file("$projectDir/src")
   buildSharedLibs = true
   setDef(['BUILD_LLAMA_CPP'     : 'ON',
           'BUILD_SHARED_LIBS'   : 'ON',
-          'LLAMA_BUILD_EXAMPLES': 'OFF'
+          'LLAMA_BUILD_EXAMPLES': 'OFF',
+          'CMAKE_TOOLCHAIN_FILE': projectDir as String + "/src/" + toolChain.file
   ])
-  if (toolChain) {
-    getDef()['CMAKE_TOOLCHAIN_FILE'] = projectDir as String + "/src/" + toolChain
+  if (toolChain.customDefs && !toolChain.customDefs.isEmpty()) {
+    toolChain.customDefs.entrySet()
+      .forEach { entry ->
+        getDef().put(entry.getKey(), entry.getValue())
+      }
   }
   buildConfig = 'Release'
   buildClean = true
@@ -84,4 +102,8 @@ static def getUnixLikeCompiler() {
   } else {
     return Compilers.NONE_FOUND
   }
+}
+
+static def getHostOS() {
+  current().isWindows() ? CompilerOs.WINDOWS : current().isLinux() ? CompilerOs.LINUX : current().isMacOsX() ? CompilerOs.MACOS : CompilerOs.OTHER
 }
