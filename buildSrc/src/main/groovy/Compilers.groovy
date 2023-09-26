@@ -14,7 +14,9 @@ enum Compilers {
 
   boolean isPresent() {
     try {
-      final output = checkCommand.execute()
+      final process = checkCommand.execute()
+      process.waitFor()
+      final output = "$process.in.text"
       if (this == MINGW && !output.contains('MinGW')) {
         return false
       }
