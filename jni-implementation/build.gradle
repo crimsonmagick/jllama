@@ -1,3 +1,4 @@
+import static CompilerOs.*
 import static org.gradle.internal.os.OperatingSystem.current
 
 plugins {
@@ -5,18 +6,18 @@ plugins {
   id("maven-publish")
 }
 
-def operatingSystem
+def os
 if (project.hasProperty("operatingSystem")) {
-  operatingSystem = CompilerOs.valueOf(project.findProperty("operatingSystem") as String)
+  os = valueOf(project.findProperty("operatingSystem") as String)
 } else {
-  operatingSystem = getHostOS()
+  os = getHostOS()
 }
 
 def compiler
 if (project.hasProperty("compiler")) {
   compiler = Compilers.valueOf(project.findProperty("compiler") as String)
 } else {
-  compiler = operatingSystem == CompilerOs.WINDOWS ? getWindowsCompiler() : getUnixLikeCompiler()
+  compiler = os == WINDOWS ? getWindowsCompiler() : getUnixLikeCompiler()
 }
 
 def arch
@@ -32,9 +33,9 @@ if (!compiler || compiler == Compilers.NONE_FOUND) {
   throw new GradleScriptException(errorMessage, null)
 }
 
-final toolChain = Toolchains.getToolchain(operatingSystem, getHostOS(), arch, compiler)
+final toolChain = Toolchains.getToolchain(os, getHostOS(), arch, compiler)
 if (!toolChain) {
-  logger.warn "No toolchain found for architecture=${arch.name()}, hostOs=${getHostOS().name()}, operatingSystem=${operatingSystem.name()}, compiler=${compiler.name()}"
+  logger.warn "No toolchain found for architecture=${arch.name()}, hostOs=${getHostOS().name()}, operatingSystem=${os.name()}, compiler=${compiler.name()}"
 }
 
 cmake {
@@ -56,6 +57,25 @@ cmake {
   buildClean = true
 }
 
+def getLibExtension(final CompilerOs operatingSystem) {
+  switch(operatingSystem) {
+    case WINDOWS:
+      return 'dll'
+    case MACOS:
+      return 'dylib'
+    case LINUX:
+    case OTHER:
+    default:
+      return 'so'
+  }
+}
+def getLibPrefix(final CompilerOs operatingSystem) {
+  if (operatingSytstem != WINDOWS) {
+    return 'lib'
+  }
+  return ''
+}
+
 static def getOSAndArch() {
   def os = current()
   def arch = System.getProperty('os.arch')
@@ -74,7 +94,8 @@ publishing {
 task prepareDllForPublish {
   dependsOn build
   doLast {
-    publishing.publications.nativeLib.artifact(file("$buildDir/cmake/main/cpp/Release/jni-implementation.dll")) {
+    publishing.publications.nativeLib.artifact(
+      file("$buildDir/cmake/jni-implementation/release/${getLibPrefix(os)}jni-implementation.${getLibExtension(os)}")) {
       classifier = getOSAndArch()
     }
   }
@@ -105,5 +126,8 @@ static def getUnixLikeCompiler() {
 }
 
 static def getHostOS() {
-  current().isWindows() ? CompilerOs.WINDOWS : current().isLinux() ? CompilerOs.LINUX : current().isMacOsX() ? CompilerOs.MACOS : CompilerOs.OTHER
+  current().isWindows() ? WINDOWS :
+    current().isLinux() ? LINUX :
+      current().isMacOsX() ? MACOS : OTHER
 }
+
