@@ -63,7 +63,7 @@ static def getOSAndArch(OperatingSystem os) {
   return "${os.getFamilyName()}_${arch}"
 }
 
-tasks.register('packageLibInJar', Jar) {
+tasks.register('packageJniImplLibInJar', Jar) {
   dependsOn build
   from("$buildDir/cmake/jni-implementation/release/")
   include('*jni-implementation*')
@@ -71,10 +71,22 @@ tasks.register('packageLibInJar', Jar) {
   archiveClassifier.set(getOSAndArch(os))
 }
 
+tasks.register('packageLlamaLibInJar', Jar) {
+  dependsOn build
+  from("$buildDir/cmake/llama/release/")
+  include('*llama*')
+  archiveBaseName.set("llama-cpp")
+  archiveClassifier.set(getOSAndArch(os))
+}
+
 publishing {
   publications {
-    nativeLib(MavenPublication) {
-      artifact packageLibInJar
+    jniImplLib(MavenPublication) {
+      artifact packageJniImplLibInJar
+    }
+    llamaLib(MavenPublication) {
+      artifact packageLlamaLibInJar
+      artifactId = 'llama-cpp'
     }
   }
   repositories {
