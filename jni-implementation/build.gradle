@@ -1,23 +1,23 @@
-import static CompilerOs.*
-import static org.gradle.internal.os.OperatingSystem.current
+import org.gradle.internal.os.OperatingSystem
 
 plugins {
   id("dev.welbyseely.gradle-cmake-plugin") version "0.0.5"
+  id("java")
   id("maven-publish")
 }
 
 def os
 if (project.hasProperty("operatingSystem")) {
-  os = valueOf(project.findProperty("operatingSystem") as String)
+  os = OperatingSystem.forName(project.findProperty("operatingSystem") as String)
 } else {
-  os = getHostOS()
+  os = OperatingSystem.current()
 }
 
 def compiler
 if (project.hasProperty("compiler")) {
   compiler = Compilers.valueOf(project.findProperty("compiler") as String)
 } else {
-  compiler = os == WINDOWS ? getWindowsCompiler() : getUnixLikeCompiler()
+  compiler = os == OperatingSystem.WINDOWS ? getWindowsCompiler() : getUnixLikeCompiler()
 }
 
 def arch
@@ -33,9 +33,10 @@ if (!compiler || compiler == Compilers.NONE_FOUND) {
   throw new GradleScriptException(errorMessage, null)
 }
 
-final toolChain = Toolchains.getToolchain(os, getHostOS(), arch, compiler)
+final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), arch, compiler)
 if (!toolChain) {
-  logger.warn "No toolchain found for architecture=${arch.name()}, hostOs=${getHostOS().name()}, operatingSystem=${os.name()}, compiler=${compiler.name()}"
+  logger.warn "No toolchain found for architecture=${arch.name()}, " +
+    "hostOs=${OperatingSystem.current().name}, operatingSystem=${os.name}, compiler=${compiler.name()}"
 }
 
 cmake {
@@ -57,52 +58,28 @@ cmake {
   buildClean = true
 }
 
-def getLibExtension(final CompilerOs operatingSystem) {
-  switch(operatingSystem) {
-    case WINDOWS:
-      return 'dll'
-    case MACOS:
-      return 'dylib'
-    case LINUX:
-    case OTHER:
-    default:
-      return 'so'
-  }
-}
-def getLibPrefix(final CompilerOs operatingSystem) {
-  if (operatingSytstem != WINDOWS) {
-    return 'lib'
-  }
-  return ''
-}
-
-static def getOSAndArch() {
-  def os = current()
+static def getOSAndArch(OperatingSystem os) {
   def arch = System.getProperty('os.arch')
   return "${os.getFamilyName()}_${arch}"
 }
 
+tasks.register('packageLibInJar', Jar) {
+  dependsOn build
+  from("$buildDir/cmake/jni-implementation/release/")
+  include('*jni-implementation*')
+  archiveBaseName.set("jni-implementation")
+  archiveClassifier.set(getOSAndArch(os))
+}
+
 publishing {
   publications {
-    nativeLib(MavenPublication) {}
+    nativeLib(MavenPublication) {
+      artifact packageLibInJar
+    }
   }
   repositories {
     mavenLocal()
   }
-}
-
-task prepareDllForPublish {
-  dependsOn build
-  doLast {
-    publishing.publications.nativeLib.artifact(
-      file("$buildDir/cmake/jni-implementation/release/${getLibPrefix(os)}jni-implementation.${getLibExtension(os)}")) {
-      classifier = getOSAndArch()
-    }
-  }
-}
-
-tasks.withType(PublishToMavenLocal) {
-  dependsOn prepareDllForPublish
 }
 
 static def getWindowsCompiler() {
@@ -124,10 +101,3 @@ static def getUnixLikeCompiler() {
     return Compilers.NONE_FOUND
   }
 }
-
-static def getHostOS() {
-  current().isWindows() ? WINDOWS :
-    current().isLinux() ? LINUX :
-      current().isMacOsX() ? MACOS : OTHER
-}
-
