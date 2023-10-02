@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation 'net.jllama:jni-bindings:0.0.1-SNAPSHOT'
+    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
