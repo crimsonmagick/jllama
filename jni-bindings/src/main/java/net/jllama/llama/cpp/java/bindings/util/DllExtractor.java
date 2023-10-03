@@ -37,8 +37,8 @@ public class DllExtractor {
         }
       }
     } catch (final IOException e) {
-      throw new ResourceNotFoundException(ERROR_MESSAGE + libraryName, e);
+      throw new ResourceNotFoundException(ERROR_MESSAGE + libraryFileName, e);
     }
-    throw new ResourceNotFoundException(ERROR_MESSAGE + libraryName);
+    throw new ResourceNotFoundException(ERROR_MESSAGE + libraryFileName);
   }
 }

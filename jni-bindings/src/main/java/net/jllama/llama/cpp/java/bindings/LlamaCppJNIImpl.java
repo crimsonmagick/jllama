@@ -34,7 +34,7 @@ class LlamaCppJNIImpl implements LlamaCpp {
     try {
       log.info("Attempting to load library from from resources, libraryName={}", libraryName);
       final String dllPath = DllExtractor.extract(libraryName);
-      System.loadLibrary(dllPath);
+      System.load(dllPath);
     } catch (final ResourceNotFoundException e) {
       log.error("Unable to locate library with libraryName={}", libraryName, e);
       throw e;
