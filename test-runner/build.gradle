@@ -13,6 +13,7 @@ repositories {
 dependencies {
     implementation 'net.jllama:jni-bindings:0.0.1-SNAPSHOT'
     implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
@@ -37,10 +38,10 @@ task runProgram(type: JavaExec) {
     dependsOn ':test-runner:build'
     mainClass = 'net.jllama.llama.cpp.java.bindings.runner.Main'
 
-    final bridgeRelativePath = '/jni-implementation/build/cmake/jni-implementation/release'
-    final bridgeAbsolutePath = parent.projectDir as String + bridgeRelativePath
+//    final bridgeRelativePath = '/jni-implementation/build/cmake/jni-implementation/release'
+//    final bridgeAbsolutePath = parent.projectDir as String + bridgeRelativePath
 
-    systemProperty 'java.library.path', bridgeAbsolutePath
+//    systemProperty 'java.library.path', bridgeAbsolutePath
     systemProperty "modelpath", System.getProperty("modelpath")
     systemProperty "loglevel", System.getProperty("loglevel")
 

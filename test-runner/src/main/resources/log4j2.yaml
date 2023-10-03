@@ -1,0 +1,19 @@
+Configuration:
+  status: "WARN"
+  Appenders:
+    Console:
+      name: "Console"
+      target: "SYSTEM_OUT"
+      PatternLayout:
+        pattern: "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+  Loggers:
+    Logger:
+      - name: "net.jllama"
+        level: "info"
+        additivity: false
+        AppenderRef:
+          - ref: "Console"
+    Root:
+      level: "error"
+      AppenderRef:
+        - ref: "Console"
