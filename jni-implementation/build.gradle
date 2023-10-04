@@ -55,7 +55,7 @@ cmake {
       }
   }
   buildConfig = 'Release'
-  buildClean = true
+  buildClean = false
 }
 
 build {
