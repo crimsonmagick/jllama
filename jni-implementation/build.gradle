@@ -58,6 +58,10 @@ cmake {
   buildClean = true
 }
 
+build {
+  dependsOn ':jni-bindings:compileJava'
+}
+
 static def getOSAndArch(OperatingSystem os) {
   def arch = System.getProperty('os.arch')
   return "${os.getFamilyName()}_${arch}"
