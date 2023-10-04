@@ -83,6 +83,16 @@ tasks.register('packageLlamaLibInJar', Jar) {
   archiveClassifier.set(getOSAndArch(os))
 }
 
+configurations {
+  jniImplLibJar
+  llamaLibJar
+}
+
+artifacts {
+  jniImplLibJar tasks.packageJniImplLibInJar
+  llamaLibJar tasks.packageLlamaLibInJar
+}
+
 publishing {
   publications {
     jniImplLib(MavenPublication) {

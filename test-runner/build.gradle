@@ -12,10 +12,13 @@ repositories {
 
 dependencies {
     implementation 'net.jllama:jni-bindings:0.0.1-SNAPSHOT'
-    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:windows_amd64'
-    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:linux_amd64'
-    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:windows_amd64'
-    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:linux_amd64'
+    implementation project(path: ':jni-implementation', configuration: 'jniImplLibJar')
+    implementation project(path: ':jni-implementation', configuration: 'llamaLibJar')
+    // Uncomment below to test JARs packaged to local maven repo
+//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:windows_amd64'
+//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:linux_amd64'
+//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:windows_amd64'
+//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:linux_amd64'
     implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
