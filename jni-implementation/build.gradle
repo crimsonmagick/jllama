@@ -62,8 +62,7 @@ build {
   dependsOn ':jni-bindings:compileJava'
 }
 
-static def getOSAndArch(OperatingSystem os) {
-  def arch = System.getProperty('os.arch')
+def getOSAndArch = {
   return "${os.getFamilyName()}_${arch}"
 }
 
@@ -72,7 +71,7 @@ tasks.register('packageJniImplLibInJar', Jar) {
   from("$buildDir/cmake/jni-implementation/release/")
   include('*jni-implementation*')
   archiveBaseName.set("jni-implementation")
-  archiveClassifier.set(getOSAndArch(os))
+  archiveClassifier.set(getOSAndArch())
 }
 
 tasks.register('packageLlamaLibInJar', Jar) {
