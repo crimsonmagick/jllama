@@ -11,6 +11,9 @@ import net.jllama.llama.cpp.java.bindings.LlamaLogLevel;
 import net.jllama.llama.cpp.java.bindings.LlamaOpaqueContext;
 import net.jllama.llama.cpp.java.bindings.LlamaOpaqueModel;
 import net.jllama.llama.cpp.java.bindings.LlamaTokenDataArray;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 
@@ -42,16 +45,17 @@ public class Main {
       llamaCpp.loadLibrary();
       llamaCpp.llamaBackendInit(true);
       llamaCpp.llamaLogSet((logLevel, message) -> {
+        final Logger log = LogManager.getLogger(llamaCpp.getClass());
         final String messageText = new String(message, StandardCharsets.UTF_8);
         if ("OFF".equalsIgnoreCase(appLogLevel)) {
           return;
         }
         if (logLevel == LlamaLogLevel.INFO && "INFO".equalsIgnoreCase(appLogLevel)) {
-          System.out.print("INFO:" + messageText);
+          log.info(messageText);
         } else if (logLevel == LlamaLogLevel.WARN) {
-          System.out.print("WARN: " + messageText);
+          log.warn(messageText);
         } else {
-          System.out.print("ERR: " + messageText);
+          log.error(messageText);
         }
       });
       long timestamp1 = llamaCpp.llamaTimeUs();

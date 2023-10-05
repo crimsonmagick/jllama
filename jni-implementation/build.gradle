@@ -1,19 +1,138 @@
-import static org.gradle.internal.os.OperatingSystem.current
+import org.gradle.internal.os.OperatingSystem
 
 plugins {
-  id("dev.welbyseely.gradle-cmake-plugin") version "0.0.4"
+  id("dev.welbyseely.gradle-cmake-plugin") version "0.0.5"
+  id("java")
+  id("maven-publish")
 }
 
-final implGenerator = current().isWindows() ? "Visual Studio 17 2022" : "Unix Makefiles"
+def os
+if (project.hasProperty("operatingSystem")) {
+  os = OperatingSystem.forName(project.findProperty("operatingSystem") as String)
+} else {
+  os = OperatingSystem.current()
+}
+
+def compiler
+if (project.hasProperty("compiler")) {
+  compiler = Compilers.valueOf(project.findProperty("compiler") as String)
+} else {
+  compiler = os == OperatingSystem.WINDOWS ? getWindowsCompiler() : getUnixLikeCompiler()
+}
+
+def arch
+if (project.hasProperty("arch")) {
+  arch = Architectures.valueOf(project.findProperty("arch") as String)
+} else {
+  arch = Architectures.getHostArch()
+}
+
+if (!compiler || compiler == Compilers.NONE_FOUND) {
+  final errorMessage = "No supported compilers found. Build cannot continue."
+  logger.error errorMessage
+  throw new GradleScriptException(errorMessage, null)
+}
+
+final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), arch, compiler)
+if (!toolChain) {
+  logger.warn "No toolchain found for architecture=${arch.name()}, " +
+    "hostOs=${OperatingSystem.current().name}, operatingSystem=${os.name}, compiler=${compiler.name()}"
+}
 
 cmake {
-  generator = implGenerator
+  generator = toolChain.generator
   sourceFolder = file("$projectDir/src")
   buildSharedLibs = true
-  setDef(['BUILD_LLAMA_CPP': 'ON', 'BUILD_SHARED_LIBS': 'ON', 'LLAMA_BUILD_EXAMPLES': 'OFF'])
+  setDef(['BUILD_LLAMA_CPP'     : 'ON',
+          'BUILD_SHARED_LIBS'   : 'ON',
+          'LLAMA_BUILD_EXAMPLES': 'OFF',
+          'CMAKE_TOOLCHAIN_FILE': projectDir as String + "/src/" + toolChain.file
+  ])
+  if (toolChain.customDefs && !toolChain.customDefs.isEmpty()) {
+    toolChain.customDefs.entrySet()
+      .forEach { entry ->
+        getDef().put(entry.getKey(), entry.getValue())
+      }
+  }
   buildConfig = 'Release'
   buildClean = true
-  if (current().isWindows()) {
-    platform = 'x64'
+}
+
+build {
+  dependsOn ':jni-bindings:compileJava'
+}
+
+def getOSAndArch = {
+  return "${os.getFamilyName()}_${arch}".replaceAll(' ', '_') // TODO stop using gradle internal so we can avoid this clunkiness
+}
+
+tasks.register('packageJniImplLibInJar', Jar) {
+  dependsOn build
+  from("$buildDir/cmake/jni-implementation/release/")
+  include('*jni-implementation*')
+  archiveBaseName.set("jni-implementation")
+  archiveClassifier.set(getOSAndArch())
+}
+
+tasks.register('packageLlamaLibInJar', Jar) {
+  dependsOn build
+  from("$buildDir/cmake/llama/release/")
+  include('*llama*')
+  archiveBaseName.set("llama-cpp")
+  archiveClassifier.set(getOSAndArch(os))
+}
+
+configurations {
+  jniImplLibJar
+  llamaLibJar
+}
+
+artifacts {
+  jniImplLibJar tasks.packageJniImplLibInJar
+  llamaLibJar tasks.packageLlamaLibInJar
+}
+
+publishing {
+  publications {
+    jniImplLib(MavenPublication) {
+      artifact packageJniImplLibInJar
+    }
+    llamaLib(MavenPublication) {
+      artifact packageLlamaLibInJar
+      artifactId = 'llama-cpp'
+    }
+  }
+  repositories {
+    mavenLocal()
+    maven {
+      name = 'OSSRH'
+      url = version.endsWith('SNAPSHOT') ?
+        'https://s01.oss.sonatype.org/content/repositories/snapshots/' :
+        'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+      credentials {
+        username = System.hasProperty("OSSRH_TOKEN_KEY") ? System.getProperty("OSSRH_TOKEN_KEY") : System.getenv("OSSRH_TOKEN_KEY")
+        password = System.hasProperty("OSSHR_TOKEN_PASSWORD") ? System.getProperty("OSSRH_TOKEN_PASSWORD") : System.getenv("OSSRH_TOKEN_PASSWORD")
+      }
+    }
+  }
+}
+
+static def getWindowsCompiler() {
+  if (Compilers.MSVC.isPresent()) {
+    return Compilers.MSVC
+  } else if (Compilers.MINGW.isPresent()) {
+    return Compilers.MINGW
+  } else {
+    return Compilers.NONE_FOUND
+  }
+}
+
+static def getUnixLikeCompiler() {
+  if (Compilers.GCC.isPresent()) {
+    return Compilers.GCC
+  } else if (Compilers.CLANG.isPresent()) {
+    return Compilers.CLANG
+  } else {
+    return Compilers.NONE_FOUND
   }
 }

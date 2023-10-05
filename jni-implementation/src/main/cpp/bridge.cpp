@@ -1,5 +1,5 @@
 #include <jni.h>
-#include <unordered_map>
+#include <iostream>
 #include "net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl.h"
 #include "exceptions/exceptions.h"
 #include "handler/LlamaManager.h"
@@ -15,7 +15,18 @@ extern "C" {
       jobject thisObject) {
 
     withJniExceptions(env, [env] {
-      loadLibrary("llama");
+      const char* libraryName = "llama";
+      try {
+        loadLibrary(libraryName);
+      } catch (const DynamicLibraryException& e) {
+        std::cout << "Unable to load library based on environment variables. Attempting to load from Java resources" << std::endl;
+        try {
+          loadLibrary(libraryName, env);
+        } catch (const DynamicLibraryException& e) {
+          std::cout << "Unable to load library from Java resources" << std::endl;
+          jni::throwDLLException(env, e);
+        }
+      }
       if (!llamaManager) {
         llamaManager = LlamaManager::getLlamaManager(env);
       }

@@ -1,3 +1,5 @@
+import static org.gradle.internal.os.OperatingSystem.current
+
 plugins {
     id 'java'
 }
@@ -8,10 +10,34 @@ targetCompatibility = JavaVersion.VERSION_1_8
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        name = 'OSSRH'
+        url = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+        credentials {
+            username = System.hasProperty("OSSRH_TOKEN_KEY") ? System.getProperty("OSSRH_TOKEN_KEY") : System.getenv("OSSRH_TOKEN_KEY")
+            password = System.hasProperty("OSSHR_TOKEN_PASSWORD") ? System.getProperty("OSSRH_TOKEN_PASSWORD") : System.getenv("OSSRH_TOKEN_PASSWORD")
+        }
+    }
 }
 
 dependencies {
-    implementation 'net.jllama:jni-bindings:0.0.1-SNAPSHOT'
+    implementation project(path: ':jni-bindings')
+    // Comment below to use packaged JARS
+    implementation project(path: ':jni-implementation', configuration: 'jniImplLibJar')
+    implementation project(path: ':jni-implementation', configuration: 'llamaLibJar')
+    // Uncomment below to test packaged JARs
+//    implementation 'net.jllama:jni-bindings:0.0.1-SNAPSHOT'
+    // Linux
+//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:linux_amd64'
+//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:linux_amd64'
+    // Mac
+//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:os_x_aarch64'
+//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:os_x_aarch64'
+    // Windows
+//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:windows_amd64'
+//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:windows_amd64'
+    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
@@ -20,11 +46,6 @@ test {
     useJUnitPlatform()
 }
 
-tasks.withType(JavaCompile).configureEach {
-    dependsOn ':jni-bindings:publishToMavenLocal'
-}
-
-import static org.gradle.internal.os.OperatingSystem.current
 
 group 'net.jllama'
 version '0.0.1-SNAPSHOT'
@@ -35,23 +56,22 @@ task runProgram(type: JavaExec) {
 
     dependsOn ':test-runner:build'
     mainClass = 'net.jllama.llama.cpp.java.bindings.runner.Main'
-
-    final bridgeRelativePath = current().isWindows()
-            ? '\\jni-implementation\\build\\cmake\\main\\cpp\\Release' : '/jni-implementation/build/cmake/main/cpp'
-    final bridgeAbsolutePath = parent.projectDir as String + bridgeRelativePath
-
-    systemProperty 'java.library.path', bridgeAbsolutePath
     systemProperty "modelpath", System.getProperty("modelpath")
     systemProperty "loglevel", System.getProperty("loglevel")
 
-    final llamaRelativePath = current().isWindows() ? '\\jni-implementation\\build\\cmake\\bin\\Release'
-            : '/jni-implementation/build/cmake/external/llama.cpp'
-    final String llamaAbsolutePath = parent.projectDir as String + llamaRelativePath
+    // Uncomment below for using custom builds of jni-implementation and llama-cpp
 
-    final dllPath = current().isWindows() ? 'PATH' :
-            current().isMacOsX() ? 'DYLD_LIBRARY_PATH' : 'LD_LIBRARY_PATH'
-    final envVariableValue = System.getenv(dllPath) ? System.getenv(dllPath) : ''
-    environment dllPath, "${envVariableValue}${File.pathSeparator}${llamaAbsolutePath}"
+//    final bridgeRelativePath = '/jni-implementation/build/cmake-manual/jni-implementation/debug'
+//    final bridgeAbsolutePath = parent.projectDir as String + bridgeRelativePath
+//    systemProperty 'java.library.path', bridgeAbsolutePath
+//
+//    final llamaRelativePath = '/jni-implementation/build/cmake/llama/release'
+//    final String llamaAbsolutePath = parent.projectDir as String + llamaRelativePath
+//
+//    final dllPath = current().isWindows() ? 'PATH' :
+//            current().isMacOsX() ? 'DYLD_LIBRARY_PATH' : 'LD_LIBRARY_PATH'
+//    final envVariableValue = System.getenv(dllPath) ? System.getenv(dllPath) : ''
+//    environment dllPath, "${envVariableValue}${File.pathSeparator}${llamaAbsolutePath}"
 
     doFirst {
         classpath = files(sourceSets.main.runtimeClasspath)
