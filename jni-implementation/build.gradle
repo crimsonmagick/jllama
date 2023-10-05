@@ -63,7 +63,7 @@ build {
 }
 
 def getOSAndArch = {
-  return "${os.getFamilyName()}_${arch}"
+  return "${os.getFamilyName()}_${arch}".replaceAll(' ', '_') // TODO stop using gradle internal so we can avoid this clunkiness
 }
 
 tasks.register('packageJniImplLibInJar', Jar) {
