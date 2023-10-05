@@ -27,7 +27,7 @@ class Toolchains {
         toolChains[key(OperatingSystem.LINUX, OperatingSystem.LINUX, Architectures.x64, Compilers.GCC)] = new ToolChain('linux-x64-gcc-toolchain.cmake', 'Unix Makefiles')
         toolChains[key(OperatingSystem.MAC_OS, OperatingSystem.LINUX, Architectures.arm64, Compilers.CLANG)] = new ToolChain('macos-linux-arm64-clang-toolchain.cmake', 'Unix Makefiles')
         toolChains[key(OperatingSystem.MAC_OS, OperatingSystem.MAC_OS, Architectures.arm64, Compilers.CLANG)] = new ToolChain('macos-arm64-clang-toolchain.cmake', 'Unix Makefiles')
-        toolChains[key(OperatingSystem.MAC_OS, OperatingSystem.MAC_OS, Architectures.arm64, Compilers.GCC)] = new ToolChain('macos-linux-arm64-clang-toolchain.cmake', 'Unix Makefiles')
+        toolChains[key(OperatingSystem.MAC_OS, OperatingSystem.MAC_OS, Architectures.arm64, Compilers.GCC)] = new ToolChain('macos-arm64-gcc-toolchain.cmake', 'Unix Makefiles')
         toolChains[key(OperatingSystem.WINDOWS, OperatingSystem.LINUX, Architectures.x64, Compilers.MINGW)] = new ToolChain('windows-linux-mingw-toolchain.cmake', 'Unix Makefiles', ['JAVA_HOME': getWinJdkHome()])
         toolChains[key(OperatingSystem.WINDOWS, OperatingSystem.WINDOWS, Architectures.x64, Compilers.MINGW)] = new ToolChain('windows-mingw-toolchain.cmake', 'MinGW Makefiles')
         toolChains[key(OperatingSystem.WINDOWS, OperatingSystem.WINDOWS, Architectures.x64, Compilers.MSVC)] = new ToolChain('windows-msvc-toolchain.cmake', 'Visual Studio 17 2022')
