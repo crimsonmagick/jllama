@@ -9,7 +9,6 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
-    mavenLocal()
     maven {
         name = 'OSSRH'
         url = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
@@ -21,21 +20,21 @@ repositories {
 }
 
 dependencies {
-    implementation project(path: ':jni-bindings')
     // Comment below to use packaged JARS
+    implementation project(path: ':jni-bindings')
     implementation project(path: ':jni-implementation', configuration: 'jniImplLibJar')
     implementation project(path: ':jni-implementation', configuration: 'llamaLibJar')
     // Uncomment below to test packaged JARs
 //    implementation 'net.jllama:jni-bindings:0.0.1-SNAPSHOT'
     // Linux
-//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:linux_amd64'
-//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:linux_amd64'
+//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:linux_x64'
+//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:linux_x64'
     // Mac
-//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:os_x_aarch64'
-//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:os_x_aarch64'
+//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:os_x_arm64'
+//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:os_x_arm64'
     // Windows
-//    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:windows_amd64'
-//    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:windows_amd64'
+    implementation 'net.jllama:jni-implementation:0.0.1-SNAPSHOT:windows_x64'
+    implementation 'net.jllama:llama-cpp:0.0.1-SNAPSHOT:windows_x64'
     implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
