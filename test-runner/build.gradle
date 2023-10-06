@@ -13,10 +13,6 @@ repositories {
     maven {
         name = 'OSSRH'
         url = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-        credentials {
-            username = System.hasProperty("OSSRH_TOKEN_KEY") ? System.getProperty("OSSRH_TOKEN_KEY") : System.getenv("OSSRH_TOKEN_KEY")
-            password = System.hasProperty("OSSHR_TOKEN_PASSWORD") ? System.getProperty("OSSRH_TOKEN_PASSWORD") : System.getenv("OSSRH_TOKEN_PASSWORD")
-        }
     }
 }
 
