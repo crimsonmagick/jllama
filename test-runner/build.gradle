@@ -18,8 +18,8 @@ repositories {
 dependencies {
     // Comment below to use packaged JARS
     implementation project(path: ':jni-bindings')
-    implementation project(path: ':jni-implementation', configuration: 'jniImplLibJar')
-    implementation project(path: ':jni-implementation', configuration: 'llamaLibJar')
+//    implementation project(path: ':jni-implementation', configuration: 'jniImplLibJar')
+//    implementation project(path: ':jni-implementation', configuration: 'llamaLibJar')
     // Uncomment below to test packaged JARs
 //    implementation 'net.jllama:jni-bindings:0.0.1-SNAPSHOT'
     // Linux
