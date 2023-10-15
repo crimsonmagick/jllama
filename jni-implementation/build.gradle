@@ -1,5 +1,7 @@
 import org.gradle.internal.os.OperatingSystem
 
+import static Classifiers.getClassifier
+
 plugins {
   id("java")
   id("maven-publish")
@@ -17,9 +19,10 @@ if (project.hasProperty("RELEASE")) {
     targets {
       windowsX64 {
         final os = OperatingSystem.WINDOWS
-        final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), Architectures.x64, Compilers.MINGW)
+        final arch = Architectures.x64
+        final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), arch, Compilers.MINGW)
         generator = toolChain.generator
-        workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + os.nativePrefix)
+        workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(os, arch))
         defs = ['BUILD_LLAMA_CPP'     : 'ON',
                 'BUILD_SHARED_LIBS'   : 'ON',
                 'LLAMA_BUILD_EXAMPLES': 'OFF',
@@ -29,9 +32,10 @@ if (project.hasProperty("RELEASE")) {
       }
       linuxX64 {
         final os = OperatingSystem.LINUX
-        final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), Architectures.x64, Compilers.GCC)
+        final arch = Architectures.x64
+        final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), arch, Compilers.GCC)
         generator = toolChain.generator
-        workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + os.nativePrefix)
+        workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(os, arch))
         defs = ['BUILD_LLAMA_CPP'     : 'ON',
                 'BUILD_SHARED_LIBS'   : 'ON',
                 'LLAMA_BUILD_EXAMPLES': 'OFF',
@@ -41,9 +45,10 @@ if (project.hasProperty("RELEASE")) {
       }
       macArm64 {
         final os = OperatingSystem.MAC_OS
-        final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), Architectures.arm64, Compilers.CLANG)
+        final arch = Architectures.arm64
+        final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), arch, Compilers.CLANG)
         generator = toolChain.generator
-        workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + os.nativePrefix)
+        workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(os, arch))
         defs = ['BUILD_LLAMA_CPP'     : 'ON',
                 'BUILD_SHARED_LIBS'   : 'ON',
                 'LLAMA_BUILD_EXAMPLES': 'OFF',
@@ -89,7 +94,7 @@ if (project.hasProperty("RELEASE")) {
   }
 
   cmake {
-    workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + os.nativePrefix)
+    workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(os, arch))
     generator = toolChain.generator
     sourceFolder = file("$projectDir/src")
     buildSharedLibs = true
@@ -108,15 +113,13 @@ build {
   dependsOn ':jni-bindings:compileJava'
 }
 
-// Get the cmake build directories
 def cmakeBuildDirs = file("$projectDir/build/cmake").listFiles().findAll { it.isDirectory() }
 
-// Iterate through each build directory
 cmakeBuildDirs.each { dir ->
   def targetName = dir.name
 
-  String jniImplLibJarConfigName = "jniImplLibJar${targetName.capitalize()}"
-  String llamaLibJarConfigName = "llamaLibJar${targetName.capitalize()}"
+  String jniImplLibJarConfigName = "jniImplLibJar${targetName}"
+  String llamaLibJarConfigName = "llamaLibJar${targetName}"
 
   configurations {
     create(jniImplLibJarConfigName)
@@ -124,7 +127,7 @@ cmakeBuildDirs.each { dir ->
   }
 
   // Create a task name for the JNI implementation Jar
-  String jniTaskName = "packageJniImplLibInJar${targetName.capitalize()}"
+  String jniTaskName = "packageJniImplLibInJar${targetName}"
   tasks.register(jniTaskName, Jar) {
     dependsOn build
     from("$dir/jni-implementation/release/")
@@ -134,7 +137,7 @@ cmakeBuildDirs.each { dir ->
   }
 
   // Create a task name for the Llama library Jar
-  String llamaTaskName = "packageLlamaLibInJar${targetName.capitalize()}"
+  String llamaTaskName = "packageLlamaLibInJar${targetName}"
   tasks.register(llamaTaskName, Jar) {
     dependsOn build
     from("$dir/llama/release/")
@@ -149,22 +152,12 @@ cmakeBuildDirs.each { dir ->
   }
 }
 
-task packageAllJars {
-  cmakeBuildDirs.each { dir ->
-    def targetName = dir.name
-    String jniTaskName = "packageJniImplLibInJar${targetName.capitalize()}"
-    String llamaTaskName = "packageLlamaLibInJar${targetName.capitalize()}"
-    dependsOn tasks.named(jniTaskName)
-    dependsOn tasks.named(llamaTaskName)
-  }
-}
-
 publishing {
   publications {
     jniImplLib(MavenPublication) {
       cmakeBuildDirs.each { dir ->
        final targetName = dir.name
-       final taskName = "packageJniImplLibInJar${targetName.capitalize()}"
+       final taskName = "packageJniImplLibInJar${targetName}"
        artifact tasks.named(taskName)
       }
       artifactId = 'jni-implementation'
@@ -172,7 +165,7 @@ publishing {
     llamaLib(MavenPublication) {
       cmakeBuildDirs.each { dir ->
         final targetName = dir.name
-        String taskName = "packageLlamaLibInJar${targetName.capitalize()}"
+        String taskName = "packageLlamaLibInJar${targetName}"
         artifact tasks.named(taskName)
       }
       artifactId = 'llama-cpp'
@@ -192,8 +185,6 @@ publishing {
     }
   }
 }
-
-
 
 static def getWindowsCompiler() {
   if (Compilers.MSVC.isPresent()) {
