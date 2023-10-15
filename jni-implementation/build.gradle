@@ -8,13 +8,11 @@ plugins {
   id("dev.welbyseely.gradle-cmake-plugin") version "0.1.0"
 }
 
-apply plugin: "dev.welbyseely.gradle-cmake-plugin"
-
 if (project.hasProperty("RELEASE")) {
   cmake {
     sourceFolder = file("$projectDir/src")
     buildSharedLibs = true
-    buildClean = true
+    buildClean = false
     buildConfig = 'Release'
     targets {
       windowsX64 {
@@ -105,7 +103,7 @@ if (project.hasProperty("RELEASE")) {
             *:toolChain.customDefs
     ]
     buildConfig = 'Release'
-    buildClean = true
+    buildClean = false
   }
 }
 
