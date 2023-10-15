@@ -1,4 +1,3 @@
 rootProject.name = 'llama-cpp-java-bindings'
 include 'jni-bindings'
 include 'jni-implementation'
-include 'test-runner'
