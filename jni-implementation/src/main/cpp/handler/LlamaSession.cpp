@@ -56,7 +56,7 @@ void LlamaManager::progressCallback(float progress, void* ctx) {
 }
 
 typedef llama_model* (* llama_load_model_from_file_pointer)
-    (const char*, struct llama_context_params);
+    (const char*, struct llama_model_params);
 jobject LlamaManager::LlamaSession::loadModelFromFile(jbyteArray path, jobject javaParams) {
   return withJniExceptions(env, [&javaParams, &path, this] {
     llama_load_model_from_file_pointer llamaLoadModel =
@@ -64,11 +64,11 @@ jobject LlamaManager::LlamaSession::loadModelFromFile(jbyteArray path, jobject j
             "llama_load_model_from_file");
 
     auto stringManager = Utf8StringManager(env, path);
-    auto paramsManager = LlamaContextParamsManager(javaParams, this);
+    auto paramsManager = LlamaModelParamsManager(javaParams, this);
     auto params = paramsManager.getParams();
 
     llama_model* model =
-        llamaLoadModel(stringManager.getUtf8String(), params);
+        llamaLoadModel(stringManager.getString(), params);
 
     if (params.progress_callback_user_data) {
       auto progressContext = reinterpret_cast<CallbackContext*>(params.progress_callback_user_data);
@@ -95,16 +95,9 @@ jobject LlamaManager::LlamaSession::loadContextWithModel(jobject jModel, jobject
             "llama_new_context_with_model");
 
     auto paramsManager = LlamaContextParamsManager(jContextParams, this);
-    auto params = paramsManager.getParams();
     auto llamaModel = jni::getLlamaModelPointer(env, jModel);
     llama_context
         * context = llamaCreateContext(llamaModel, paramsManager.getParams());
-
-    if (params.progress_callback_user_data) {
-      auto progressContext = reinterpret_cast<CallbackContext*>(params.progress_callback_user_data);
-      env->DeleteGlobalRef(progressContext->callback);
-      delete progressContext;
-    }
 
     if (context) {
       return jni::constructLlamaOpaqueContext(env, context);
@@ -117,28 +110,29 @@ jobject LlamaManager::LlamaSession::loadContextWithModel(jobject jModel, jobject
 }
 
 
-typedef int(* llama_tokenize_with_model_pointer)
-    (llama_model*, const char*, llama_token*, int, bool);
+typedef int(* llama_tokenize_pointer)
+    (llama_model*, const char*, int, llama_token*, int, bool, bool);
 jint LlamaManager::LlamaSession::tokenizeWithModel(jobject jModel,
                                      jbyteArray jToTokenize,
                                      jintArray jTokensOut,
                                      jint jmaxTokens,
                                      jboolean jBos) {
   return withJniExceptions(env, [&jModel, &jToTokenize, &jTokensOut, &jmaxTokens, &jBos, this] {
-    llama_tokenize_with_model_pointer tokenize =
-        (llama_tokenize_with_model_pointer) getFunctionAddress(
-            "llama_tokenize_with_model");
+    llama_tokenize_pointer tokenize =
+        (llama_tokenize_pointer) getFunctionAddress("llama_tokenize");
+
 
     auto llamaModel = jni::getLlamaModelPointer(env, jModel);
 
-    auto stringManager = Utf8StringManager(env, jToTokenize);
-    auto toTokenize = stringManager.getUtf8String();
+    jbyte* toTokenize = env->GetByteArrayElements(jToTokenize, nullptr);
+    jsize length = env->GetArrayLength(jToTokenize);
     jint* tokensOut = env->GetIntArrayElements(jTokensOut, nullptr);
     int result = tokenize(llamaModel,
-                          toTokenize,
+                          reinterpret_cast<const char*>(toTokenize),
+                          length,
                           reinterpret_cast<llama_token*>(tokensOut),
                           jmaxTokens,
-                          jBos);
+                          jBos, false);
     if (result > 0) {
       env->ReleaseIntArrayElements(jTokensOut, tokensOut, 0);
     } else {
@@ -150,13 +144,12 @@ jint LlamaManager::LlamaSession::tokenizeWithModel(jobject jModel,
 }
 
 
-typedef int(* llama_eval_pointer)(llama_context*, llama_token*, int, int, int);
+typedef int(* llama_eval_pointer)(llama_context*, llama_token*, int, int);
 jint LlamaManager::LlamaSession::eval(jobject jContext,
                         jintArray jTokens,
                         jint jnTokens,
-                        jint jnPast,
-                        jint jnThreads) {
-  return withJniExceptions(env, [&jContext, &jTokens, &jnTokens, &jnPast, &jnThreads, this] {
+                        jint jnPast) {
+  return withJniExceptions(env, [&jContext, &jTokens, &jnTokens, &jnPast, this] {
 
     llama_eval_pointer eval = (llama_eval_pointer) getFunctionAddress(
         "llama_eval");
@@ -165,23 +158,25 @@ jint LlamaManager::LlamaSession::eval(jobject jContext,
     int result = eval(llamaContext,
                       reinterpret_cast<int*>(tokens),
                       jnTokens,
-                      jnPast,
-                      jnThreads);
+                      jnPast);
     env->ReleaseIntArrayElements(jTokens, tokens, JNI_ABORT);
     return result;
   });
 }
 
-typedef int (* llama_n_vocab_pointer)(const struct llama_context*);
+typedef int (* llama_n_vocab_pointer)(const struct llama_model*);
 typedef float* (* llama_get_logits_pointer)(llama_context*);
+typedef llama_model* (* llama_get_model_pointer)(llama_context* ctx);
 jfloatArray LlamaManager::LlamaSession::getLogits(jobject jContext) {
   return withJniExceptions(env, [&jContext, this] {
     auto getLogits = (llama_get_logits_pointer) getFunctionAddress(
         "llama_get_logits");
+    auto getModel = (llama_get_model_pointer) getFunctionAddress("llama_get_model");
     auto getVocabLength = (llama_n_vocab_pointer) getFunctionAddress("llama_n_vocab");
     auto llamaContext = jni::getLlamaContextPointer(env, jContext);
     float* logits = getLogits(llamaContext);
-    int vocabLength = getVocabLength(llamaContext);
+    auto llamaModel = getModel(llamaContext);
+    int vocabLength = getVocabLength(llamaModel);
     auto jLogits = env->NewFloatArray(vocabLength);
     env->SetFloatArrayRegion(jLogits, 0, vocabLength, logits);
     return jLogits;
@@ -212,18 +207,18 @@ jint LlamaManager::LlamaSession::sampleToken(jobject jContext, jobject jCandidat
   });
 }
 
-typedef int (* llama_token_to_piece_pointer)(llama_context*, llama_token, char*, int);
-jint LlamaManager::LlamaSession::tokenToPiece(jobject jContext, jint jToken, jbyteArray joutput) {
-  return withJniExceptions(env, [&jContext, jToken, this, joutput]{
+typedef int (* llama_token_to_piece_pointer)(llama_model*, llama_token, char*, int);
+jint LlamaManager::LlamaSession::tokenToPiece(jobject jModel, jint jToken, jbyteArray joutput) {
+  return withJniExceptions(env, [&jModel, jToken, this, joutput]{
     auto detokenize = (llama_token_to_piece_pointer) getFunctionAddress(
         "llama_token_to_piece");
 
     auto joutputPointer = env->GetByteArrayElements(joutput, nullptr);
     char* outputPointer = reinterpret_cast<char*>(joutputPointer);
     jsize length = env->GetArrayLength(joutput);
-    auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+    auto llamaModel = jni::getLlamaModelPointer(env, jModel);
 
-    int result = detokenize(llamaContext, jToken, outputPointer, length);
+    int result = detokenize(llamaModel, jToken, outputPointer, length);
     env->ReleaseByteArrayElements(joutput, joutputPointer, 0);
     return result;
   });
@@ -255,7 +250,7 @@ jint LlamaManager::LlamaSession::tokenNl(jobject jContext) {
   });
 }
 
-void LlamaManager::loggerCallback(enum llama_log_level level, const char* text, void* user_data) {
+void LlamaManager::loggerCallback(enum ggml_log_level level, const char* text, void* user_data) {
   JNIEnv* env;
   jint jniStatus = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
   jint attachResult;
@@ -301,7 +296,7 @@ void LlamaManager::loggerCallback(enum llama_log_level level, const char* text, 
   }
 }
 
-typedef void (* llama_log_set_pointer)(llama_log_callback, void*);
+typedef void (* llama_log_set_pointer)(ggml_log_callback, void*);
 void LlamaManager::LlamaSession::setLogger(jobject logger) {
   withJniExceptions(env, [this, logger] {
     if (jloggerCallback) {
@@ -356,11 +351,22 @@ jobject LlamaManager::LlamaSession::defaultContextParams() {
             "llama_context_default_params"));
     llama_context_params params = getDefaultParams();
     auto paramsManager = LlamaContextParamsManager(params, this);
-    jobject jParams = paramsManager.getJavaPrams();
+    jobject jParams = paramsManager.getJavaParams();
     return jParams;
   });
 }
 
+typedef llama_model_params (* llama_model_default_params_pointer)(void);
+jobject LlamaManager::LlamaSession::defaultModelParams() {
+  return withJniExceptions(env, [this] {
+    auto getDefaultParams =
+        reinterpret_cast<llama_model_default_params_pointer>(getFunctionAddress(
+            "llama_context_default_params"));
+    llama_model_params params = getDefaultParams();
+    auto paramsManager = LlamaModelParamsManager(params, this);
+    jobject jParams = paramsManager.getJavaParams();
+    return jParams;
+  });}
 
 typedef void (* llama_sample_repetition_penalty_pointer) (struct llama_context * ctx,
     llama_token_data_array * candidates, const llama_token * last_tokens,

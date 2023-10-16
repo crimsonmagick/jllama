@@ -58,25 +58,24 @@ class LlamaCppJNIImpl implements LlamaCpp {
 
   @Override
   public native LlamaOpaqueModel llamaLoadModelFromFile(byte[] pathModel,
-      LlamaContextParams params);
+      LlamaModelParams params);
 
   @Override
   public native void llamaFreeModel(LlamaOpaqueModel model);
 
   @Override
-  public native LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel,
+  public native LlamaOpaqueContext llamaNewContextWithModel(LlamaOpaqueModel opaqueModel,
       LlamaContextParams params);
 
   @Override
   public native void llamaFree(LlamaOpaqueContext context);
 
   @Override
-  public native int llamaTokenizeWithModel(LlamaOpaqueModel model, byte[] text, int[] tokens,
+  public native int llamaTokenize(LlamaOpaqueModel model, byte[] text, int[] tokens,
       int nMaxTokens, boolean addBos);
 
   @Override
-  public native int llamaEval(LlamaOpaqueContext context, int[] tokens, int nTokens, int nPast,
-      int nThreads);
+  public native int llamaEval(LlamaOpaqueContext context, int[] tokens, int nTokens, int nPast);
 
   @Override
   public native float[] llamaGetLogits(LlamaOpaqueContext context);
@@ -89,7 +88,7 @@ class LlamaCppJNIImpl implements LlamaCpp {
       LlamaTokenDataArray candidates);
 
   @Override
-  public native int llamaTokenToPiece(LlamaOpaqueContext context, int llamaToken, byte[] buf);
+  public native int llamaTokenToPiece(LlamaOpaqueModel model, int llamaToken, byte[] buf);
 
   @Override
   public native void llamaSampleRepetitionPenalty(LlamaOpaqueContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
@@ -126,6 +125,9 @@ class LlamaCppJNIImpl implements LlamaCpp {
 
   @Override
   public native LlamaContextParams llamaContextDefaultParams();
+
+  @Override
+  public native LlamaModelParams llamaModelDefaultParams();
 
   @Override
   public native void llamaSampleTypical(LlamaOpaqueContext llamaOpaqueContext,
