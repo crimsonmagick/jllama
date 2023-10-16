@@ -19,13 +19,22 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier = 'sources'
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
 
+            artifact(sourceJar) {
+                classifier = 'sources'
+            }
+
             pom {
-                name = 'Jllama CPP Bindings'
+                name = 'jLlama CPP Bindings'
                 description = 'Provides Java bindings to the Llama CPP library'
                 url = 'https://github.com/crimsonmagick/llama-cpp-java-bindings'
                 licenses {
