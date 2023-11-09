@@ -78,16 +78,16 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
   jclass javaParamsClass = env->GetObjectClass(javaContextParams);
 
   llamaContextParams = {
-      jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "seed"),
-      jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "nCtx"),
-      jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "nBatch"),
-      jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "nThreads"),
-      jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "nThreadsBatch"),
-      jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqBase"),
-      jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqScale"),
-      jni::getBool(env, javaParamsClass, javaContextParams, "mulMatQ"),
-      jni::getBool(env, javaParamsClass, javaContextParams, "f16Kv"),
-      jni::getBool(env, javaParamsClass, javaContextParams, "logitsAll"),
-      jni::getBool(env, javaParamsClass, javaContextParams, "embedding")
+      .seed = jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "seed"),
+      .n_ctx = jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "nCtx"),
+      .n_batch = jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "nBatch"),
+      .n_threads = jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "nThreads"),
+      .n_threads_batch = jni::getUnsignedInt32(env, javaParamsClass, javaContextParams, "nThreadsBatch"),
+      .rope_freq_base = jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqBase"),
+      .rope_freq_scale = jni::getFloat(env, javaParamsClass, javaContextParams, "ropeFreqScale"),
+      .mul_mat_q = jni::getBool(env, javaParamsClass, javaContextParams, "mulMatQ"),
+      .f16_kv = jni::getBool(env, javaParamsClass, javaContextParams, "f16Kv"),
+      .logits_all = jni::getBool(env, javaParamsClass, javaContextParams, "logitsAll"),
+      .embedding = jni::getBool(env, javaParamsClass, javaContextParams, "embedding")
   };
 }
