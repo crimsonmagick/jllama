@@ -60,4 +60,11 @@ public interface LlamaCpp {
   void llamaSampleTypical(LlamaOpaqueContext llamaOpaqueContext, LlamaTokenDataArray candidates, float p, int minKeep);
 
   void llamaSampleTemperature(LlamaOpaqueContext llamaOpaqueContext, LlamaTokenDataArray candidates, float temp);
+
+  // NEW BATCH STUFF
+  LlamaBatch llamaBatchInit(int nTokens, int embd, int nSeqMax);
+  void llamaBatchFree(LlamaBatch batch);
+
+  int llamaDecode(LlamaOpaqueContext ctx, LlamaBatch batch);
+
 }

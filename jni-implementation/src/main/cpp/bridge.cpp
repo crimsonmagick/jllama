@@ -186,5 +186,20 @@ extern "C" {
     llamaManager->newSession(env).llamaSampleTemperature(jContext, jCandidates, temp);
   }
 
+  JNIEXPORT jobject JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaBatchInit
+    (JNIEnv* env, jobject thisObject, jint nTokens, jint embd, jint nSeqMax) {
+    return nullptr;
+  }
+
+
+  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaBatchFree
+      (JNIEnv* env, jobject thisObject, jobject jBatch) {
+
+  }
+
+  JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaDecode
+      (JNIEnv* env, jobject thisObject, jobject jContext, jobject jBatch) {
+    return 0;
+  }
 
 }
