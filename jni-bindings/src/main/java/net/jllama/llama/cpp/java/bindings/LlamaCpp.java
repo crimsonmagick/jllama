@@ -12,26 +12,25 @@ public interface LlamaCpp {
 
   void llamaBackendFree();
 
-  LlamaOpaqueModel llamaLoadModelFromFile(byte[] pathModel, LlamaContextParams params);
+  LlamaOpaqueModel llamaLoadModelFromFile(byte[] pathModel, LlamaModelParams params);
 
   void llamaFreeModel(LlamaOpaqueModel model);
 
-  LlamaOpaqueContext llamaLoadContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams llamaContextParams);
+  LlamaOpaqueContext llamaNewContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams llamaContextParams);
 
   // free Context
   void llamaFree(LlamaOpaqueContext context);
 
-  int llamaTokenizeWithModel(LlamaOpaqueModel model, byte[] text, int[] tokens, int nMaxTokens,
-      boolean addBos);
+  int llamaTokenize(LlamaOpaqueModel model, byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
 
-  int llamaEval(LlamaOpaqueContext context, int[] tokens, int nTokens, int nPast, int nThreads);
+  int llamaEval(LlamaOpaqueContext context, int[] tokens, int nTokens, int nPast);
 
   float[] llamaGetLogits(LlamaOpaqueContext context);
 
   int llamaSampleToken(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
   int llamaSampleTokenGreedy(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
 
-  int llamaTokenToPiece(LlamaOpaqueContext context, int llamaToken, byte[] buf);
+  int llamaTokenToPiece(LlamaOpaqueModel model, int llamaToken, byte[] buf);
 
   void llamaSampleRepetitionPenalty(LlamaOpaqueContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
 
@@ -56,8 +55,16 @@ public interface LlamaCpp {
   long llamaTimeUs();
 
   LlamaContextParams llamaContextDefaultParams();
+  LlamaModelParams llamaModelDefaultParams();
 
   void llamaSampleTypical(LlamaOpaqueContext llamaOpaqueContext, LlamaTokenDataArray candidates, float p, int minKeep);
 
   void llamaSampleTemperature(LlamaOpaqueContext llamaOpaqueContext, LlamaTokenDataArray candidates, float temp);
+
+  // NEW BATCH STUFF
+  LlamaBatch llamaBatchInit(int nTokens, int embd, int nSeqMax);
+  void llamaBatchFree(LlamaBatch batch);
+
+  int llamaDecode(LlamaOpaqueContext ctx, LlamaBatch batch);
+
 }

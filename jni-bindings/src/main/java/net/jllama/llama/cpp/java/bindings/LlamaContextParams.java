@@ -1,27 +1,19 @@
 package net.jllama.llama.cpp.java.bindings;
 
-import java.util.function.Consumer;
-
 public class LlamaContextParams {
     private int seed; // unsigned
     private int nCtx;
     private int nBatch;
-    private int nGpuLayers;
-    private int mainGpu;
-    private float[] tensorSplit;
+    private int nThreads;
+    private int nThreadsBatch;
     private float ropeFreqBase;
     private float ropeFreqScale;
-    private Consumer<Float> progressCallback;
-    private boolean lowVram;
     private boolean mulMatQ;
     private boolean f16Kv;
     private boolean logitsAll;
-    private boolean vocabOnly;
-    private boolean useMmap;
-    private boolean useMlock;
     private boolean embedding;
 
-    public long getSeed() {
+    public int getSeed() {
         return seed;
     }
 
@@ -45,28 +37,20 @@ public class LlamaContextParams {
         this.nBatch = nBatch;
     }
 
-    public int getnGpuLayers() {
-        return nGpuLayers;
+    public int getnThreads() {
+        return nThreads;
     }
 
-    public void setnGpuLayers(int nGpuLayers) {
-        this.nGpuLayers = nGpuLayers;
+    public void setnThreads(int nThreads) {
+        this.nThreads = nThreads;
     }
 
-    public int getMainGpu() {
-        return mainGpu;
+    public int getnThreadsBatch() {
+        return nThreadsBatch;
     }
 
-    public void setMainGpu(int mainGpu) {
-        this.mainGpu = mainGpu;
-    }
-
-    public float[] getTensorSplit() {
-        return tensorSplit;
-    }
-
-    public void setTensorSplit(float[] tensorSplit) {
-        this.tensorSplit = tensorSplit;
+    public void setnThreadsBatch(int nThreadsBatch) {
+        this.nThreadsBatch = nThreadsBatch;
     }
 
     public float getRopeFreqBase() {
@@ -83,22 +67,6 @@ public class LlamaContextParams {
 
     public void setRopeFreqScale(float ropeFreqScale) {
         this.ropeFreqScale = ropeFreqScale;
-    }
-
-    public Consumer<Float> getProgressCallback() {
-        return progressCallback;
-    }
-
-    public void setProgressCallback(Consumer<Float> progressCallback) {
-        this.progressCallback = progressCallback;
-    }
-
-    public boolean isLowVram() {
-        return lowVram;
-    }
-
-    public void setLowVram(boolean lowVram) {
-        this.lowVram = lowVram;
     }
 
     public boolean isMulMatQ() {
@@ -123,30 +91,6 @@ public class LlamaContextParams {
 
     public void setLogitsAll(boolean logitsAll) {
         this.logitsAll = logitsAll;
-    }
-
-    public boolean isVocabOnly() {
-        return vocabOnly;
-    }
-
-    public void setVocabOnly(boolean vocabOnly) {
-        this.vocabOnly = vocabOnly;
-    }
-
-    public boolean isUseMmap() {
-        return useMmap;
-    }
-
-    public void setUseMmap(boolean useMmap) {
-        this.useMmap = useMmap;
-    }
-
-    public boolean isUseMlock() {
-        return useMlock;
-    }
-
-    public void setUseMlock(boolean useMlock) {
-        this.useMlock = useMlock;
     }
 
     public boolean isEmbedding() {

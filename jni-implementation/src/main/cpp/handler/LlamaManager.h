@@ -27,14 +27,13 @@ class LlamaManager {
         jint eval(jobject jContext,
                   jintArray jTokens,
                   jint jnTokens,
-                  jint jnPast,
-                  jint jnThreads);
+                  jint jnPast);
 
         jfloatArray getLogits(jobject jContext);
 
         jint sampleTokenGreedy(jobject jContext, jobject jCandidates);
 
-        jint tokenToPiece(jobject jContext, jint jToken, jbyteArray output);
+        jint tokenToPiece(jobject jModel, jint jToken, jbyteArray output);
 
         jint tokenBos(jobject jContext);
         jint tokenEos(jobject jContext);
@@ -77,7 +76,8 @@ class LlamaManager {
         void llamaSampleTemperature(jobject jContext,
                                     jobject jCandidates,
                                     jfloat temp);
-      private:
+      jobject defaultModelParams();
+     private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
             : env(env), manager(outer) {}
@@ -87,17 +87,31 @@ class LlamaManager {
           public:
             LlamaContextParamsManager(llama_context_params contextParams, LlamaSession* session);
             LlamaContextParamsManager(jobject javaContextParams, LlamaSession* session);
-            ~LlamaContextParamsManager();
             llama_context_params getParams();
-            jobject getJavaPrams();
+            jobject getJavaParams();
 
           private:
             llama_context_params llamaContextParams{};
             jobject jLlamaContextParams;
-            jfloatArray tensorSplitFloatArray;
-            const float* tensorSplit;
             LlamaSession* session;
         };
+
+      class LlamaModelParamsManager {
+       public:
+        LlamaModelParamsManager(llama_model_params modelParams, LlamaSession* session);
+        LlamaModelParamsManager(jobject javaModelParams, LlamaSession* session);
+        ~LlamaModelParamsManager();
+        llama_model_params getParams();
+        jobject getJavaParams();
+
+       private:
+        llama_model_params llamaModelParams{};
+        jobject jLlamaModelParams;
+        jfloatArray tensorSplitFloatArray;
+        const float* tensorSplit;
+        LlamaSession* session;
+      };
+
     };
     static LlamaManager* singleton;
     static JavaVM* javaVm;
@@ -105,7 +119,7 @@ class LlamaManager {
     static inline std::once_flag initFlag;
     explicit LlamaManager();
     static void progressCallback(float progress, void* ctx);
-    static void loggerCallback(enum llama_log_level level, const char * text, void * user_data);
+    static void loggerCallback(enum ggml_log_level level, const char * text, void * user_data);
 
   public:
     static LlamaManager* getLlamaManager(JNIEnv* env);

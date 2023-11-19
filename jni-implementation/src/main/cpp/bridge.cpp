@@ -62,12 +62,12 @@ extern "C" {
   }
 
   JNIEXPORT jobject
-  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaLoadContextWithModel
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaNewContextWithModel
       (JNIEnv* env, jobject thisObject, jobject jModel, jobject jContextParams) {
     return llamaManager->newSession(env).loadContextWithModel(jModel, jContextParams);
   }
 
-  JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenizeWithModel(JNIEnv* env, jobject thisObject, jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos) {
+  JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenize(JNIEnv* env, jobject thisObject, jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos) {
     return llamaManager->newSession(env)
       .tokenizeWithModel(jModel, jToTokenize, jTokensOut, jmaxTokens, jBos);
   }
@@ -78,9 +78,8 @@ extern "C" {
       jobject jContext,
       jintArray jTokens,
       jint jnTokens,
-      jint jnPast,
-      jint jnThreads) {
-    return llamaManager->newSession(env).eval(jContext, jTokens, jnTokens, jnPast, jnThreads);
+      jint jnPast) {
+    return llamaManager->newSession(env).eval(jContext, jTokens, jnTokens, jnPast);
   }
 
   JNIEXPORT jfloatArray JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaGetLogits(JNIEnv * env, jobject thisObject, jobject jContext) {
@@ -96,8 +95,8 @@ extern "C" {
   }
 
   JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenToPiece
-    (JNIEnv* env, jobject thisObject, jobject jContext, jint jToken, jbyteArray output) {
-    return llamaManager->newSession(env).tokenToPiece(jContext, jToken, output);
+    (JNIEnv* env, jobject thisObject, jobject jModel, jint jToken, jbyteArray output) {
+    return llamaManager->newSession(env).tokenToPiece(jModel, jToken, output);
   }
 
   JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaTokenBos(JNIEnv* env, jobject thisObject, jobject jContext) {
@@ -142,6 +141,17 @@ extern "C" {
     }
   }
 
+  JNIEXPORT jobject
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaModelDefaultParams
+      (JNIEnv *env, jobject thisObject) {
+    try {
+      jobject ret = llamaManager->newSession(env).defaultModelParams();
+      return ret;
+    } catch (std::exception &e) {
+      return nullptr;
+    }
+  }
+
   JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaSampleRepetitionPenalty(JNIEnv* env, jobject thisObject, jobject jContext, jobject jCandidates, jintArray lastTokens, jfloat penalty) {
     llamaManager->newSession(env).applyRepetitionPenalty(jContext, jCandidates, lastTokens, penalty);
   }
@@ -176,5 +186,20 @@ extern "C" {
     llamaManager->newSession(env).llamaSampleTemperature(jContext, jCandidates, temp);
   }
 
+  JNIEXPORT jobject JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaBatchInit
+    (JNIEnv* env, jobject thisObject, jint nTokens, jint embd, jint nSeqMax) {
+    return nullptr;
+  }
+
+
+  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaBatchFree
+      (JNIEnv* env, jobject thisObject, jobject jBatch) {
+
+  }
+
+  JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaDecode
+      (JNIEnv* env, jobject thisObject, jobject jContext, jobject jBatch) {
+    return 0;
+  }
 
 }

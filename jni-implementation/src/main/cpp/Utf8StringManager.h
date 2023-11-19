@@ -5,7 +5,7 @@ class Utf8StringManager {
   public:
   Utf8StringManager(JNIEnv* env, jbyteArray jutf8String);
   ~Utf8StringManager();
-  char * getUtf8String();
+  char * getString();
 
   private:
   JNIEnv* env;
