@@ -77,6 +77,7 @@ class LlamaManager {
                                     jobject jCandidates,
                                     jfloat temp);
       jobject defaultModelParams();
+      jobject llamaBatchInit(jint nTokens, jint embd, jint nSeqMax);
      private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

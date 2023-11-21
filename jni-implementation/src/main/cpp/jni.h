@@ -28,12 +28,13 @@ namespace jni {
   void setBoolean(bool value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   jfloatArray getJFloatArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
   jobject constructLlamaOpaqueModel(JNIEnv* env, llama_model* modelPointer);
+  jobject constructBatch(JNIEnv* env, llama_batch batch);
   llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaOpaqueModel);
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);
   void throwJNIException(JNIEnv* env, const JNIException& e);
   void throwLlamaCppException(JNIEnv* env, const LlamaCppException& e);
   void throwRuntimeException(JNIEnv* env, const std::exception& e);
-  jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer);
+  jobject constructLlamaContext(JNIEnv* env, llama_context* jcontextPointer);
   llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext);
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray);
   void updateTokenDateArray(JNIEnv* env, jobject destination, llama_token_data_array* src);

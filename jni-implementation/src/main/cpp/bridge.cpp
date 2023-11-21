@@ -188,7 +188,7 @@ extern "C" {
 
   JNIEXPORT jobject JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCppJNIImpl_llamaBatchInit
     (JNIEnv* env, jobject thisObject, jint nTokens, jint embd, jint nSeqMax) {
-    return nullptr;
+    return llamaManager->newSession(env).llamaBatchInit(nTokens, embd, nSeqMax);
   }
 
 

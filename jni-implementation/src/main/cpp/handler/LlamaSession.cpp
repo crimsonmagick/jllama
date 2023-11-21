@@ -100,7 +100,7 @@ jobject LlamaManager::LlamaSession::loadContextWithModel(jobject jModel, jobject
         * context = llamaCreateContext(llamaModel, paramsManager.getParams());
 
     if (context) {
-      return jni::constructLlamaOpaqueContext(env, context);
+      return jni::constructLlamaContext(env, context);
     }
     jni::throwJNIException(env,
                            jni::JNIException(
@@ -501,5 +501,20 @@ void LlamaManager::LlamaSession::llamaSampleTemperature(jobject jContext,
     llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
     sampleTemperature(context, &candidates, temp);
     jni::updateTokenDateArray(env, jCandidates, &candidates);
+  });
+}
+
+typedef llama_batch (* llama_batch_init_pointer) (int32_t n_tokens, int32_t embd, int32_t n_seq_max);
+struct llama_batch llama_batch_init(
+    int32_t n_tokens,
+    int32_t embd,
+    int32_t n_seq_max);
+jobject LlamaManager::LlamaSession::llamaBatchInit(jint nTokens,
+                                                   jint embd,
+                                                   jint nSeqMax) {
+  return withJniExceptions(env, [nTokens, embd, nSeqMax] {
+    auto batchInit = reinterpret_cast<llama_batch_init_pointer>(getFunctionAddress("llama_batch_init"));
+    llama_batch batch = batchInit(nTokens, embd, nSeqMax);
+    return nullptr;
   });
 }

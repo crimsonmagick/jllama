@@ -16,39 +16,39 @@ public interface LlamaCpp {
 
   void llamaFreeModel(LlamaOpaqueModel model);
 
-  LlamaOpaqueContext llamaNewContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams llamaContextParams);
+  LlamaContext llamaNewContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams llamaContextParams);
 
   // free Context
-  void llamaFree(LlamaOpaqueContext context);
+  void llamaFree(LlamaContext context);
 
   int llamaTokenize(LlamaOpaqueModel model, byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
 
-  int llamaEval(LlamaOpaqueContext context, int[] tokens, int nTokens, int nPast);
+  int llamaEval(LlamaContext context, int[] tokens, int nTokens, int nPast);
 
-  float[] llamaGetLogits(LlamaOpaqueContext context);
+  float[] llamaGetLogits(LlamaContext context);
 
-  int llamaSampleToken(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
-  int llamaSampleTokenGreedy(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
+  int llamaSampleToken(LlamaContext context, LlamaTokenDataArray candidates);
+  int llamaSampleTokenGreedy(LlamaContext context, LlamaTokenDataArray candidates);
 
   int llamaTokenToPiece(LlamaOpaqueModel model, int llamaToken, byte[] buf);
 
-  void llamaSampleRepetitionPenalty(LlamaOpaqueContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
+  void llamaSampleRepetitionPenalty(LlamaContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
 
-  void llamaSampleFrequencyAndPresencePenalties(LlamaOpaqueContext context, LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency, float alphaPresence);
+  void llamaSampleFrequencyAndPresencePenalties(LlamaContext context, LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency, float alphaPresence);
 
-  void llamaSampleSoftMax(LlamaOpaqueContext context, LlamaTokenDataArray candidates);
+  void llamaSampleSoftMax(LlamaContext context, LlamaTokenDataArray candidates);
 
-  void llamaSampleTopK(LlamaOpaqueContext context, LlamaTokenDataArray candidates, int k, long minKeep);
+  void llamaSampleTopK(LlamaContext context, LlamaTokenDataArray candidates, int k, long minKeep);
 
-  void llamaSampleTopP(LlamaOpaqueContext context, LlamaTokenDataArray candidates, float p, long minKeep);
+  void llamaSampleTopP(LlamaContext context, LlamaTokenDataArray candidates, float p, long minKeep);
 
-  void llamaSampleTailFree(LlamaOpaqueContext context, LlamaTokenDataArray candidates, float z, long minKeep);
+  void llamaSampleTailFree(LlamaContext context, LlamaTokenDataArray candidates, float z, long minKeep);
 
-  int llamaTokenBos(LlamaOpaqueContext context);
+  int llamaTokenBos(LlamaContext context);
 
-  int llamaTokenEos(LlamaOpaqueContext context);
+  int llamaTokenEos(LlamaContext context);
 
-  int llamaTokenNl(LlamaOpaqueContext context);
+  int llamaTokenNl(LlamaContext context);
 
   void llamaLogSet(BiConsumer<LlamaLogLevel, byte[]> llamaLogCallback);
 
@@ -57,14 +57,14 @@ public interface LlamaCpp {
   LlamaContextParams llamaContextDefaultParams();
   LlamaModelParams llamaModelDefaultParams();
 
-  void llamaSampleTypical(LlamaOpaqueContext llamaOpaqueContext, LlamaTokenDataArray candidates, float p, int minKeep);
+  void llamaSampleTypical(LlamaContext llamaOpaqueContext, LlamaTokenDataArray candidates, float p, int minKeep);
 
-  void llamaSampleTemperature(LlamaOpaqueContext llamaOpaqueContext, LlamaTokenDataArray candidates, float temp);
+  void llamaSampleTemperature(LlamaContext llamaOpaqueContext, LlamaTokenDataArray candidates, float temp);
 
   // NEW BATCH STUFF
   LlamaBatch llamaBatchInit(int nTokens, int embd, int nSeqMax);
   void llamaBatchFree(LlamaBatch batch);
 
-  int llamaDecode(LlamaOpaqueContext ctx, LlamaBatch batch);
+  int llamaDecode(LlamaContext ctx, LlamaBatch batch);
 
 }
