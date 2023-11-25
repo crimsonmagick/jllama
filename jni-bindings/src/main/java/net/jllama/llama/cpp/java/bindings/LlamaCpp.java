@@ -55,8 +55,6 @@ public class LlamaCpp {
 
   public static native void llamaFreeModel(LlamaModel model);
 
-  public static native LlamaContext llamaNewContextWithModel(LlamaModel opaqueModel, LlamaContextParams llamaContextParams);
-
   // free Context
   public static native void llamaFree(LlamaContext context);
 

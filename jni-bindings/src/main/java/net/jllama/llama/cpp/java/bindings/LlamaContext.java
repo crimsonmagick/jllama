@@ -2,7 +2,7 @@ package net.jllama.llama.cpp.java.bindings;
 
 public class LlamaContext {
 
-  long contextPointer;
+  private long contextPointer;
 
   public LlamaContext(final long contextPointer) {
     this.contextPointer = contextPointer;

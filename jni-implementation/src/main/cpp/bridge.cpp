@@ -60,12 +60,6 @@ extern "C" {
     return llamaManager->newSession(env).loadModelFromFile(path, javaParams);
   }
 
-  JNIEXPORT jobject
-  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCpp_llamaNewContextWithModel
-      (JNIEnv* env, jclass classReference, jobject jModel, jobject jContextParams) {
-    return llamaManager->newSession(env).loadContextWithModel(jModel, jContextParams);
-  }
-
   JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCpp_llamaTokenize(JNIEnv* env, jclass classReference, jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos) {
     return llamaManager->newSession(env)
       .tokenizeWithModel(jModel, jToTokenize, jTokensOut, jmaxTokens, jBos);
