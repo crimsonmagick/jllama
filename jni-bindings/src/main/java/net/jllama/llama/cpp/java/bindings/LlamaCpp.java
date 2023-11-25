@@ -1,70 +1,109 @@
 package net.jllama.llama.cpp.java.bindings;
 
 import java.util.function.BiConsumer;
+import net.jllama.llama.cpp.java.bindings.exceptions.ResourceNotFoundException;
+import net.jllama.llama.cpp.java.bindings.util.DllExtractor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public interface LlamaCpp {
+public class LlamaCpp {
 
-  void loadLibrary();
+  final static Logger log = LogManager.getLogger(LlamaCpp.class);
 
-  void closeLibrary();
+  static {
+    loadJniImplementation();
+  }
 
-  void llamaBackendInit(boolean useNuma);
+  private static void loadJniImplementation() {
+    final String libraryName = "jni-implementation";
+    try {
+      loadFromOs(libraryName);
+    } catch (final UnsatisfiedLinkError e) {
+      log.info("Unable to load library from OS with libraryName={}", libraryName, e);
+      loadFromResources(libraryName);
+    }
+  }
 
-  void llamaBackendFree();
+  private static void loadFromOs(final String libraryName) {
+    log.info("Attempting to load library using OS path, libraryName={}", libraryName);
+    System.loadLibrary(libraryName);
+  }
 
-  LlamaOpaqueModel llamaLoadModelFromFile(byte[] pathModel, LlamaModelParams params);
+  private static void loadFromResources(final String libraryName) {
+    try {
+      log.info("Attempting to load library from from resources, libraryName={}", libraryName);
+      final String dllPath = DllExtractor.extract(libraryName);
+      System.load(dllPath);
+    } catch (final ResourceNotFoundException e) {
+      log.error("Unable to locate library with libraryName={}", libraryName, e);
+      throw e;
+    } catch (final UnsatisfiedLinkError e) {
+      log.info("Unable to load library from resources with libraryName={}", libraryName, e);
+      throw e;
+    }
+  }
 
-  void llamaFreeModel(LlamaOpaqueModel model);
+  public static native void loadLibrary();
 
-  LlamaContext llamaNewContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams llamaContextParams);
+  public static native void closeLibrary();
+
+  public static native void llamaBackendInit(boolean useNuma);
+
+  public static native void llamaBackendFree();
+
+  public static native LlamaOpaqueModel llamaLoadModelFromFile(byte[] pathModel, LlamaModelParams params);
+
+  public static native void llamaFreeModel(LlamaOpaqueModel model);
+
+  public static native LlamaContext llamaNewContextWithModel(LlamaOpaqueModel opaqueModel, LlamaContextParams llamaContextParams);
 
   // free Context
-  void llamaFree(LlamaContext context);
+  public static native void llamaFree(LlamaContext context);
 
-  int llamaTokenize(LlamaOpaqueModel model, byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
+  public static native int llamaTokenize(LlamaOpaqueModel model, byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
 
-  int llamaEval(LlamaContext context, int[] tokens, int nTokens, int nPast);
+  public static native int llamaEval(LlamaContext context, int[] tokens, int nTokens, int nPast);
 
-  float[] llamaGetLogits(LlamaContext context);
+  public static native float[] llamaGetLogits(LlamaContext context);
 
-  int llamaSampleToken(LlamaContext context, LlamaTokenDataArray candidates);
-  int llamaSampleTokenGreedy(LlamaContext context, LlamaTokenDataArray candidates);
+  public static native int llamaSampleToken(LlamaContext context, LlamaTokenDataArray candidates);
+  public static native int llamaSampleTokenGreedy(LlamaContext context, LlamaTokenDataArray candidates);
 
-  int llamaTokenToPiece(LlamaOpaqueModel model, int llamaToken, byte[] buf);
+  public static native int llamaTokenToPiece(LlamaOpaqueModel model, int llamaToken, byte[] buf);
 
-  void llamaSampleRepetitionPenalty(LlamaContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
+  public static native void llamaSampleRepetitionPenalty(LlamaContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
 
-  void llamaSampleFrequencyAndPresencePenalties(LlamaContext context, LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency, float alphaPresence);
+  public static native void llamaSampleFrequencyAndPresencePenalties(LlamaContext context, LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency, float alphaPresence);
 
-  void llamaSampleSoftMax(LlamaContext context, LlamaTokenDataArray candidates);
+  public static native void llamaSampleSoftMax(LlamaContext context, LlamaTokenDataArray candidates);
 
-  void llamaSampleTopK(LlamaContext context, LlamaTokenDataArray candidates, int k, long minKeep);
+  public static native void llamaSampleTopK(LlamaContext context, LlamaTokenDataArray candidates, int k, long minKeep);
 
-  void llamaSampleTopP(LlamaContext context, LlamaTokenDataArray candidates, float p, long minKeep);
+  public static native void llamaSampleTopP(LlamaContext context, LlamaTokenDataArray candidates, float p, long minKeep);
 
-  void llamaSampleTailFree(LlamaContext context, LlamaTokenDataArray candidates, float z, long minKeep);
+  public static native void llamaSampleTailFree(LlamaContext context, LlamaTokenDataArray candidates, float z, long minKeep);
 
-  int llamaTokenBos(LlamaContext context);
+  public static native int llamaTokenBos(LlamaContext context);
 
-  int llamaTokenEos(LlamaContext context);
+  public static native int llamaTokenEos(LlamaContext context);
 
-  int llamaTokenNl(LlamaContext context);
+  public static native int llamaTokenNl(LlamaContext context);
 
-  void llamaLogSet(BiConsumer<LlamaLogLevel, byte[]> llamaLogCallback);
+  public static native void llamaLogSet(BiConsumer<LlamaLogLevel, byte[]> llamaLogCallback);
 
-  long llamaTimeUs();
+  public static native long llamaTimeUs();
 
-  LlamaContextParams llamaContextDefaultParams();
-  LlamaModelParams llamaModelDefaultParams();
+  public static native LlamaContextParams llamaContextDefaultParams();
+  public static native LlamaModelParams llamaModelDefaultParams();
 
-  void llamaSampleTypical(LlamaContext llamaOpaqueContext, LlamaTokenDataArray candidates, float p, int minKeep);
+  public static native void llamaSampleTypical(LlamaContext llamaOpaqueContext, LlamaTokenDataArray candidates, float p, int minKeep);
 
-  void llamaSampleTemperature(LlamaContext llamaOpaqueContext, LlamaTokenDataArray candidates, float temp);
+  public static native void llamaSampleTemperature(LlamaContext llamaOpaqueContext, LlamaTokenDataArray candidates, float temp);
 
-  // NEW BATCH STUFF
-  LlamaBatch llamaBatchInit(int nTokens, int embd, int nSeqMax);
-  void llamaBatchFree(LlamaBatch batch);
-
-  int llamaDecode(LlamaContext ctx, LlamaBatch batch);
+//  // NEW BATCH STUFF
+//  LlamaBatch llamaBatchInit(int nTokens, int embd, int nSeqMax);
+//  void llamaBatchFree(LlamaBatch batch);
+//
+//  int llamaDecode(LlamaContext ctx, LlamaBatch batch);
 
 }
