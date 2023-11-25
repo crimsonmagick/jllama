@@ -27,9 +27,9 @@ namespace jni {
   bool getBool(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   void setBoolean(bool value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   jfloatArray getJFloatArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
-  jobject constructLlamaOpaqueModel(JNIEnv* env, llama_model* modelPointer);
+  jobject constructLlamaModel(JNIEnv* env, llama_model* modelPointer);
   jobject constructBatch(JNIEnv* env, llama_batch batch);
-  llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaOpaqueModel);
+  llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaModel);
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);
   void throwJNIException(JNIEnv* env, const JNIException& e);
   void throwLlamaCppException(JNIEnv* env, const LlamaCppException& e);

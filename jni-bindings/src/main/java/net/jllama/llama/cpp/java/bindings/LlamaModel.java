@@ -1,10 +1,10 @@
 package net.jllama.llama.cpp.java.bindings;
 
-public class LlamaOpaqueModel {
+public class LlamaModel {
 
   long modelPointer;
 
-  public LlamaOpaqueModel(final long modelPointer) {
+  public LlamaModel(final long modelPointer) {
     this.modelPointer = modelPointer;
   }
 

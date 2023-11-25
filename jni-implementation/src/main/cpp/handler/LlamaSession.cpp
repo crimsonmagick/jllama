@@ -77,7 +77,7 @@ jobject LlamaManager::LlamaSession::loadModelFromFile(jbyteArray path, jobject j
     }
 
     if (model) {
-      return jni::constructLlamaOpaqueModel(env, model);
+      return jni::constructLlamaModel(env, model);
     }
     jni::throwJNIException(env,
                            jni::JNIException(
