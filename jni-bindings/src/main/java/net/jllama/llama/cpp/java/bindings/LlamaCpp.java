@@ -51,23 +51,12 @@ public class LlamaCpp {
 
   public static native void llamaBackendFree();
 
-  public static native LlamaModel llamaLoadModelFromFile(byte[] pathModel, LlamaModelParams params);
-
-  public static native void llamaFreeModel(LlamaModel model);
-
-  // free Context
-  public static native void llamaFree(LlamaContext context);
-
-  public static native int llamaTokenize(LlamaModel model, byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
-
-  public static native int llamaEval(LlamaContext context, int[] tokens, int nTokens, int nPast);
+  public static native LlamaModel loadModel(byte[] pathModel, LlamaModelParams params);
 
   public static native float[] llamaGetLogits(LlamaContext context);
 
   public static native int llamaSampleToken(LlamaContext context, LlamaTokenDataArray candidates);
   public static native int llamaSampleTokenGreedy(LlamaContext context, LlamaTokenDataArray candidates);
-
-  public static native int llamaTokenToPiece(LlamaModel model, int llamaToken, byte[] buf);
 
   public static native void llamaSampleRepetitionPenalty(LlamaContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
 
@@ -92,7 +81,6 @@ public class LlamaCpp {
   public static native long llamaTimeUs();
 
   public static native LlamaContextParams llamaContextDefaultParams();
-  public static native LlamaModelParams llamaModelDefaultParams();
 
   public static native void llamaSampleTypical(LlamaContext llamaContext, LlamaTokenDataArray candidates, float p, int minKeep);
 

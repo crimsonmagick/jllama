@@ -1,7 +1,6 @@
 package net.jllama.llama.cpp.java.bindings;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 public class LlamaModel implements Closeable {
 
@@ -13,31 +12,43 @@ public class LlamaModel implements Closeable {
     closed = false;
   }
 
-  public LlamaContext createContext(LlamaContextParams llamaContextParams) {
+  public static native LlamaModelParams llamaModelDefaultParams();
+
+  private void validateState() {
     if (isClosed()) {
       throw new IllegalStateException("LlamaModel is closed.");
     }
-    return newContext(llamaContextParams);
-  }
-  private native LlamaContext newContext(LlamaContextParams llamaContextParams);
-
-  private native void close(long modelPointer);
-
-  public long getModelPointer() {
-    return modelPointer;
   }
 
-  public void setModelPointer(final long modelPointer) {
-    this.modelPointer = modelPointer;
+  private native LlamaContext createContextNative(LlamaContextParams llamaContextParams);
+  public LlamaContext createContext(LlamaContextParams llamaContextParams) {
+    validateState();
+    return createContextNative(llamaContextParams);
   }
+
+  private native int tokenizeNative(byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
+  public int tokenize(byte[] text, int[] tokens, int nMaxTokens, boolean addBos) {
+    validateState();
+    return tokenizeNative(text, tokens, nMaxTokens, addBos);
+  }
+
+  private native int detokenizeNative(int llamaToken, byte[] buf);
+
+  public int detokenize(int llamaToken, byte[] buf) {
+    validateState();
+    return detokenizeNative(llamaToken, buf);
+  }
+
+  private native void closeNative();
 
   public boolean isClosed() {
     return closed;
   }
 
   @Override
-  public void close() throws IOException {
-    close(modelPointer);
+  public void close() {
+    validateState();
+    closeNative();
     this.modelPointer = 0;
     closed = true;
   }
