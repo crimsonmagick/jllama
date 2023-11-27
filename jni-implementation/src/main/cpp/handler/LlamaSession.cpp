@@ -377,7 +377,7 @@ void LlamaManager::LlamaSession::applyRepetitionPenalty(jobject jContext,
 
     withJniExceptions(env, [jContext, this, jCandidates, jPreviousTokens, jPenalty] {
     auto applyPenalty = reinterpret_cast<llama_sample_repetition_penalty_pointer>(
-      getFunctionAddress("llama_sample_repetition_penalty"));
+      getFunctionAddress("llama_sample_repetition_penalties"));
     llama_context* context = jni::getLlamaContextPointer(env, jContext);
 
     llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);

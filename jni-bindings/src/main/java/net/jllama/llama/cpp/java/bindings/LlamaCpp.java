@@ -10,6 +10,10 @@ public class LlamaCpp {
 
   final static Logger log = LogManager.getLogger(LlamaCpp.class);
 
+  private LlamaCpp() {
+
+  }
+
   static {
     loadJniImplementation();
   }
@@ -53,43 +57,8 @@ public class LlamaCpp {
 
   public static native LlamaModel loadModel(byte[] pathModel, LlamaModelParams params);
 
-  public static native float[] llamaGetLogits(LlamaContext context);
-
-  public static native int llamaSampleToken(LlamaContext context, LlamaTokenDataArray candidates);
-  public static native int llamaSampleTokenGreedy(LlamaContext context, LlamaTokenDataArray candidates);
-
-  public static native void llamaSampleRepetitionPenalty(LlamaContext ctx, LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
-
-  public static native void llamaSampleFrequencyAndPresencePenalties(LlamaContext context, LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency, float alphaPresence);
-
-  public static native void llamaSampleSoftMax(LlamaContext context, LlamaTokenDataArray candidates);
-
-  public static native void llamaSampleTopK(LlamaContext context, LlamaTokenDataArray candidates, int k, long minKeep);
-
-  public static native void llamaSampleTopP(LlamaContext context, LlamaTokenDataArray candidates, float p, long minKeep);
-
-  public static native void llamaSampleTailFree(LlamaContext context, LlamaTokenDataArray candidates, float z, long minKeep);
-
-  public static native int llamaTokenBos(LlamaContext context);
-
-  public static native int llamaTokenEos(LlamaContext context);
-
-  public static native int llamaTokenNl(LlamaContext context);
-
   public static native void llamaLogSet(BiConsumer<LlamaLogLevel, byte[]> llamaLogCallback);
 
   public static native long llamaTimeUs();
-
-  public static native LlamaContextParams llamaContextDefaultParams();
-
-  public static native void llamaSampleTypical(LlamaContext llamaContext, LlamaTokenDataArray candidates, float p, int minKeep);
-
-  public static native void llamaSampleTemperature(LlamaContext llamaContext, LlamaTokenDataArray candidates, float temp);
-
-//  // NEW BATCH STUFF
-//  LlamaBatch llamaBatchInit(int nTokens, int embd, int nSeqMax);
-//  void llamaBatchFree(LlamaBatch batch);
-//
-//  int llamaDecode(LlamaContext ctx, LlamaBatch batch);
 
 }
