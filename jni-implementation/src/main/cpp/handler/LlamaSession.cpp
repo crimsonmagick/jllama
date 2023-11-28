@@ -517,3 +517,13 @@ jobject LlamaManager::LlamaSession::llamaBatchInit(jobject jContext,
     return jni::constructBatch(env, jContext, jMaxTokenCount, batchHeap);
   });
 }
+
+typedef void (* llama_batch_free_pointer) (llama_batch);
+void LlamaManager::LlamaSession::llamaBatchFree(jobject jBatch) {
+  return withJniExceptions(env, [this, jBatch] {
+    auto batchFree = reinterpret_cast<llama_batch_free_pointer>(getFunctionAddress("llama_batch_free"));
+    llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
+    batchFree(*batch);
+    delete batch;
+  });
+}

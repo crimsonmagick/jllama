@@ -176,7 +176,7 @@ namespace jni {
     if (jConstructor == nullptr) {
       throw JNIException("Unable to find LlamaBatch constructor");
     }
-    jobject jBatch = env->NewObject(jBatchClass, jConstructor, jContext, maxTokenCount, jBatchPointer);
+    jobject jBatch = env->NewObject(jBatchClass, jConstructor, jContext, jBatchPointer, maxTokenCount);
     if (jBatch == nullptr) {
       throw JNIException("Unable to initialize LlamaBatch");
     }
@@ -224,6 +224,18 @@ namespace jni {
       throw JNIException("Unable to find contextPointer field for LlamaContext class");
     }
     return reinterpret_cast<llama_context*>(env->GetLongField(jLlamaContext, fieldId));
+  }
+
+  llama_batch* getLlamaBatchPointer(JNIEnv* env, jobject jBatch) {
+    jclass llamaBatchClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext$LlamaBatch");
+    if (llamaBatchClass == nullptr) {
+      throw JNIException("Unable to find LlamaContext class");
+    }
+    jfieldID fieldId = env->GetFieldID(llamaBatchClass, "batchPointer", "J");
+    if (!fieldId) {
+      throw JNIException("Unable to find batchPointer field for LlamaBatch class");
+    }
+    return reinterpret_cast<llama_batch*>(env->GetLongField(jBatch, fieldId));
   }
 
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray) {

@@ -36,6 +36,7 @@ namespace jni {
   void throwRuntimeException(JNIEnv* env, const std::exception& e);
   jobject constructLlamaContext(JNIEnv* env, llama_context* jcontextPointer);
   llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext);
+  llama_batch* getLlamaBatchPointer(JNIEnv* env, jobject jBatch);
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray);
   void updateTokenDateArray(JNIEnv* env, jobject destination, llama_token_data_array* src);
 }

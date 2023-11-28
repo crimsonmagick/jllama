@@ -79,6 +79,7 @@ class LlamaManager {
       jobject defaultModelParams();
       jobject llamaBatchInit(jobject jContext, jint jMaxTokenCount,
                              jint jEmbeddingVectorSize, jint jSequenceIdLength);
+      void llamaBatchFree(jobject jBatch);
      private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
