@@ -70,7 +70,6 @@ extern "C" {
     return LlamaManager::getLlamaManager(env)->newSession(env).tokenNl(jContext);
   }
 
-
   JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_llamaSampleTokenNative(JNIEnv* env, jobject jContext, jobject jCandiates) {
     return LlamaManager::getLlamaManager(env)
       ->newSession(env).sampleToken(jContext, jCandiates);
@@ -82,7 +81,14 @@ extern "C" {
   }
 
   JNIEXPORT jobject
-  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_llamaContextDefaultParams(JNIEnv* env,jclass classReference) {
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_createBatchNative
+    (JNIEnv* env, jobject jContext, jint jMaxTokenCount, jint jEmbeddingVectorSize, jint jSequenceIdLength) {
+    return LlamaManager::getLlamaManager(env)
+        ->newSession(env).llamaBatchInit(jContext, jMaxTokenCount, jEmbeddingVectorSize, jSequenceIdLength);
+  }
+
+  JNIEXPORT jobject
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_llamaContextDefaultParams(JNIEnv* env, jclass classReference) {
 
     try {
       jobject ret = LlamaManager::getLlamaManager(env)->newSession(env).defaultContextParams();

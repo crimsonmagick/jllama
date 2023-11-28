@@ -505,16 +505,15 @@ void LlamaManager::LlamaSession::llamaSampleTemperature(jobject jContext,
 }
 
 typedef llama_batch (* llama_batch_init_pointer) (int32_t n_tokens, int32_t embd, int32_t n_seq_max);
-struct llama_batch llama_batch_init(
-    int32_t n_tokens,
-    int32_t embd,
-    int32_t n_seq_max);
-jobject LlamaManager::LlamaSession::llamaBatchInit(jint nTokens,
-                                                   jint embd,
-                                                   jint nSeqMax) {
-  return withJniExceptions(env, [nTokens, embd, nSeqMax] {
+jobject LlamaManager::LlamaSession::llamaBatchInit(jobject jContext,
+                                                   jint jMaxTokenCount,
+                                                   jint jEmbeddingVectorSize,
+                                                   jint jSequenceIdLength) {
+  return withJniExceptions(env, [this, jContext, jMaxTokenCount, jEmbeddingVectorSize, jSequenceIdLength] {
     auto batchInit = reinterpret_cast<llama_batch_init_pointer>(getFunctionAddress("llama_batch_init"));
-    llama_batch batch = batchInit(nTokens, embd, nSeqMax);
-    return nullptr;
+    llama_batch batchStack = batchInit(jMaxTokenCount, jEmbeddingVectorSize, jSequenceIdLength);
+    llama_batch* batchHeap = new llama_batch;
+    std::memcpy(batchHeap, &batchStack, sizeof(llama_batch));
+    return jni::constructBatch(env, jContext, jMaxTokenCount, batchHeap);
   });
 }

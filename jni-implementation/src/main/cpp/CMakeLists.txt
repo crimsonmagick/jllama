@@ -4,7 +4,7 @@ add_library(jni-implementation SHARED
         handler/LlamaSession.cpp jni.h exceptions/exceptions.h handler/LlamaManager.h
         handler/LlamaModelParamsManager.cpp
         model_bridge.cpp
-        context_bridge.cpp)
+        context_bridge.cpp batch_bridge.cpp)
 
 set_target_properties(jni-implementation PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/jni-implementation"

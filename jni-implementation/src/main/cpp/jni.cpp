@@ -165,20 +165,23 @@ namespace jni {
     return llamaModelObj;
   }
 
-//  jobject constructBatch(JNIEnv* env, llama_batch batch) {
-//    jclass jBatchClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaBatch");
-//    if (jBatchClass == nullptr) {
-//      throw JNIException("Unable to find LlamaBatch class");
-//    }
-//
-//    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(J)V");
-//    if (jConstructor == nullptr) {
-//      throw JNIException("Unable to find LlamaBatch constructor");
-//    }
-//    jobject jBatch = env->NewObject(jBatchClass, jConstructor);
-//    env->NewIntArray()
-//
-//  }
+  jobject constructBatch(JNIEnv* env, jobject jContext, jint maxTokenCount, llama_batch* batch) {
+    auto jBatchPointer = reinterpret_cast<jlong>(batch);
+    jclass jBatchClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext$LlamaBatch");
+    if (jBatchClass == nullptr) {
+      throw JNIException("Unable to find LlamaBatch class");
+    }
+
+    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(Lnet/jllama/llama/cpp/java/bindings/LlamaContext;JI)V");
+    if (jConstructor == nullptr) {
+      throw JNIException("Unable to find LlamaBatch constructor");
+    }
+    jobject jBatch = env->NewObject(jBatchClass, jConstructor, jContext, maxTokenCount, jBatchPointer);
+    if (jBatch == nullptr) {
+      throw JNIException("Unable to initialize LlamaBatch");
+    }
+    return jBatch;
+  }
 
   jobject constructLlamaContext(JNIEnv* env, llama_context* jcontextPointer) {
 
