@@ -183,6 +183,22 @@ jfloatArray LlamaManager::LlamaSession::getLogits(jobject jContext) {
   });
 }
 
+jfloatArray LlamaManager::LlamaSession::getLogits(jobject jContext, jint batchTokenIndex) {
+  return withJniExceptions(env, [&jContext, this, batchTokenIndex] {
+    auto getLogits = (llama_get_logits_pointer) getFunctionAddress(
+        "llama_get_logits");
+    auto getModel = (llama_get_model_pointer) getFunctionAddress("llama_get_model");
+    auto getVocabLength = (llama_n_vocab_pointer) getFunctionAddress("llama_n_vocab");
+    auto llamaContext = jni::getLlamaContextPointer(env, jContext);
+    float* logits = getLogits(llamaContext);
+    auto llamaModel = getModel(llamaContext);
+    int vocabLength = getVocabLength(llamaModel);
+    auto jLogits = env->NewFloatArray(vocabLength);
+    env->SetFloatArrayRegion(jLogits, 0, vocabLength, logits + batchTokenIndex * vocabLength);
+    return jLogits;
+  });
+}
+
 typedef llama_token (* llama_sample_token_pointer)
     (struct llama_context*, llama_token_data_array*);
 jint LlamaManager::LlamaSession::sampleTokenGreedy(jobject jContext, jobject jCandidates) {
@@ -526,4 +542,46 @@ void LlamaManager::LlamaSession::llamaBatchFree(jobject jBatch) {
     batchFree(*batch);
     delete batch;
   });
+}
+
+void LlamaManager::LlamaSession::submitSequence(jobject jBatch,
+                                                jintArray jTokens,
+                                                jint jSequenceId) {
+  withJniExceptions(env, [this, jBatch, jTokens, jSequenceId] {
+    llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
+    jint* tokens = env->GetIntArrayElements(jTokens, nullptr);
+    jsize tokenCount = env->GetArrayLength(jTokens);
+    int32_t startIndex = batch->n_tokens;
+    for (jsize i = 0; i < tokenCount; i++) {
+      int32_t index = startIndex + i;
+      batch->token[index] = tokens[i];
+      batch->pos[index] = i;
+      batch->n_seq_id[index] = 1;
+      batch->seq_id[index][0] = jSequenceId;
+      batch->logits[index] = 0;
+    }
+    batch->logits[startIndex + tokenCount - 1] = 1;
+    batch->n_tokens += tokenCount;
+    jclass batchClass = env->GetObjectClass(jBatch);
+    jni::setSignedInt32(batch->n_tokens, env, batchClass, jBatch, "currentTokenCount");
+    env->ReleaseIntArrayElements(jTokens, tokens, 0); // TODO should we use JNI_ABORT?
+  });
+}
+
+typedef int (* llama_decode_pointer) (llama_context*, llama_batch);
+jint LlamaManager::LlamaSession::evaluate(jobject jContext, jobject jBatch) {
+  return withJniExceptions(env, [this, jContext, jBatch] {
+    auto decode = reinterpret_cast<llama_decode_pointer>(getFunctionAddress("llama_decode"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
+    return decode(context, *batch);
+  });
+}
+
+void LlamaManager::LlamaSession::setCurrentTokenCount(jobject jBatch,
+                                                      jint currentTokenCount) {
+    withJniExceptions(env, [this, jBatch, currentTokenCount] {
+        llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
+        batch->n_tokens = currentTokenCount;
+    });
 }

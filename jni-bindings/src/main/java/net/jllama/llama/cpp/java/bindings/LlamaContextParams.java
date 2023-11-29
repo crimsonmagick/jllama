@@ -6,8 +6,14 @@ public class LlamaContextParams {
     private int nBatch;
     private int nThreads;
     private int nThreadsBatch;
+    private byte ropeScalingType;
     private float ropeFreqBase;
     private float ropeFreqScale;
+    private float yarnExtFactor;
+    private float yarnAttnFactor;
+    private float yarnBetaFast;
+    private float yarnBetaSlow;
+    private int yarnOrigCtx;
     private boolean mulMatQ;
     private boolean f16Kv;
     private boolean logitsAll;
@@ -53,6 +59,14 @@ public class LlamaContextParams {
         this.nThreadsBatch = nThreadsBatch;
     }
 
+    public byte getRopeScalingType() {
+        return ropeScalingType;
+    }
+
+    public void setRopeScalingType(byte ropeScalingType) {
+        this.ropeScalingType = ropeScalingType;
+    }
+
     public float getRopeFreqBase() {
         return ropeFreqBase;
     }
@@ -67,6 +81,46 @@ public class LlamaContextParams {
 
     public void setRopeFreqScale(float ropeFreqScale) {
         this.ropeFreqScale = ropeFreqScale;
+    }
+
+    public float getYarnExtFactor() {
+        return yarnExtFactor;
+    }
+
+    public void setYarnExtFactor(float yarnExtFactor) {
+        this.yarnExtFactor = yarnExtFactor;
+    }
+
+    public float getYarnAttnFactor() {
+        return yarnAttnFactor;
+    }
+
+    public void setYarnAttnFactor(float yarnAttnFactor) {
+        this.yarnAttnFactor = yarnAttnFactor;
+    }
+
+    public float getYarnBetaFast() {
+        return yarnBetaFast;
+    }
+
+    public void setYarnBetaFast(float yarnBetaFast) {
+        this.yarnBetaFast = yarnBetaFast;
+    }
+
+    public float getYarnBetaSlow() {
+        return yarnBetaSlow;
+    }
+
+    public void setYarnBetaSlow(float yarnBetaSlow) {
+        this.yarnBetaSlow = yarnBetaSlow;
+    }
+
+    public int getYarnOrigCtx() {
+        return yarnOrigCtx;
+    }
+
+    public void setYarnOrigCtx(int yarnOrigCtx) {
+        this.yarnOrigCtx = yarnOrigCtx;
     }
 
     public boolean isMulMatQ() {

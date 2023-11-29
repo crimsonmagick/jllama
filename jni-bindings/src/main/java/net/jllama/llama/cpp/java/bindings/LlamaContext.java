@@ -1,18 +1,21 @@
 package net.jllama.llama.cpp.java.bindings;
 
 import java.io.Closeable;
+import java.util.HashSet;
 import java.util.Set;
+import net.jllama.llama.cpp.java.bindings.exceptions.LlamaCppException;
 
 public class LlamaContext implements Closeable {
 
   private long contextPointer;
   private boolean closed;
-
   private Set<Integer> sequences;
+  private int lastBatchTokenCount = 0;
 
   public LlamaContext(final long contextPointer) {
     this.contextPointer = contextPointer;
     closed = false;
+    sequences = new HashSet<>();
   }
 
   private void validateState() {
@@ -37,7 +40,14 @@ public class LlamaContext implements Closeable {
     if (batch.getCurrentTokenCount() == 0) {
       throw new IllegalStateException("LlamaBatch is empty.");
     }
-    evaluateNative(batch);
+    final int returnValue = evaluateNative(batch);
+    if (returnValue < 0) {
+      throw new LlamaCppException("LlamaBatch evaluation failed.");
+    }
+    if (returnValue == 1) {
+      throw new LlamaCppException("Could not find a KV slot for the batch (try reducing the size of the batch or increase the context).");
+    }
+    lastBatchTokenCount = batch.currentTokenCount;
   }
 
   public native void llamaSampleSoftMaxNative(LlamaTokenDataArray candidates);
@@ -97,6 +107,12 @@ public class LlamaContext implements Closeable {
   }
 
   public native float[] llamaGetLogitsNative();
+  public native float[] getLogitsNative(int batchTokenIndex);
+
+  public float[] getLogits() {
+    validateState();
+    return getLogitsNative(lastBatchTokenCount - 1);
+  }
 
   public float[] llamaGetLogits() {
     validateState();
@@ -218,6 +234,12 @@ public class LlamaContext implements Closeable {
 
     public int getMaxTokenCount() {
       return maxTokenCount;
+    }
+
+    private native void setCurrentTokenCountNative(int currentTokenCount);
+    private void setCurrentTokenCount(final int currentTokenCount) {
+      this.currentTokenCount = currentTokenCount;
+      setCurrentTokenCountNative(currentTokenCount);
     }
 
     public int getCurrentTokenCount() {

@@ -85,14 +85,14 @@ LlamaManager::LlamaSession::LlamaModelParamsManager::LlamaModelParamsManager(
   }
 
   llamaModelParams = {
-      jni::getInt32(env, javaParamsClass, javaContextParams, "nGpuLayers"),
-      jni::getInt32(env, javaParamsClass, javaContextParams, "mainGpu"),
-      tensorSplit,
-      progressCallback,
-      callbackContext,
-      jni::getBool(env, javaParamsClass, javaContextParams, "vocabOnly"),
-      jni::getBool(env, javaParamsClass, javaContextParams, "useMmap"),
-      jni::getBool(env, javaParamsClass, javaContextParams, "useMlock"),
+      .n_gpu_layers = jni::getInt32(env, javaParamsClass, javaContextParams, "nGpuLayers"),
+      .main_gpu = jni::getInt32(env, javaParamsClass, javaContextParams, "mainGpu"),
+      .tensor_split = tensorSplit,
+      .progress_callback = progressCallback,
+      .progress_callback_user_data = callbackContext,
+      .vocab_only = jni::getBool(env, javaParamsClass, javaContextParams, "vocabOnly"),
+      .use_mmap = jni::getBool(env, javaParamsClass, javaContextParams, "useMmap"),
+      .use_mlock = jni::getBool(env, javaParamsClass, javaContextParams, "useMlock"),
   };
 }
 

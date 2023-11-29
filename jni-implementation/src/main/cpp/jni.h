@@ -18,6 +18,8 @@ namespace jni {
 
   };
 
+  int8_t getByte(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  void setByte(int8_t value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   int32_t getInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   void setSignedInt32(int32_t value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   uint32_t getUnsignedInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);

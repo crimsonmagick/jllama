@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <iostream>
 #include <jni.h>
 #include "jni.h"
@@ -9,6 +8,26 @@ std::string fieldNotFound(const char* fieldName) {
 }
 
 namespace jni {
+
+  int8_t getByte(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "B");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    return static_cast<int8_t>(env->GetByteField(jInstance, fieldId));
+  }
+
+  void setByte(int8_t value,
+               JNIEnv* env,
+               jclass jType,
+               jobject jInstance,
+               const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "B");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    env->SetByteField(jInstance, fieldId, value);
+  }
 
   int32_t getInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "I");

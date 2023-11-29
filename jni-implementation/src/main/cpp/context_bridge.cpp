@@ -98,4 +98,18 @@ extern "C" {
     }
   }
 
+  JNIEXPORT jfloatArray
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_getLogitsNative
+    (JNIEnv* env, jobject jContext, jint batchTokenIndex) {
+    return LlamaManager::getLlamaManager(env)
+        ->newSession(env).getLogits(jContext, batchTokenIndex);
+  }
+
+  JNIEXPORT jint
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_evaluateNative
+      (JNIEnv* env, jobject jContext, jobject jBatch) {
+    return LlamaManager::getLlamaManager(env)
+        ->newSession(env).evaluate(jContext, jBatch);
+  }
+
 }
