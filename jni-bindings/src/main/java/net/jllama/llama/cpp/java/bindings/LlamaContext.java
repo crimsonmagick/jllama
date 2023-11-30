@@ -1,34 +1,29 @@
 package net.jllama.llama.cpp.java.bindings;
 
 import java.io.Closeable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
 import net.jllama.llama.cpp.java.bindings.exceptions.LlamaCppException;
 
 public class LlamaContext implements Closeable {
 
   private long contextPointer;
   private boolean closed;
-  private Set<Integer> sequences;
-  private int lastBatchTokenCount = 0;
+  private final HashMap<Integer, Integer> sequences;
+  private int lastBatchTokenCount;
+  private int contextTokenCount;
 
   public LlamaContext(final long contextPointer) {
     this.contextPointer = contextPointer;
     closed = false;
-    sequences = new HashSet<>();
+    sequences = new HashMap<>();
+    lastBatchTokenCount = 0;
+    contextTokenCount = 0;
   }
 
   private void validateState() {
     if (isClosed()) {
       throw new IllegalStateException("LlamaModel is closed.");
     }
-  }
-
-  private native int llamaEvalNative(int[] tokens, int nTokens, int nPast);
-
-  public int llamaEval(int[] tokens, int nTokens, int nPast) {
-    validateState();
-    return llamaEvalNative(tokens, nTokens, nPast);
   }
 
   private native int evaluateNative(LlamaBatch batch);
@@ -48,6 +43,8 @@ public class LlamaContext implements Closeable {
       throw new LlamaCppException("Could not find a KV slot for the batch (try reducing the size of the batch or increase the context).");
     }
     lastBatchTokenCount = batch.currentTokenCount;
+
+    batch.setCurrentTokenCount(0);
   }
 
   public native void llamaSampleSoftMaxNative(LlamaTokenDataArray candidates);
@@ -106,17 +103,11 @@ public class LlamaContext implements Closeable {
     return llamaTokenNlNative();
   }
 
-  public native float[] llamaGetLogitsNative();
   public native float[] getLogitsNative(int batchTokenIndex);
 
   public float[] getLogits() {
     validateState();
     return getLogitsNative(lastBatchTokenCount - 1);
-  }
-
-  public float[] llamaGetLogits() {
-    validateState();
-    return llamaGetLogitsNative();
   }
 
   public native int llamaSampleTokenNative(LlamaTokenDataArray candidates);
@@ -188,7 +179,7 @@ public class LlamaContext implements Closeable {
       }
     }
 
-    private native void submitSequenceNative(int[] tokens, int sequenceId);
+    private native void submitSequenceNative(int[] tokens, int sequenceId, int tokenSequenceIndex);
     public int submitSequence(final int[] tokens) {
       validateState();
       if (currentTokenCount + tokens.length > maxTokenCount) {
@@ -198,24 +189,25 @@ public class LlamaContext implements Closeable {
       if (sequences.isEmpty()) {
         sequenceId = 0;
       } else {
-        sequenceId = sequences.stream().max(Integer::compareTo).get() + 1;
+        sequenceId = sequences.keySet().stream().max(Integer::compareTo).get() + 1;
       }
-      sequences.add(sequenceId);
-      submitSequenceNative(tokens, sequenceId);
-      currentTokenCount += tokens.length;
+      submitSequenceNative(tokens, sequenceId, 0);
+      contextTokenCount += tokens.length;
+      sequences.put(sequenceId, tokens.length);
       return sequenceId;
     }
 
     public void appendToSequence(final int[] tokens, final int sequenceId) {
       validateState();
-      if (!sequences.contains(sequenceId)) {
+      if (!sequences.containsKey(sequenceId)) {
         throw new IllegalStateException("Sequence does not exist.");
       }
       if (currentTokenCount + tokens.length > maxTokenCount) {
         throw new IllegalStateException("LlamaBatch is full.");
       }
-      submitSequenceNative(tokens, sequenceId);
-      currentTokenCount += tokens.length;
+      final int nextSequenceIndex = sequences.get(sequenceId);
+      submitSequenceNative(tokens, sequenceId, nextSequenceIndex);
+      sequences.put(sequenceId,  nextSequenceIndex + tokens.length);
     }
 
     private native void closeNative();

@@ -546,21 +546,22 @@ void LlamaManager::LlamaSession::llamaBatchFree(jobject jBatch) {
 
 void LlamaManager::LlamaSession::submitSequence(jobject jBatch,
                                                 jintArray jTokens,
-                                                jint jSequenceId) {
-  withJniExceptions(env, [this, jBatch, jTokens, jSequenceId] {
+                                                jint jSequenceId,
+                                                jint sequenceTokenIndex) {
+  withJniExceptions(env, [this, jBatch, jTokens, jSequenceId, sequenceTokenIndex] {
     llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
     jint* tokens = env->GetIntArrayElements(jTokens, nullptr);
     jsize tokenCount = env->GetArrayLength(jTokens);
-    int32_t startIndex = batch->n_tokens;
+    int32_t startingBatchSize = batch->n_tokens;
     for (jsize i = 0; i < tokenCount; i++) {
-      int32_t index = startIndex + i;
+      int32_t index = startingBatchSize + i;
       batch->token[index] = tokens[i];
-      batch->pos[index] = i;
+      batch->pos[index] = sequenceTokenIndex + i;
       batch->n_seq_id[index] = 1;
       batch->seq_id[index][0] = jSequenceId;
       batch->logits[index] = 0;
     }
-    batch->logits[startIndex + tokenCount - 1] = 1;
+    batch->logits[startingBatchSize + tokenCount - 1] = 1;
     batch->n_tokens += tokenCount;
     jclass batchClass = env->GetObjectClass(jBatch);
     jni::setSignedInt32(batch->n_tokens, env, batchClass, jBatch, "currentTokenCount");

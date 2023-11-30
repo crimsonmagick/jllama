@@ -82,7 +82,7 @@ class LlamaManager {
                              jint jEmbeddingVectorSize, jint jSequenceIdLength);
       void llamaBatchFree(jobject jBatch);
         void
-        submitSequence(jobject jBatch, jintArray jTokens, jint jSequenceId);
+        submitSequence(jobject jBatch, jintArray jTokens, jint jSequenceId, jint sequenceTokenIndex);
         jint evaluate(jobject jContext, jobject jBatch);
         void setCurrentTokenCount(jobject jBatch, jint currentTokenCount);
       private:
