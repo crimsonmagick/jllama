@@ -76,8 +76,7 @@ extern "C" {
   JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_llamaContextDefaultParams(JNIEnv* env, jclass classReference) {
 
     try {
-      jobject ret = LlamaManager::getLlamaManager(env)->newSession(env).defaultContextParams();
-      return ret;
+      return LlamaManager::getLlamaManager(env)->newSession(env).defaultContextParams();
     } catch (std::exception& e) {
       return nullptr;
     }
