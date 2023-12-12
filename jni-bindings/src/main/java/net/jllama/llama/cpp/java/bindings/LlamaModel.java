@@ -39,6 +39,24 @@ public class LlamaModel implements Closeable {
     return detokenizeNative(llamaToken, buf);
   }
 
+  public native int llamaTokenBosNative();
+  public int llamaTokenBos() {
+    validateState();
+    return llamaTokenBosNative();
+  }
+
+  public native int llamaTokenEosNative();
+  public int llamaTokenEos() {
+    validateState();
+    return llamaTokenEosNative();
+  }
+
+  public native int llamaTokenNlNative();
+  public int llamaTokenNl() {
+    validateState();
+    return llamaTokenNlNative();
+  }
+
   private native void closeNative();
 
   public boolean isClosed() {

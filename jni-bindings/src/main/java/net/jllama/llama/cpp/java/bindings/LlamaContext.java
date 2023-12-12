@@ -83,24 +83,6 @@ public class LlamaContext implements Closeable {
     llamaSampleTemperatureNative(candidates, temp);
   }
 
-  public native int llamaTokenBosNative();
-  public int llamaTokenBos() {
-    validateState();
-    return llamaTokenBosNative();
-  }
-
-  public native int llamaTokenEosNative();
-  public int llamaTokenEos() {
-    validateState();
-    return llamaTokenEosNative();
-  }
-
-  public native int llamaTokenNlNative();
-  public int llamaTokenNl() {
-    validateState();
-    return llamaTokenNlNative();
-  }
-
   public native float[] getLogitsNative(int batchTokenIndex);
 
   public float[] getLogits(final Sequence sequence) {

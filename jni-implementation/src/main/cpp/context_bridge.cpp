@@ -43,18 +43,6 @@ extern "C" {
     LlamaManager::getLlamaManager(env)->newSession(env).applyFrequencyAndPresencePenalties(jContext, jCandidates, jLastTokens, jAlphaFrequency, jPenalty);
   }
 
-  JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_llamaTokenBosNative(JNIEnv* env, jobject jContext) {
-    return LlamaManager::getLlamaManager(env)->newSession(env).tokenBos(jContext);
-  }
-
-  JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_llamaTokenEosNative(JNIEnv* env, jobject jContext) {
-    return LlamaManager::getLlamaManager(env)->newSession(env).tokenEos(jContext);
-  }
-
-  JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_llamaTokenNlNative(JNIEnv* env, jobject jContext) {
-    return LlamaManager::getLlamaManager(env)->newSession(env).tokenNl(jContext);
-  }
-
   JNIEXPORT jint JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaContext_llamaSampleTokenNative(JNIEnv* env, jobject jContext, jobject jCandiates) {
     return LlamaManager::getLlamaManager(env)
       ->newSession(env).sampleToken(jContext, jCandiates);

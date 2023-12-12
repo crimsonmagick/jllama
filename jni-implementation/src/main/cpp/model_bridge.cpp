@@ -40,4 +40,27 @@ extern "C" {
     }
   }
 
+
+  JNIEXPORT jint
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaModel_llamaTokenBosNative
+      (JNIEnv *env, jobject jModel) {
+    return LlamaManager::getLlamaManager(env)->newSession(env).tokenBos(jModel);
+  }
+
+  JNIEXPORT jint
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaModel_llamaTokenEosNative(
+      JNIEnv *env,
+      jobject jModel) {
+    return LlamaManager::getLlamaManager(env)->newSession(env).tokenEos(jModel);
+  }
+
+  JNIEXPORT jint
+  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaModel_llamaTokenNlNative(
+      JNIEnv *env,
+      jobject jModel) {
+    return LlamaManager::getLlamaManager(env)->newSession(env).tokenNl(jModel);
+  }
+
+
+
 }

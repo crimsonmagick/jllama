@@ -37,8 +37,8 @@ class LlamaManager {
         jint tokenToPiece(jobject jModel, jint jToken, jbyteArray output);
 
         jint tokenBos(jobject jContext);
-        jint tokenEos(jobject jContext);
-        jint tokenNl(jobject jContext);
+        jint tokenEos(jobject jModel);
+        jint tokenNl(jobject jModel);
 
         void setLogger(jobject logger);
 

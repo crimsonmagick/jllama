@@ -132,7 +132,7 @@ jint LlamaManager::LlamaSession::tokenizeWithModel(jobject jModel,
                           length,
                           reinterpret_cast<llama_token*>(tokensOut),
                           jmaxTokens,
-                          jBos, false);
+                          jBos, true);
     if (result > 0) {
       env->ReleaseIntArrayElements(jTokensOut, tokensOut, 0);
     } else {
@@ -240,29 +240,29 @@ jint LlamaManager::LlamaSession::tokenToPiece(jobject jModel, jint jToken, jbyte
   });
 }
 
-typedef llama_token (* get_special_token_pointer)(llama_context*);
+typedef llama_token (* get_special_token_pointer)(llama_model*);
 
-jint LlamaManager::LlamaSession::tokenBos(jobject jContext) {
-  return withJniExceptions(env, [this, jContext]{
-    auto context = jni::getLlamaContextPointer(env, jContext);
+jint LlamaManager::LlamaSession::tokenBos(jobject jModel) {
+  return withJniExceptions(env, [this, jModel]{
+    auto model = jni::getLlamaModelPointer(env, jModel);
     auto getBos = (get_special_token_pointer) getFunctionAddress("llama_token_bos");
-    return getBos(context);
+    return getBos(model);
   });
 }
 
-jint LlamaManager::LlamaSession::tokenEos(jobject jContext) {
-  return withJniExceptions(env, [this, jContext]{
-    auto context = jni::getLlamaContextPointer(env, jContext);
+jint LlamaManager::LlamaSession::tokenEos(jobject jModel) {
+  return withJniExceptions(env, [this, jModel]{
+    auto model = jni::getLlamaModelPointer(env, jModel);
     auto getEos = (get_special_token_pointer) getFunctionAddress("llama_token_eos");
-    return getEos(context);
+    return getEos(model);
   });
 }
 
-jint LlamaManager::LlamaSession::tokenNl(jobject jContext) {
-  return withJniExceptions(env, [this, jContext]{
-    auto context = jni::getLlamaContextPointer(env, jContext);
+jint LlamaManager::LlamaSession::tokenNl(jobject jModel) {
+  return withJniExceptions(env, [this, jModel]{
+    auto model = jni::getLlamaModelPointer(env, jModel);
     auto getNl = (get_special_token_pointer) getFunctionAddress("llama_token_nl");
-    return getNl(context);
+    return getNl(model);
   });
 }
 
