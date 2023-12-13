@@ -9,4 +9,5 @@ set(MAC_FRAMEWORKS "/usr/local/osxcross/SDK/MacOSX13.3.sdk/System/Library/Framew
 set(MAC_TARGET "arm64-apple-darwin")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -target ${MAC_TARGET} -fuse-ld=${ARM64_LINKER} -F${MAC_FRAMEWORKS}")
-set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -target ${MAC_TARGET} -fuse-ld=${ARM64_LINKER} -F${MAC_FRAMEWORKS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -target ${MAC_TARGET} -fuse-ld=${ARM64_LINKER} -F${MAC_FRAMEWORKS}")
+set(CMAKE_FRAMEWORK_PATH ${MAC_FRAMEWORKS} CACHE PATH "Path to macOS Frameworks")
