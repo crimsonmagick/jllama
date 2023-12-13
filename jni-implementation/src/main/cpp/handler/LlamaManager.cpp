@@ -9,17 +9,11 @@ jobject LlamaManager::jloggerCallback = nullptr;
 LlamaManager::LlamaManager() = default;
 
 LlamaManager* LlamaManager::getLlamaManager(JNIEnv* env) {
-  JavaVM* vm;
-  env->GetJavaVM(&vm);
 
-  std::call_once(initFlag, [vm](){
-    LlamaManager::javaVm = vm;
+  std::call_once(initFlag, [env](){
+    env->GetJavaVM(&LlamaManager::javaVm);
     singleton = new LlamaManager();
   });
-
-  if (vm != javaVm) {
-    throw LlamaCppException("JavaVM for provided JNIEnv does not match previously cached JavaVM. LlamaManager only supports one JavaVM per process.");
-  }
   return singleton;
 }
 LlamaManager::LlamaSession LlamaManager::newSession(JNIEnv* env) {

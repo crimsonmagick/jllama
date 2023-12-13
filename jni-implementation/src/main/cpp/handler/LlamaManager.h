@@ -30,14 +30,15 @@ class LlamaManager {
                   jint jnPast);
 
         jfloatArray getLogits(jobject jContext);
+        jfloatArray getLogits(jobject jContext, jint batchTokenIndex);
 
         jint sampleTokenGreedy(jobject jContext, jobject jCandidates);
 
         jint tokenToPiece(jobject jModel, jint jToken, jbyteArray output);
 
         jint tokenBos(jobject jContext);
-        jint tokenEos(jobject jContext);
-        jint tokenNl(jobject jContext);
+        jint tokenEos(jobject jModel);
+        jint tokenNl(jobject jModel);
 
         void setLogger(jobject logger);
 
@@ -77,7 +78,14 @@ class LlamaManager {
                                     jobject jCandidates,
                                     jfloat temp);
       jobject defaultModelParams();
-     private:
+      jobject llamaBatchInit(jobject jContext, jint jMaxTokenCount,
+                             jint jEmbeddingVectorSize, jint jSequenceIdLength);
+      void llamaBatchFree(jobject jBatch);
+        void
+        submitSequence(jobject jBatch, jintArray jTokens, jint jSequenceId, jint sequenceTokenIndex);
+        jint evaluate(jobject jContext, jobject jBatch);
+        void setCurrentTokenCount(jobject jBatch, jint currentTokenCount);
+      private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
             : env(env), manager(outer) {}

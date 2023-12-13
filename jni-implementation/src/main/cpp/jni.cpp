@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <iostream>
 #include <jni.h>
 #include "jni.h"
@@ -9,6 +8,26 @@ std::string fieldNotFound(const char* fieldName) {
 }
 
 namespace jni {
+
+  int8_t getByte(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "B");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    return static_cast<int8_t>(env->GetByteField(jInstance, fieldId));
+  }
+
+  void setByte(int8_t value,
+               JNIEnv* env,
+               jclass jType,
+               jobject jInstance,
+               const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "B");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    env->SetByteField(jInstance, fieldId, value);
+  }
 
   int32_t getInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "I");
@@ -145,66 +164,97 @@ namespace jni {
     throwNativeException(env, "java/lang/RuntimeException", e.what());
   }
 
-  jobject constructLlamaOpaqueModel(JNIEnv *env, llama_model *modelPointer) {
+  jobject constructLlamaModel(JNIEnv *env, llama_model *modelPointer) {
     auto jmodelPointer = reinterpret_cast<jlong>(modelPointer);
 
-    jclass llamaOpaqueModelClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaOpaqueModel");
-    if (llamaOpaqueModelClass == nullptr) {
-      throw JNIException("Unable to find LlamaOpaqueModel class");
+    jclass llamaModelClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaModel");
+    if (llamaModelClass == nullptr) {
+      throw JNIException("Unable to find LlamaModel class");
     }
 
-    jmethodID constructor = env->GetMethodID(llamaOpaqueModelClass, "<init>", "(J)V");
+    jmethodID constructor = env->GetMethodID(llamaModelClass, "<init>", "(J)V");
     if (constructor == nullptr) {
-      throw JNIException("Unable to find LlamaOpaqueModel constructor");
+      throw JNIException("Unable to find LlamaModel constructor");
     }
 
-    jobject llamaOpaqueModelObj = env->NewObject(llamaOpaqueModelClass, constructor, jmodelPointer);
-    if (llamaOpaqueModelObj == nullptr) {
-      throw JNIException("Unable to initialize LlamaOpaqueModel");
+    jobject llamaModelObj = env->NewObject(llamaModelClass, constructor, jmodelPointer);
+    if (llamaModelObj == nullptr) {
+      throw JNIException("Unable to initialize LlamaModel");
     }
-    return llamaOpaqueModelObj;
+    return llamaModelObj;
   }
 
-  jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer) {
-
-    jclass llamaOpaqueContextClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaOpaqueContext");
-    if (llamaOpaqueContextClass == nullptr) {
-      throw JNIException("Unable to find LlamaOpaqueContext class");
+  jobject constructBatch(JNIEnv* env, jobject jContext, jint maxTokenCount, llama_batch* batch) {
+    auto jBatchPointer = reinterpret_cast<jlong>(batch);
+    jclass jBatchClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext$LlamaBatch");
+    if (jBatchClass == nullptr) {
+      throw JNIException("Unable to find LlamaBatch class");
     }
 
-    jmethodID constructor = env->GetMethodID(llamaOpaqueContextClass, "<init>", "(J)V");
-    if (constructor == nullptr) {
-      throw JNIException("Unable to find LlamaOpaqueContext constructor");
+    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(Lnet/jllama/llama/cpp/java/bindings/LlamaContext;JI)V");
+    if (jConstructor == nullptr) {
+      throw JNIException("Unable to find LlamaBatch constructor");
     }
-
-    jobject llamaOpaqueContextObj = env->NewObject(llamaOpaqueContextClass, constructor, jcontextPointer);
-    if (llamaOpaqueContextObj == nullptr) {
-      throw JNIException("Unable to initialize LlamaOpaqueContext");
+    jobject jBatch = env->NewObject(jBatchClass, jConstructor, jContext, jBatchPointer, maxTokenCount);
+    if (jBatch == nullptr) {
+      throw JNIException("Unable to initialize LlamaBatch");
     }
-    return llamaOpaqueContextObj;
+    return jBatch;
   }
 
-  llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaOpaqueModel) {
-    jclass llamaOpaqueModelClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaOpaqueModel");
-    if (llamaOpaqueModelClass == nullptr) {
-      throw JNIException("Unable to find LlamaOpaqueModel class");
+  jobject constructLlamaContext(JNIEnv* env, llama_context* jcontextPointer) {
+
+    jclass llamaContextClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext");
+    if (llamaContextClass == nullptr) {
+      throw JNIException("Unable to find LlamaContext class");
     }
-    jfieldID fieldId = env->GetFieldID(llamaOpaqueModelClass, "modelPointer", "J");
+
+    jmethodID constructor = env->GetMethodID(llamaContextClass, "<init>", "(J)V");
+    if (constructor == nullptr) {
+      throw JNIException("Unable to find LlamaContext constructor");
+    }
+
+    jobject llamaContextObj = env->NewObject(llamaContextClass, constructor, jcontextPointer);
+    if (llamaContextObj == nullptr) {
+      throw JNIException("Unable to initialize LlamaContext");
+    }
+    return llamaContextObj;
+  }
+
+  llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaModel) {
+    jclass llamaModelClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaModel");
+    if (llamaModelClass == nullptr) {
+      throw JNIException("Unable to find LlamaModel class");
+    }
+    jfieldID fieldId = env->GetFieldID(llamaModelClass, "modelPointer", "J");
     if (!fieldId) {
-      throw JNIException("Unable to find modelPointer field for LlamaOpaqueModel class");
+      throw JNIException("Unable to find modelPointer field for LlamaModel class");
     }
-    return reinterpret_cast<llama_model*>(env->GetLongField(llamaOpaqueModel, fieldId));
+    return reinterpret_cast<llama_model*>(env->GetLongField(llamaModel, fieldId));
   }
+
   llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext) {
-    jclass llamaOpaqueContextClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaOpaqueContext");
-    if (llamaOpaqueContextClass == nullptr) {
-      throw JNIException("Unable to find LlamaOpaqueContext class");
+    jclass llamaContextClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext");
+    if (llamaContextClass == nullptr) {
+      throw JNIException("Unable to find LlamaContext class");
     }
-    jfieldID fieldId = env->GetFieldID(llamaOpaqueContextClass, "contextPointer", "J");
+    jfieldID fieldId = env->GetFieldID(llamaContextClass, "contextPointer", "J");
     if (!fieldId) {
-      throw JNIException("Unable to find contextPointer field for LlamaOpaqueContext class");
+      throw JNIException("Unable to find contextPointer field for LlamaContext class");
     }
     return reinterpret_cast<llama_context*>(env->GetLongField(jLlamaContext, fieldId));
+  }
+
+  llama_batch* getLlamaBatchPointer(JNIEnv* env, jobject jBatch) {
+    jclass llamaBatchClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext$LlamaBatch");
+    if (llamaBatchClass == nullptr) {
+      throw JNIException("Unable to find LlamaContext class");
+    }
+    jfieldID fieldId = env->GetFieldID(llamaBatchClass, "batchPointer", "J");
+    if (!fieldId) {
+      throw JNIException("Unable to find batchPointer field for LlamaBatch class");
+    }
+    return reinterpret_cast<llama_batch*>(env->GetLongField(jBatch, fieldId));
   }
 
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray) {
@@ -254,6 +304,7 @@ namespace jni {
       dataArray, size, sorted
     };
   }
+
   void updateTokenDateArray(JNIEnv* env,
                             jobject destination,
                             llama_token_data_array* src) {

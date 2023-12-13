@@ -18,6 +18,8 @@ namespace jni {
 
   };
 
+  int8_t getByte(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  void setByte(int8_t value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   int32_t getInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   void setSignedInt32(int32_t value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   uint32_t getUnsignedInt32(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
@@ -27,14 +29,16 @@ namespace jni {
   bool getBool(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   void setBoolean(bool value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   jfloatArray getJFloatArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
-  jobject constructLlamaOpaqueModel(JNIEnv* env, llama_model* modelPointer);
-  llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaOpaqueModel);
+  jobject constructLlamaModel(JNIEnv* env, llama_model* modelPointer);
+  jobject constructBatch(JNIEnv* env, jobject jContext, jint maxTokenCount, llama_batch* batch);
+  llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaModel);
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);
   void throwJNIException(JNIEnv* env, const JNIException& e);
   void throwLlamaCppException(JNIEnv* env, const LlamaCppException& e);
   void throwRuntimeException(JNIEnv* env, const std::exception& e);
-  jobject constructLlamaOpaqueContext(JNIEnv* env, llama_context* jcontextPointer);
+  jobject constructLlamaContext(JNIEnv* env, llama_context* jcontextPointer);
   llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext);
+  llama_batch* getLlamaBatchPointer(JNIEnv* env, jobject jBatch);
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray);
   void updateTokenDateArray(JNIEnv* env, jobject destination, llama_token_data_array* src);
 }
