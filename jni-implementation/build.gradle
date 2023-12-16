@@ -8,7 +8,13 @@ plugins {
   id("dev.welbyseely.gradle-cmake-plugin") version "0.1.0"
 }
 
+def workingFolders = []
 if (project.hasProperty("RELEASE")) {
+  final windowsX64Folder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(OperatingSystem.WINDOWS,  Architectures.x64))
+  final linuxX64Folder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(OperatingSystem.LINUX,  Architectures.x64))
+  final macArm64Folder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(OperatingSystem.MAC_OS,  Architectures.arm64))
+  workingFolders.addAll([windowsX64Folder, linuxX64Folder, macArm64Folder])
+
   cmake {
     sourceFolder = file("$projectDir/src")
     buildSharedLibs = true
@@ -20,10 +26,11 @@ if (project.hasProperty("RELEASE")) {
         final arch = Architectures.x64
         final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), arch, Compilers.MINGW)
         generator = toolChain.generator
-        workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(os, arch))
+        workingFolder = windowsX64Folder
         defs = ['BUILD_LLAMA_CPP'     : 'ON',
                 'BUILD_SHARED_LIBS'   : 'ON',
                 'LLAMA_BUILD_EXAMPLES': 'OFF',
+                'CMAKE_EXPORT_COMPILE_COMMANDS': 'ON',
                 'CMAKE_TOOLCHAIN_FILE': projectDir as String + "/src/" + toolChain.file,
                 *:toolChain.customDefs
         ]
@@ -33,7 +40,7 @@ if (project.hasProperty("RELEASE")) {
         final arch = Architectures.x64
         final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), arch, Compilers.GCC)
         generator = toolChain.generator
-        workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(os, arch))
+        workingFolder = linuxX64Folder
         defs = ['BUILD_LLAMA_CPP'     : 'ON',
                 'BUILD_SHARED_LIBS'   : 'ON',
                 'LLAMA_BUILD_EXAMPLES': 'OFF',
@@ -46,7 +53,7 @@ if (project.hasProperty("RELEASE")) {
         final arch = Architectures.arm64
         final toolChain = Toolchains.getToolchain(os, OperatingSystem.current(), arch, Compilers.CLANG)
         generator = toolChain.generator
-        workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(os, arch))
+        workingFolder = macArm64Folder
         defs = ['BUILD_LLAMA_CPP'     : 'ON',
                 'BUILD_SHARED_LIBS'   : 'ON',
                 'LLAMA_BUILD_EXAMPLES': 'OFF',
@@ -91,8 +98,11 @@ if (project.hasProperty("RELEASE")) {
       "hostOs=${OperatingSystem.current().name}, operatingSystem=${os.name}, compiler=${compiler.name()}"
   }
 
+  final buildWorkingFolder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(os, arch))
+  workingFolders.add(buildWorkingFolder)
+
   cmake {
-    workingFolder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(os, arch))
+    workingFolder = buildWorkingFolder
     generator = toolChain.generator
     sourceFolder = file("$projectDir/src")
     buildSharedLibs = true
@@ -100,6 +110,7 @@ if (project.hasProperty("RELEASE")) {
             'BUILD_SHARED_LIBS'   : 'ON',
             'LLAMA_BUILD_EXAMPLES': 'OFF',
             'CMAKE_TOOLCHAIN_FILE': projectDir as String + "/src/" + toolChain.file,
+            'CMAKE_EXPORT_COMPILE_COMMANDS': 'ON',
             *:toolChain.customDefs
     ]
     buildConfig = 'Release'
@@ -111,9 +122,8 @@ build {
   dependsOn ':jni-bindings:compileJava'
 }
 
-def cmakeBuildDirs = file("$projectDir/build/cmake").listFiles().findAll { it.isDirectory() }
 
-cmakeBuildDirs.each { dir ->
+workingFolders.each { dir ->
   def targetName = dir.name
 
   String jniImplLibJarConfigName = "jniImplLibJar${targetName}"
@@ -153,7 +163,7 @@ cmakeBuildDirs.each { dir ->
 publishing {
   publications {
     jniImplLib(MavenPublication) {
-      cmakeBuildDirs.each { dir ->
+      workingFolders.each { dir ->
        final targetName = dir.name
        final taskName = "packageJniImplLibInJar${targetName}"
        artifact tasks.named(taskName)
@@ -161,7 +171,7 @@ publishing {
       artifactId = 'jni-implementation'
     }
     llamaLib(MavenPublication) {
-      cmakeBuildDirs.each { dir ->
+      workingFolders.each { dir ->
         final targetName = dir.name
         String taskName = "packageLlamaLibInJar${targetName}"
         artifact tasks.named(taskName)
