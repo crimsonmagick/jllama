@@ -25,7 +25,7 @@ class Toolchains {
 
     static {
         toolChains[key(OperatingSystem.LINUX, OperatingSystem.LINUX, Architectures.x64, Compilers.GCC)] = new ToolChain('linux-x64-gcc-toolchain.cmake', 'Unix Makefiles')
-        toolChains[key(OperatingSystem.MAC_OS, OperatingSystem.LINUX, Architectures.arm64, Compilers.CLANG)] = new ToolChain('macos-linux-arm64-clang-toolchain.cmake', 'Unix Makefiles')
+        toolChains[key(OperatingSystem.MAC_OS, OperatingSystem.LINUX, Architectures.arm64, Compilers.CLANG)] = new ToolChain('macos-linux-arm64-clang-toolchain.cmake', 'Unix Makefiles', ['JAVA_HOME': getMacJdkHome()])
         toolChains[key(OperatingSystem.MAC_OS, OperatingSystem.MAC_OS, Architectures.arm64, Compilers.CLANG)] = new ToolChain('macos-arm64-clang-toolchain.cmake', 'Unix Makefiles')
         toolChains[key(OperatingSystem.MAC_OS, OperatingSystem.MAC_OS, Architectures.arm64, Compilers.GCC)] = new ToolChain('macos-arm64-gcc-toolchain.cmake', 'Unix Makefiles')
         toolChains[key(OperatingSystem.WINDOWS, OperatingSystem.LINUX, Architectures.x64, Compilers.MINGW)] = new ToolChain('windows-linux-mingw-toolchain.cmake', 'Unix Makefiles', ['JAVA_HOME': getWinJdkHome()])
@@ -41,8 +41,14 @@ class Toolchains {
         return "${targetOs.getFamilyName()}-${hostOs.getFamilyName()}-${architecture.name()}-${compiler.name()}}" as String
     }
 
+    private static def getMacJdkHome() {
+        final MAC_JAVA_HOME = 'JDK_MAC_LOCATION'
+        final location = System.hasProperty(MAC_JAVA_HOME) ? System.getProperty(MAC_JAVA_HOME) : System.getenv(MAC_JAVA_HOME) ? System.getenv(MAC_JAVA_HOME) : '/usr/local/include/jdk-17-mac'
+        return "${location}/Contents/Home";
+    }
+
     private static def getWinJdkHome() {
-        final WIN_JAVA_HOME = 'WIN_JAVA_HOME'
-        return System.hasProperty(WIN_JAVA_HOME) ? System.getProperty(WIN_JAVA_HOME) : System.getenv(WIN_JAVA_HOME) ? System.getenv(WIN_JAVA_HOME) : '/usr/local/include/jdk-17-win/jdk-17.0.8.1+1'
+        final WIN_JAVA_HOME = 'JDK_WIN_LOCATION'
+        return System.hasProperty(WIN_JAVA_HOME) ? System.getProperty(WIN_JAVA_HOME) : System.getenv(WIN_JAVA_HOME) ? System.getenv(WIN_JAVA_HOME) : '/usr/local/include/jdk-17-win'
     }
 }
