@@ -1,0 +1,1 @@
+Write-Output "I am a script -_-;;;"
