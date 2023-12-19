@@ -30,7 +30,7 @@ jobs:
           echo "Validation failed: is_valid=false"
           exit 1
         else
-          echo "is_valid=false" >> $GITHUB_OUTPUT
+          echo "is_valid=true" >> $GITHUB_OUTPUT
           echo "Validation succeeded: is_valid=true"
         fi
   build-and-publish:
