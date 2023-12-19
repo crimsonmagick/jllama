@@ -109,10 +109,12 @@ if (project.hasProperty("RELEASE")) {
     defs = ['BUILD_LLAMA_CPP'     : 'ON',
             'BUILD_SHARED_LIBS'   : 'ON',
             'LLAMA_BUILD_EXAMPLES': 'OFF',
-            'CMAKE_TOOLCHAIN_FILE': projectDir as String + "/src/" + toolChain.file,
             'CMAKE_EXPORT_COMPILE_COMMANDS': 'ON',
             *:toolChain.customDefs
     ]
+    if (toolChain.file) {
+      defs.put('CMAKE_TOOLCHAIN_FILE': projectDir as String + "/src/" + toolChain.file)
+    }
     buildConfig = 'Release'
     buildClean = false
   }
