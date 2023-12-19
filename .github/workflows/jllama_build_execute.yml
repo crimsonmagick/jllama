@@ -24,11 +24,11 @@ jobs:
       - name: Build and publish jLlama
         run: | 
           VERSION=${{ github.event.inputs.artifact_version}}
-          if [ -z "$VERSION" ]; then
-            docker run $DOCKER_IMAGE
-          else
-            docker run $DOCKER_IMAGE "-Pversion=$VERSION"
+          gradleArgs=(-e OSSRH_TOKEN_KEY=$OSSRH_TOKEN_KEY -e OSSRH_TOKEN_PASSWORD=$OSSRH_TOKEN_PASSWORD --info)
+          if [ -n "$VERSION" ]; then
+            gradleArgs+=("-Pversion=$VERSION")
           fi
+          docker run "${gradleArgs[@]}" $DOCKER_IMAGE
         env:
           OSSRH_TOKEN_KEY: ${{ secrets.OSSRH_TOKEN_KEY }}
           OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
