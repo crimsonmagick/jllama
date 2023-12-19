@@ -57,10 +57,10 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
+          context: ./docker/jllama-build
           tags: yourusername/yourrepository:${{ github.event.inputs.tag_version }}
           platforms: linux/amd64,linux/arm64
           build-args: TAG_VERSION=${{ github.event.inputs.tag_version }}
-
       - name: Tag and Push as Latest
         if: ${{ github.event.inputs.tag_as_latest == 'true' }}
         run: |
