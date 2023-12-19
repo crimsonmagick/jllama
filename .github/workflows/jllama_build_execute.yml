@@ -1,0 +1,35 @@
+name: Build and Publish jLlama to OSSRH
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: false
+        default: 'master'
+      artifact_version:
+        description: 'Published artifacts version'
+        required: false
+
+jobs:
+  run-docker:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE: supermangoman/jllama-build:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Pull Docker image
+        run: docker pull $DOCKER_IMAGE
+      - name: Build and publish jLlama
+        run: | 
+          VERSION = {{ github.event.inputs.artifact_version}}
+          if [ -z "$VERSION"];
+            docker run $DOCKER_IMAGE
+          else
+            docker run $DOCKER_IMAGE "-Pversion=$VERSION"
+          fi
+        env:
+          OSSRH_TOKEN_KEY: ${{ secrets.OSSRH_TOKEN_KEY }}
+          OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
+          BRANCH_NAME: ${{${{ github.event.inputs.branch }}}}
