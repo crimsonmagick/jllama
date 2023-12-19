@@ -24,7 +24,7 @@ jobs:
       - name: Build and publish jLlama
         run: | 
           VERSION=${{ github.event.inputs.artifact_version}}
-          if [ -z "$VERSION" ];
+          if [ -z "$VERSION" ]; then
             docker run $DOCKER_IMAGE
           else
             docker run $DOCKER_IMAGE "-Pversion=$VERSION"
