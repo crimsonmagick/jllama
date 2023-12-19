@@ -1,0 +1,65 @@
+name: Build and Publish "jllama-build" Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: false
+        default: 'master'
+      tag_version:
+        description: 'Docker image tag version (cannot be "latest")'
+        required: true
+      tag_as_latest:
+        description: 'Also tag as latest'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      is_valid: ${{ steps.check-version.outputs.is_valid }}
+    steps:
+      - name: Validate version
+        id: check-version
+        run: |
+          if [[ "${{ github.event.inputs.tag_version }}" == "latest" ]]; then
+            echo "The tag_version input cannot be 'latest'."
+            echo "is_valid=false" >> $GITHUB_ENV
+            exit 1
+          else
+            echo "is_valid=true" >> $GITHUB_ENV
+          fi
+
+  build-and-publish:
+    runs-on: ubuntu-latest
+    needs: validate-inputs
+    if: needs.validate-inputs.outputs.is_valid == 'true'
+    steps:
+      - name: Check Out Repo
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: supermango/jllama-build:${{ github.event.inputs.tag_version }}
+
+      - name: Tag and Push as Latest
+        if: ${{ github.event.inputs.tag_as_latest == 'true' }}
+        run: |
+          docker tag supermango/jllama-build:${{ github.event.inputs.tag_version }} supermango/jllama-build:latest
+          docker push supermango/jllama-build:latest
