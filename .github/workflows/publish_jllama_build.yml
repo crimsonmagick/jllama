@@ -56,10 +56,11 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: supermango/jllama-build:${{ github.event.inputs.tag_version }}
+          tags: yourusername/yourrepository:${{ github.event.inputs.tag_version }}
+          platforms: linux/amd64,linux/arm64
+          build-args: TAG_VERSION=${{ github.event.inputs.tag_version }}
 
       - name: Tag and Push as Latest
         if: ${{ github.event.inputs.tag_as_latest == 'true' }}
         run: |
-          docker tag supermango/jllama-build:${{ github.event.inputs.tag_version }} supermango/jllama-build:latest
-          docker push supermango/jllama-build:latest
+          docker buildx build --platform linux/amd64,linux/arm64 --tag yourusername/yourrepository:latest --push .
