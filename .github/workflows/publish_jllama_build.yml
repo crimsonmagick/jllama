@@ -26,11 +26,11 @@ jobs:
       run: |
         if [[ "${{ github.event.inputs.tag_version }}" == "latest" ]]; then
           echo "The tag_version input cannot be 'latest'."
-          echo "is_valid=false" >> $GITHUB_ENV
+          echo "is_valid=false" >> $GITHUB_OUTPUT
           echo "Validation failed: is_valid=false"
           exit 1
         else
-          echo "::set-output name=is_valid::true"
+          echo "is_valid=false" >> $GITHUB_OUTPUT
           echo "Validation succeeded: is_valid=true"
         fi
   build-and-publish:
