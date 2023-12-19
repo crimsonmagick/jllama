@@ -60,3 +60,4 @@ jobs:
         if: ${{ github.event.inputs.tag_as_latest == 'true' }}
         run: |
           docker tag supermangoman/jllama-build:${{ github.event.inputs.tag_version }} supermangoman/jllama-build:latest
+          docker push supermangoman/jllama-build:latest
