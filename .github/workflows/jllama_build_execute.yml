@@ -32,4 +32,4 @@ jobs:
         env:
           OSSRH_TOKEN_KEY: ${{ secrets.OSSRH_TOKEN_KEY }}
           OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
-          BRANCH_NAME: ${{${{ github.event.inputs.branch }}}}
+          BRANCH_NAME: ${{ github.event.inputs.branch }}
