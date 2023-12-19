@@ -5,5 +5,4 @@ git clone -b $BRANCH_NAME https://github.com/crimsonmagick/llama-cpp-java-bindin
 cd jllama
 git submodule update --init --recursive
 args=("$@")
-./gradlew build jar publish -PRELEASE "${args[@]}" --info
-#./gradlew build jar publish -PRELEASE --info
+./gradlew build jar publish -PRELEASE "${args[@]}"
