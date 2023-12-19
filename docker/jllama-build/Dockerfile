@@ -71,4 +71,4 @@ RUN git clone -b ${OSXCROSS_BRANCH} ${OSXCROSS_REPO} ${OSXCROSS_SRC} \
 
 COPY release_jllama.sh /usr/src/workspace
 RUN chmod +x /usr/src/workspace/release_jllama.sh
-CMD ["/usr/src/workspace/release_jllama.sh"]
+ENTRYPOINT ["", "/usr/src/workspace/release_jllama.sh"]
