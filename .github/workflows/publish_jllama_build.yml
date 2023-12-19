@@ -22,17 +22,18 @@ jobs:
     outputs:
       is_valid: ${{ steps.check-version.outputs.is_valid }}
     steps:
-      - name: Validate version
-        id: check-version
-        run: |
-          if [[ "${{ github.event.inputs.tag_version }}" == "latest" ]]; then
-            echo "The tag_version input cannot be 'latest'."
-            echo "is_valid=false" >> $GITHUB_ENV
-            exit 1
-          else
-            echo "is_valid=true" >> $GITHUB_ENV
-          fi
-
+    - name: Validate version
+      id: check-version
+      run: |
+        if [[ "${{ github.event.inputs.tag_version }}" == "latest" ]]; then
+          echo "The tag_version input cannot be 'latest'."
+          echo "is_valid=false" >> $GITHUB_ENV
+          echo "Validation failed: is_valid=false"
+          exit 1
+        else
+          echo "is_valid=true" >> $GITHUB_ENV
+          echo "Validation succeeded: is_valid=true"
+        fi
   build-and-publish:
     runs-on: ubuntu-latest
     needs: validate-inputs
