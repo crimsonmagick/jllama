@@ -1,6 +1,6 @@
 #include <jni.h>
 #include <iostream>
-#include "net_jllama_llama_cpp_java_bindings_LlamaCpp.h"
+#include "net_jllama_core_LlamaCpp.h"
 #include "exceptions/exceptions.h"
 #include "handler/LlamaManager.h"
 #include "libloader.h"
@@ -10,7 +10,7 @@ LlamaManager* llamaManager = nullptr;
 extern "C" {
 
   JNIEXPORT void
-  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCpp_loadLibrary(
+  JNICALL Java_net_jllama_core_LlamaCpp_loadLibrary(
       JNIEnv *env, jclass classReference) {
 
     withJniExceptions(env, [env] {
@@ -33,7 +33,7 @@ extern "C" {
   }
 
   JNIEXPORT void
-  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCpp_closeLibrary(
+  JNICALL Java_net_jllama_core_LlamaCpp_closeLibrary(
       JNIEnv *env,
       jclass classReference) {
       withJniExceptions(env, [] {
@@ -42,7 +42,7 @@ extern "C" {
   }
 
   JNIEXPORT void
-  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCpp_llamaBackendInit(
+  JNICALL Java_net_jllama_core_LlamaCpp_llamaBackendInit(
       JNIEnv *env,
       jclass classReference,
       jboolean useNuma) {
@@ -50,21 +50,21 @@ extern "C" {
   }
 
   JNIEXPORT void
-  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCpp_llamaBackendFree(JNIEnv *env, jclass classReference) {
+  JNICALL Java_net_jllama_core_LlamaCpp_llamaBackendFree(JNIEnv *env, jclass classReference) {
     llamaManager->newSession(env).backendFree();
   }
 
   JNIEXPORT jobject
-  JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCpp_loadModel(
+  JNICALL Java_net_jllama_core_LlamaCpp_loadModel(
       JNIEnv *env, jclass classReference, jbyteArray path, jobject javaParams) {
     return llamaManager->newSession(env).loadModelFromFile(path, javaParams);
   }
 
-  JNIEXPORT void JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCpp_llamaLogSet(JNIEnv* env, jclass classReference, jobject llamaLogCallback) {
+  JNIEXPORT void JNICALL Java_net_jllama_core_LlamaCpp_llamaLogSet(JNIEnv* env, jclass classReference, jobject llamaLogCallback) {
     return llamaManager->newSession(env).setLogger(llamaLogCallback);
   }
 
-  JNIEXPORT jlong JNICALL Java_net_jllama_llama_cpp_java_bindings_LlamaCpp_llamaTimeUs(JNIEnv* env, jclass classReference) {
+  JNIEXPORT jlong JNICALL Java_net_jllama_core_LlamaCpp_llamaTimeUs(JNIEnv* env, jclass classReference) {
     return llamaManager->newSession(env).getTimestampInMicroseconds();
   }
 

@@ -1,4 +1,4 @@
-package net.jllama.llama.cpp.java.bindings;
+package net.jllama.core;
 
 public class LlamaTokenData {
   int llamaToken;

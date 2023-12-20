@@ -1,5 +1,5 @@
-#ifndef LLAMA_CPP_JAVA_BINDINGS_JNI_H
-#define LLAMA_CPP_JAVA_BINDINGS_JNI_H
+#ifndef core_JNI_H
+#define core_JNI_H
 #include <jni.h>
 #include "exceptions/DynamicLibraryException.h"
 #include "exceptions/LlamaCppException.h"
@@ -42,4 +42,4 @@ namespace jni {
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray);
   void updateTokenDateArray(JNIEnv* env, jobject destination, llama_token_data_array* src);
 }
-#endif //LLAMA_CPP_JAVA_BINDINGS_JNI_H
+#endif //core_JNI_H

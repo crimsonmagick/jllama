@@ -1,8 +1,8 @@
-package net.jllama.llama.cpp.java.bindings;
+package net.jllama.core;
 
 import java.util.function.BiConsumer;
-import net.jllama.llama.cpp.java.bindings.exceptions.ResourceNotFoundException;
-import net.jllama.llama.cpp.java.bindings.util.DllExtractor;
+import net.jllama.core.exceptions.ResourceNotFoundException;
+import net.jllama.core.util.DllExtractor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

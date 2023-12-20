@@ -1,8 +1,8 @@
-package net.jllama.llama.cpp.java.bindings;
+package net.jllama.core;
 
 import java.io.Closeable;
 import java.util.HashMap;
-import net.jllama.llama.cpp.java.bindings.exceptions.LlamaCppException;
+import net.jllama.core.exceptions.LlamaCppException;
 
 public class LlamaContext implements Closeable {
 

@@ -1,6 +1,6 @@
-package net.jllama.llama.cpp.java.bindings.util;
+package net.jllama.core.util;
 
-import net.jllama.llama.cpp.java.bindings.exceptions.ResourceNotFoundException;
+import static java.nio.file.Files.newOutputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,8 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
-
-import static java.nio.file.Files.newOutputStream;
+import net.jllama.core.exceptions.ResourceNotFoundException;
 
 public class DllExtractor {
 

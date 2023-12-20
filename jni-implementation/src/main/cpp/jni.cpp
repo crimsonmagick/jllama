@@ -149,15 +149,15 @@ namespace jni {
 
   void throwDLLException(JNIEnv * env, const DynamicLibraryException& e) {
     throwNativeException(env,
-                         "net/jllama/llama/cpp/java/bindings/exceptions/LlamaCppException", e.what());
+                         "net/jllama/core/exceptions/LlamaCppException", e.what());
   }
 
   void throwJNIException(JNIEnv *env, const JNIException &e) {
-    throwNativeException(env, "net/jllama/llama/cpp/java/bindings/exceptions/JNIException", e.what());
+    throwNativeException(env, "net/jllama/core/exceptions/JNIException", e.what());
   }
 
   void throwLlamaCppException(JNIEnv* env, const LlamaCppException& e) {
-    throwNativeException(env, "net/jllama/llama/cpp/java/bindings/exceptions/LlamaCppException", e.what());
+    throwNativeException(env, "net/jllama/core/exceptions/LlamaCppException", e.what());
   }
 
   void throwRuntimeException(JNIEnv* env, const std::exception& e) {
@@ -167,7 +167,7 @@ namespace jni {
   jobject constructLlamaModel(JNIEnv *env, llama_model *modelPointer) {
     auto jmodelPointer = reinterpret_cast<jlong>(modelPointer);
 
-    jclass llamaModelClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaModel");
+    jclass llamaModelClass = env->FindClass("net/jllama/core/LlamaModel");
     if (llamaModelClass == nullptr) {
       throw JNIException("Unable to find LlamaModel class");
     }
@@ -186,12 +186,12 @@ namespace jni {
 
   jobject constructBatch(JNIEnv* env, jobject jContext, jint maxTokenCount, llama_batch* batch) {
     auto jBatchPointer = reinterpret_cast<jlong>(batch);
-    jclass jBatchClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext$LlamaBatch");
+    jclass jBatchClass = env->FindClass("net/jllama/core/LlamaContext$LlamaBatch");
     if (jBatchClass == nullptr) {
       throw JNIException("Unable to find LlamaBatch class");
     }
 
-    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(Lnet/jllama/llama/cpp/java/bindings/LlamaContext;JI)V");
+    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(Lnet/jllama/core/LlamaContext;JI)V");
     if (jConstructor == nullptr) {
       throw JNIException("Unable to find LlamaBatch constructor");
     }
@@ -204,7 +204,7 @@ namespace jni {
 
   jobject constructLlamaContext(JNIEnv* env, llama_context* jcontextPointer) {
 
-    jclass llamaContextClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext");
+    jclass llamaContextClass = env->FindClass("net/jllama/core/LlamaContext");
     if (llamaContextClass == nullptr) {
       throw JNIException("Unable to find LlamaContext class");
     }
@@ -222,7 +222,7 @@ namespace jni {
   }
 
   llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaModel) {
-    jclass llamaModelClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaModel");
+    jclass llamaModelClass = env->FindClass("net/jllama/core/LlamaModel");
     if (llamaModelClass == nullptr) {
       throw JNIException("Unable to find LlamaModel class");
     }
@@ -234,7 +234,7 @@ namespace jni {
   }
 
   llama_context* getLlamaContextPointer(JNIEnv* env, jobject jLlamaContext) {
-    jclass llamaContextClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext");
+    jclass llamaContextClass = env->FindClass("net/jllama/core/LlamaContext");
     if (llamaContextClass == nullptr) {
       throw JNIException("Unable to find LlamaContext class");
     }
@@ -246,7 +246,7 @@ namespace jni {
   }
 
   llama_batch* getLlamaBatchPointer(JNIEnv* env, jobject jBatch) {
-    jclass llamaBatchClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaContext$LlamaBatch");
+    jclass llamaBatchClass = env->FindClass("net/jllama/core/LlamaContext$LlamaBatch");
     if (llamaBatchClass == nullptr) {
       throw JNIException("Unable to find LlamaContext class");
     }
@@ -258,16 +258,16 @@ namespace jni {
   }
 
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray) {
-    jclass jTokenDataArrayClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaTokenDataArray");
+    jclass jTokenDataArrayClass = env->FindClass("net/jllama/core/LlamaTokenDataArray");
     if (jTokenDataArrayClass == nullptr) {
       throw JNIException("Unable to find LlamaTokenDataArray class");
     }
-    jfieldID jArrayFieldId = env->GetFieldID(jTokenDataArrayClass, "data", "[Lnet/jllama/llama/cpp/java/bindings/LlamaTokenData;");
+    jfieldID jArrayFieldId = env->GetFieldID(jTokenDataArrayClass, "data", "[Lnet/jllama/core/LlamaTokenData;");
     if (jArrayFieldId == nullptr) {
       throw JNIException("Unable to find LlamaTokenData array \"data\"");
     }
 
-    jclass jTokenDataClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaTokenData");
+    jclass jTokenDataClass = env->FindClass("net/jllama/core/LlamaTokenData");
     if (jTokenDataClass == nullptr) {
       throw JNIException("Unable to find jTokenDataClass class");
     }
@@ -308,16 +308,16 @@ namespace jni {
   void updateTokenDateArray(JNIEnv* env,
                             jobject destination,
                             llama_token_data_array* src) {
-    jclass jTokenDataArrayClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaTokenDataArray");
+    jclass jTokenDataArrayClass = env->FindClass("net/jllama/core/LlamaTokenDataArray");
     if (jTokenDataArrayClass == nullptr) {
       throw JNIException("Unable to find LlamaTokenDataArray class");
     }
-    jfieldID jArrayFieldId = env->GetFieldID(jTokenDataArrayClass, "data", "[Lnet/jllama/llama/cpp/java/bindings/LlamaTokenData;");
+    jfieldID jArrayFieldId = env->GetFieldID(jTokenDataArrayClass, "data", "[Lnet/jllama/core/LlamaTokenData;");
     if (jArrayFieldId == nullptr) {
       throw JNIException("Unable to find LlamaTokenData array \"data\"");
     }
 
-    jclass jTokenDataClass = env->FindClass("net/jllama/llama/cpp/java/bindings/LlamaTokenData");
+    jclass jTokenDataClass = env->FindClass("net/jllama/core/LlamaTokenData");
     if (jTokenDataClass == nullptr) {
       throw JNIException("Unable to find jTokenDataClass class");
     }
