@@ -113,7 +113,7 @@ if (project.hasProperty("RELEASE")) {
             *:toolChain.customDefs
     ]
     if (toolChain.file) {
-      defs.put('CMAKE_TOOLCHAIN_FILE': projectDir as String + "/src/" + toolChain.file)
+      defs.put('CMAKE_TOOLCHAIN_FILE', projectDir as String + "/src/" + toolChain.file)
     }
     buildConfig = 'Release'
     buildClean = false
