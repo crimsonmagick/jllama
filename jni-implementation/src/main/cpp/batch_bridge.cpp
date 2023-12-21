@@ -4,7 +4,7 @@
 extern "C" {
 
   JNIEXPORT void
-  JNICALL Java_net_jllama_core_LlamaContext_00024LlamaBatch_submitSequenceNative
+  JNICALL Java_net_jllama_core_LlamaContext_00024LlamaBatch_submitSequenceOldNative
       (JNIEnv *env, jobject jBatch, jintArray jTokens, jint jSequenceId, jint tokenSequenceIndex) {
     LlamaManager::getLlamaManager(env)->newSession(env)
       .submitSequence(jBatch, jTokens, jSequenceId, tokenSequenceIndex);

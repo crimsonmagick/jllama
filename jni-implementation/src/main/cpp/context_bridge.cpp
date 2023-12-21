@@ -54,10 +54,10 @@ extern "C" {
   }
 
   JNIEXPORT jobject
-  JNICALL Java_net_jllama_core_LlamaContext_createBatchNative
-    (JNIEnv* env, jobject jContext, jint jMaxTokenCount, jint jEmbeddingVectorSize, jint jSequenceIdLength) {
+  JNICALL Java_net_jllama_core_LlamaContext_llamaBatchInitNative
+    (JNIEnv* env, jobject jContext, jint nTokens, jint embd, jint nSeqMax) {
     return LlamaManager::getLlamaManager(env)
-        ->newSession(env).llamaBatchInit(jContext, jMaxTokenCount, jEmbeddingVectorSize, jSequenceIdLength);
+        ->newSession(env).llamaBatchInit(jContext, nTokens, embd, nSeqMax);
   }
 
   JNIEXPORT jobject

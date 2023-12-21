@@ -125,11 +125,11 @@ public class LlamaContext implements Closeable {
     llamaSampleFrequencyAndPresencePenaltiesNative(candidates, lastTokens, alphaFrequency, alphaPresence);
   }
 
-  private native LlamaBatch createBatchNative(int maxTokenCount, int embeddingVectorSize, int sequenceIdLength);
+  private native LlamaBatch llamaBatchInitNative(int nTokens, int embd, int nSeqMax);
 
-  public LlamaBatch createBatch(int maxTokenCount) {
+  public LlamaBatch llamaBatchInit(int nTokens, int embd, int nSeqMax) {
     validateState();
-    return createBatchNative(maxTokenCount,0, 1);
+    return llamaBatchInitNative(nTokens,embd, nSeqMax);
   }
 
   public static native LlamaContextParams llamaContextDefaultParams();
@@ -167,8 +167,9 @@ public class LlamaContext implements Closeable {
       }
     }
 
-    private native void submitSequenceNative(int[] tokens, int sequenceId, int tokenSequenceIndex);
-    public Sequence submitSequence(final int[] tokens) {
+    private native void submitSequenceOldNative(int[] tokens, int sequenceId, int tokenSequenceIndex);
+
+    public Sequence submitSequenceOld(final int[] tokens) {
       validateState();
       if (currentTokenCount + tokens.length > maxTokenCount) {
         throw new IllegalStateException("LlamaBatch is full.");
@@ -183,10 +184,12 @@ public class LlamaContext implements Closeable {
       sequence.setId(sequenceId);
       sequence.setLength(tokens.length);
       sequence.setLastLogitPosition(tokens.length - 1);
-      submitSequenceNative(tokens, sequenceId, 0);
+      submitSequenceOldNative(tokens, sequenceId, 0);
       sequences.put(sequenceId, sequence);
       return sequence;
     }
+
+
 
     public void appendToSequence(final int[] tokens, final Sequence sequence) {
       validateState();
@@ -196,7 +199,7 @@ public class LlamaContext implements Closeable {
       if (currentTokenCount + tokens.length > maxTokenCount) {
         throw new IllegalStateException("LlamaBatch is full.");
       }
-      submitSequenceNative(tokens, sequence.getId(), sequence.getLength());
+      submitSequenceOldNative(tokens, sequence.getId(), sequence.getLength());
       sequence.setLength(sequence.getLength() + tokens.length);
       sequence.setLastLogitPosition(tokens.length - 1);
     }
