@@ -45,6 +45,14 @@ public class LlamaContext implements Closeable {
     batch.setCurrentTokenCount(0);
   }
 
+  public int decode(final LlamaBatch batch) {
+    validateState();
+    batch.validateState();
+    return decodeNative(batch);
+  }
+
+  private native int decodeNative(final LlamaBatch batch);
+
   public native void llamaSampleSoftMaxNative(LlamaTokenDataArray candidates);
 
   public void llamaSampleSoftMax(LlamaTokenDataArray candidates) {

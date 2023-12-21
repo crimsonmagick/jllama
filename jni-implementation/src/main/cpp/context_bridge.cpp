@@ -84,4 +84,11 @@ extern "C" {
         ->newSession(env).evaluate(jContext, jBatch);
   }
 
+  JNIEXPORT jint
+  JNICALL Java_net_jllama_core_LlamaContext_decodeNative
+    (JNIEnv* env, jobject jContext, jobject jBatch) {
+    return LlamaManager::getLlamaManager(env)
+      ->newSession(env).decodeNative(jContext, jBatch);
+  }
+
 }

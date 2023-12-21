@@ -4,8 +4,8 @@ import java.io.Closeable;
 
 public class LlamaModel implements Closeable {
 
-  boolean closed;
-  long modelPointer;
+  private boolean closed;
+  private long modelPointer;
 
   public LlamaModel(final long modelPointer) {
     this.modelPointer = modelPointer;

@@ -85,7 +85,8 @@ class LlamaManager {
         submitSequence(jobject jBatch, jintArray jTokens, jint jSequenceId, jint sequenceTokenIndex);
         jint evaluate(jobject jContext, jobject jBatch);
         void setCurrentTokenCount(jobject jBatch, jint currentTokenCount);
-      private:
+      jint decodeNative(jobject jContext, jobject jBatch);
+     private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
             : env(env), manager(outer) {}
@@ -120,6 +121,10 @@ class LlamaManager {
         LlamaSession* session;
       };
 
+      void submitSequenceNative(jobject jBatch,
+                                jintArray jTokens,
+                                jint jSequenceId,
+                                jint sequenceTokenIndex);
     };
     static LlamaManager* singleton;
     static JavaVM* javaVm;

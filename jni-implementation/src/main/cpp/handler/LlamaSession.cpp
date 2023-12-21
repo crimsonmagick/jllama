@@ -569,6 +569,31 @@ void LlamaManager::LlamaSession::submitSequence(jobject jBatch,
   });
 }
 
+void LlamaManager::LlamaSession::submitSequenceNative(jobject jBatch,
+                                                jintArray jTokens,
+                                                jint jSequenceId,
+                                                jint sequenceTokenIndex) {
+  withJniExceptions(env, [this, jBatch, jTokens, jSequenceId, sequenceTokenIndex] {
+    llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
+    jint* tokens = env->GetIntArrayElements(jTokens, nullptr);
+    jsize tokenCount = env->GetArrayLength(jTokens);
+    int32_t startingBatchSize = batch->n_tokens;
+    for (jsize i = 0; i < tokenCount; i++) {
+      int32_t index = startingBatchSize + i;
+      batch->token[index] = tokens[i];
+      batch->pos[index] = sequenceTokenIndex + i;
+      batch->n_seq_id[index] = 1;
+      batch->seq_id[index][0] = jSequenceId;
+      batch->logits[index] = 0;
+    }
+    batch->logits[startingBatchSize + tokenCount - 1] = 1;
+    batch->n_tokens += tokenCount;
+    jclass batchClass = env->GetObjectClass(jBatch);
+    jni::setSignedInt32(batch->n_tokens, env, batchClass, jBatch, "currentTokenCount");
+    env->ReleaseIntArrayElements(jTokens, tokens, 0); // TODO should we use JNI_ABORT?
+  });
+}
+
 typedef int (* llama_decode_pointer) (llama_context*, llama_batch);
 jint LlamaManager::LlamaSession::evaluate(jobject jContext, jobject jBatch) {
   return withJniExceptions(env, [this, jContext, jBatch] {
@@ -585,4 +610,13 @@ void LlamaManager::LlamaSession::setCurrentTokenCount(jobject jBatch,
         llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
         batch->n_tokens = currentTokenCount;
     });
+}
+
+jint LlamaManager::LlamaSession::decodeNative(jobject jContext, jobject jBatch) {
+  return withJniExceptions(env, [this, jContext, jBatch] {
+    auto decode = reinterpret_cast<llama_decode_pointer>(getFunctionAddress("llama_decode"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
+    return decode(context, *batch);
+  });
 }
