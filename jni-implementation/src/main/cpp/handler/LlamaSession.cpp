@@ -521,16 +521,29 @@ void LlamaManager::LlamaSession::llamaSampleTemperature(jobject jContext,
 }
 
 typedef llama_batch (* llama_batch_init_pointer) (int32_t n_tokens, int32_t embd, int32_t n_seq_max);
-jobject LlamaManager::LlamaSession::llamaBatchInit(jobject jContext,
-                                                   jint jMaxTokenCount,
-                                                   jint jEmbeddingVectorSize,
-                                                   jint jSequenceIdLength) {
+jobject LlamaManager::LlamaSession::llamaBatchInitOld(jobject jContext,
+                                                      jint jMaxTokenCount,
+                                                      jint jEmbeddingVectorSize,
+                                                      jint jSequenceIdLength) {
   return withJniExceptions(env, [this, jContext, jMaxTokenCount, jEmbeddingVectorSize, jSequenceIdLength] {
     auto batchInit = reinterpret_cast<llama_batch_init_pointer>(getFunctionAddress("llama_batch_init"));
     llama_batch batchStack = batchInit(jMaxTokenCount, jEmbeddingVectorSize, jSequenceIdLength);
     llama_batch* batchHeap = new llama_batch;
     std::memcpy(batchHeap, &batchStack, sizeof(llama_batch));
-    return jni::constructBatch(env, jContext, jMaxTokenCount, batchHeap);
+    return jni::constructBatchOld(env, jContext, jMaxTokenCount, batchHeap);
+  });
+}
+
+jobject LlamaManager::LlamaSession::llamaBatchInit(jobject jContext,
+                                                   jint jNTokens,
+                                                   jint jEmbd,
+                                                   jint nSeqId) {
+  return withJniExceptions(env, [this, jContext, jNTokens, jEmbd, nSeqId] {
+    auto batchInit = reinterpret_cast<llama_batch_init_pointer>(getFunctionAddress("llama_batch_init"));
+    llama_batch batchStack = batchInit(jNTokens, jEmbd, nSeqId);
+    llama_batch* batchHeap = new llama_batch;
+    std::memcpy(batchHeap, &batchStack, sizeof(llama_batch));
+    return jni::constructBatch(env, jContext, batchHeap, jNTokens, jEmbd, nSeqId);
   });
 }
 

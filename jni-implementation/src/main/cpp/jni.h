@@ -11,11 +11,13 @@ struct llama_context;
 namespace jni {
 
   class JNIException: public std::runtime_error {
-    public:
-    explicit JNIException(const char* message) : runtime_error(message) {
+   public:
+    explicit JNIException(char const* const message, jthrowable const jCause = nullptr) :  runtime_error(message), jCause(jCause) {
 
     }
 
+   private:
+    jthrowable const jCause;
   };
 
   int8_t getByte(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
@@ -28,9 +30,13 @@ namespace jni {
   void setFloat(float value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   bool getBool(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   void setBoolean(bool value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
-  jfloatArray getJFloatArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
+  template <typename T>
+  T newPrimitiveArray(JNIEnv* env, jint size);
+  jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType);
+  jfloatArray getJFloatArray(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   jobject constructLlamaModel(JNIEnv* env, llama_model* modelPointer);
-  jobject constructBatch(JNIEnv* env, jobject jContext, jint maxTokenCount, llama_batch* batch);
+  jobject constructBatchOld(JNIEnv* env, jobject jContext, jint maxTokenCount, llama_batch* batch);
+  jobject constructBatch(JNIEnv* env, jobject jContext,  llama_batch *batch, jint jNTokens, jint jEmbd, jint nSeqId);
   llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaModel);
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);
   void throwJNIException(JNIEnv* env, const JNIException& e);
@@ -41,5 +47,6 @@ namespace jni {
   llama_batch* getLlamaBatchPointer(JNIEnv* env, jobject jBatch);
   llama_token_data_array getTokenDataArray(JNIEnv* env, jobject jTokenDataArray);
   void updateTokenDateArray(JNIEnv* env, jobject destination, llama_token_data_array* src);
+
 }
 #endif //core_JNI_H

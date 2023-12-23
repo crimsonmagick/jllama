@@ -14,4 +14,7 @@ public class Context {
 
   }
 
+  public LlamaContext getLlamaContext() {
+    return llamaContext;
+  }
 }

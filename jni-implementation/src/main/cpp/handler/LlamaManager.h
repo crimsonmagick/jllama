@@ -78,14 +78,22 @@ class LlamaManager {
                                     jobject jCandidates,
                                     jfloat temp);
       jobject defaultModelParams();
-      jobject llamaBatchInit(jobject jContext, jint jMaxTokenCount,
-                             jint jEmbeddingVectorSize, jint jSequenceIdLength);
+      jobject llamaBatchInitOld(jobject jContext, jint jMaxTokenCount,
+                                jint jEmbeddingVectorSize, jint jSequenceIdLength);
       void llamaBatchFree(jobject jBatch);
         void
         submitSequence(jobject jBatch, jintArray jTokens, jint jSequenceId, jint sequenceTokenIndex);
         jint evaluate(jobject jContext, jobject jBatch);
         void setCurrentTokenCount(jobject jBatch, jint currentTokenCount);
       jint decodeNative(jobject jContext, jobject jBatch);
+      void submitSequencePiece(jobject jBatch,
+                               jintArray jToken,
+                               jfloatArray jEmbd,
+                               jintArray jPos,
+                               jobjectArray jSeqId,
+                               jbooleanArray jLogits);
+      jobject
+      llamaBatchInit(jobject jContext, jint nTokens, jint jEmbd, jint nSeqId);
      private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
