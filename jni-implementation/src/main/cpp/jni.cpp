@@ -357,13 +357,14 @@ jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType) {
     if (jConstructor == nullptr) {
       throw JNIException("Unable to find LlamaBatch constructor");
     }
-//    jobject jBatch = env->NewObject(jBatchClass, jConstructor, jContext,
-//                                    jBatchPointer, batch->n_tokens, jTokenArray, jEmbdArray,
-//                                    jPos, jNSeqIdArray, jSeqIdArray, jLogits);
-//    if (jBatch == nullptr) {
-//      throw JNIException("Unable to initialize LlamaBatch");
-//    }
-    return nullptr;
+    jobject jBatch = env->NewObject(jBatchClass, jConstructor, jContext,
+                                    jBatchPointer, batch->n_tokens, jTokenArray,
+                                    jEmbdArray, jPos, jNSeqIdArray, jSeqIdArray,
+                                    jLogits);
+    if (jBatch == nullptr) {
+      throw JNIException("Unable to initialize LlamaBatch");
+    }
+    return jBatch;
   }
 
   jobject constructLlamaContext(JNIEnv* env, llama_context* jcontextPointer) {
