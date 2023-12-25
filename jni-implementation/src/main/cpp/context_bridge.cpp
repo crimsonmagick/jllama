@@ -9,11 +9,6 @@ extern "C" {
     LlamaManager::getLlamaManager(env)->newSession(env).freeContext(jContext);
   }
 
-  JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleSoftMaxNative
-      (JNIEnv* env, jobject jContext, jobject jCandidates) {
-    LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleSoftMax(jContext, jCandidates);
-  }
-
   JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTopKNative
       (JNIEnv* env, jobject jContext, jobject jCandidates, jint k, jlong minKeep) {
     LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleTopK(jContext, jCandidates, k, minKeep);
@@ -33,14 +28,6 @@ extern "C" {
 
   JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTemperatureNative(JNIEnv* env, jobject jContext, jobject jCandidates, jfloat temp) {
     LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleTemperature(jContext, jCandidates, temp);
-  }
-
-  JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleRepetitionPenaltyNative(JNIEnv* env, jobject jContext, jobject jCandidates, jintArray lastTokens, jfloat penalty) {
-    LlamaManager::getLlamaManager(env)->newSession(env).applyRepetitionPenalty(jContext, jCandidates, lastTokens, penalty);
-  }
-
-  JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleFrequencyAndPresencePenaltiesNative(JNIEnv * env, jobject jContext, jobject jCandidates, jintArray jLastTokens, jfloat jAlphaFrequency, jfloat jPenalty) {
-    LlamaManager::getLlamaManager(env)->newSession(env).applyFrequencyAndPresencePenalties(jContext, jCandidates, jLastTokens, jAlphaFrequency, jPenalty);
   }
 
   JNIEXPORT jint JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTokenNative(JNIEnv* env, jobject jContext, jobject jCandiates) {

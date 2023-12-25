@@ -25,13 +25,6 @@ public class LlamaContext implements Closeable {
     return llamaDecodeNative(batch);
   }
 
-  public native void llamaSampleSoftMaxNative(LlamaTokenDataArray candidates);
-
-  public void llamaSampleSoftMax(LlamaTokenDataArray candidates) {
-    validateState();
-    llamaSampleSoftMaxNative(candidates);
-  }
-
   public native void llamaSampleTopKNative(LlamaTokenDataArray candidates, int k, long minKeep);
 
   public void llamaSampleTopK(LlamaTokenDataArray candidates, int k, long minKeep) {
@@ -88,21 +81,6 @@ public class LlamaContext implements Closeable {
     return llamaSampleTokenGreedyNative(candidates);
   }
 
-  public native void llamaSampleRepetitionPenaltyNative(LlamaTokenDataArray candidates, int[] lastTokens, float penalty);
-
-  public void llamaSampleRepetitionPenalty(LlamaTokenDataArray candidates, int[] lastTokens, float penalty) {
-    validateState();
-    llamaSampleRepetitionPenaltyNative(candidates, lastTokens, penalty);
-  }
-
-  public native void llamaSampleFrequencyAndPresencePenaltiesNative(LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency,
-      float alphaPresence);
-
-  public void llamaSampleFrequencyAndPresencePenalties(LlamaTokenDataArray candidates, int[] lastTokens, float alphaFrequency, float alphaPresence) {
-    validateState();
-    llamaSampleFrequencyAndPresencePenaltiesNative(candidates, lastTokens, alphaFrequency, alphaPresence);
-  }
-
   private native LlamaBatch llamaBatchInitNative(final int nTokens, final int embd, final int nSeqMax);
 
   public LlamaBatch llamaBatchInit(int nTokens, int embd, int nSeqMax) {
@@ -128,11 +106,10 @@ public class LlamaContext implements Closeable {
 
   /**
    * Represents a batch of inputs, either tokens or embeddings, to be submitted to llama.cpp to be "decoded" (evaluated).
-   *
+   * <p>
    * The batch can either be used for the decoding of tokens of embedding values, and thus the  `token` and `embed` arrays are mutually exclusive. If you pass a non-zero value for `embd` to decode(), `token` will be set to null and `embd` will be instantiated. If zero is passed as the `embd` value, `token` will be instantiated and `embd` will be null.
-   *
+   * <p>
    * Each array is related to the others by way of index. Each array represents a piece of data about a token or embedding value. For example:
-   *
    * {@code
    * int tokens = getTokens(); // assume the program has already provided an array of tokens
    * LlamaBatch batch = llamaContext.llamaBatchInit(40, 0, 1); // sets array sizes for token, pos, nSeqId, seqId, and logits to 40
