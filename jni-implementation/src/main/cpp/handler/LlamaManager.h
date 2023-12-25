@@ -139,7 +139,7 @@ class LlamaManager {
     static jobject jloggerCallback;
     static inline std::once_flag initFlag;
     explicit LlamaManager();
-    static void progressCallback(float progress, void* ctx);
+    static bool progressCallback(float progress, void* ctx);
     static void loggerCallback(enum ggml_log_level level, const char * text, void * user_data);
 
   public:

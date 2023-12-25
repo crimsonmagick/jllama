@@ -25,7 +25,7 @@ void LlamaManager::LlamaSession::backendFree() {
   });
 }
 
-void LlamaManager::progressCallback(float progress, void* ctx) {
+bool LlamaManager::progressCallback(float progress, void* ctx) {
   if (ctx) {
     JNIEnv* env;
     jint jniStatus = javaVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
@@ -53,6 +53,7 @@ void LlamaManager::progressCallback(float progress, void* ctx) {
       }
     }
   }
+  return false;
 }
 
 typedef llama_model* (* llama_load_model_from_file_pointer)

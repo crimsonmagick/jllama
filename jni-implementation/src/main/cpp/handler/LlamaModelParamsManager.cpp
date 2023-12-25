@@ -67,6 +67,15 @@ LlamaManager::LlamaSession::LlamaModelParamsManager::LlamaModelParamsManager(
                                              "tensorSplit");
   tensorSplit = tensorSplitFloatArray ? env->GetFloatArrayElements(tensorSplitFloatArray, nullptr) : nullptr;
 
+  llamaModelParams = {
+      .n_gpu_layers = jni::getInt32(env, javaParamsClass, javaContextParams, "nGpuLayers"),
+      .main_gpu = jni::getInt32(env, javaParamsClass, javaContextParams, "mainGpu"),
+      .tensor_split = tensorSplit,
+      .vocab_only = jni::getBool(env, javaParamsClass, javaContextParams, "vocabOnly"),
+      .use_mmap = jni::getBool(env, javaParamsClass, javaContextParams, "useMmap"),
+      .use_mlock = jni::getBool(env, javaParamsClass, javaContextParams, "useMlock")
+  };
+
   jfieldID callbackFieldId = env->GetFieldID( javaParamsClass, "progressCallback", "Ljava/util/function/Consumer;");
   if (callbackFieldId == nullptr) {
     throw jni::JNIException("field \"progressCallback\" must exist on Java LlamaModelParams class");
@@ -79,21 +88,13 @@ LlamaManager::LlamaSession::LlamaModelParamsManager::LlamaModelParamsManager(
     callbackContext = new CallbackContext{
       env->NewGlobalRef(jprogressCallback)
     };
+    llamaModelParams.progress_callback = progressCallback,
+    llamaModelParams.progress_callback_user_data = callbackContext,
     env->DeleteLocalRef(jprogressCallback);
   } else {
     callbackContext = nullptr;
   }
 
-  llamaModelParams = {
-      .n_gpu_layers = jni::getInt32(env, javaParamsClass, javaContextParams, "nGpuLayers"),
-      .main_gpu = jni::getInt32(env, javaParamsClass, javaContextParams, "mainGpu"),
-      .tensor_split = tensorSplit,
-      .progress_callback = progressCallback,
-      .progress_callback_user_data = callbackContext,
-      .vocab_only = jni::getBool(env, javaParamsClass, javaContextParams, "vocabOnly"),
-      .use_mmap = jni::getBool(env, javaParamsClass, javaContextParams, "useMmap"),
-      .use_mlock = jni::getBool(env, javaParamsClass, javaContextParams, "useMlock"),
-  };
 }
 
 LlamaManager::LlamaSession::LlamaModelParamsManager::~LlamaModelParamsManager() {

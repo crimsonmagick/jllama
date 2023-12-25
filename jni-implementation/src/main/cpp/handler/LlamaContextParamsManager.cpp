@@ -92,11 +92,6 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                   jParamsClass,
                   jLlamaContextParams,
                   "mulMatQ");
-  jni::setBoolean(llamaContextParams.f16_kv,
-                  env,
-                  jParamsClass,
-                  jLlamaContextParams,
-                  "f16Kv");
   jni::setBoolean(llamaContextParams.logits_all,
                   env,
                   jParamsClass,
@@ -174,10 +169,6 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                                 javaParamsClass,
                                 javaContextParams,
                                 "mulMatQ"),
-      .f16_kv = jni::getBool(env,
-                             javaParamsClass,
-                             javaContextParams,
-                             "f16Kv"),
       .logits_all = jni::getBool(env,
                                  javaParamsClass,
                                  javaContextParams,
