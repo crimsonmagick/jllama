@@ -183,8 +183,8 @@ jfloatArray LlamaManager::LlamaSession::getLogits(jobject jContext) {
   });
 }
 
-jfloatArray LlamaManager::LlamaSession::getLogits(jobject jContext, jint batchTokenIndex) {
-  return withJniExceptions(env, [&jContext, this, batchTokenIndex] {
+jfloatArray LlamaManager::LlamaSession::getLogitsIth(jobject jContext, jint i) {
+  return withJniExceptions(env, [&jContext, this, i] {
     auto getLogits = (llama_get_logits_pointer) getFunctionAddress(
         "llama_get_logits");
     auto getModel = (llama_get_model_pointer) getFunctionAddress("llama_get_model");
@@ -194,7 +194,7 @@ jfloatArray LlamaManager::LlamaSession::getLogits(jobject jContext, jint batchTo
     auto llamaModel = getModel(llamaContext);
     int vocabLength = getVocabLength(llamaModel);
     auto jLogits = env->NewFloatArray(vocabLength);
-    env->SetFloatArrayRegion(jLogits, 0, vocabLength, logits + batchTokenIndex * vocabLength);
+    env->SetFloatArrayRegion(jLogits, 0, vocabLength, logits + i * vocabLength);
     return jLogits;
   });
 }
@@ -628,8 +628,57 @@ void LlamaManager::LlamaSession::setCurrentTokenCount(jobject jBatch,
 jint LlamaManager::LlamaSession::decodeNative(jobject jContext, jobject jBatch) {
   return withJniExceptions(env, [this, jContext, jBatch] {
     auto decode = reinterpret_cast<llama_decode_pointer>(getFunctionAddress("llama_decode"));
+
     llama_context* context = jni::getLlamaContextPointer(env, jContext);
     llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
+    jclass jBatchClass = env->GetObjectClass(jBatch);
+
+    int32_t nTokens = jni::getInt32(env, jBatchClass, jBatch, "nTokens");
+    batch->n_tokens = nTokens;
+
+    jintArray jTokenArray = jni::getInt32Array(env, jBatchClass,jBatch, "token");
+    jint* jTokens = jTokenArray != nullptr ? env->GetIntArrayElements(jTokenArray, nullptr) : nullptr;
+
+    jfloatArray jEmbdArray = jni::getFloatArray(env, jBatchClass,jBatch, "embd");
+    jfloat* jEmbd = jEmbdArray != nullptr ? env->GetFloatArrayElements(jEmbdArray, nullptr) : nullptr;
+
+    jintArray jPosArray = jni::getInt32Array(env, jBatchClass,jBatch, "pos");
+    jint* jPos = env->GetIntArrayElements(jPosArray, nullptr);
+
+    jintArray jNSeqIdArray = jni::getInt32Array(env, jBatchClass,jBatch, "nSeqId");
+    jint* jNSeqId = env->GetIntArrayElements(jNSeqIdArray, nullptr);
+
+    jobjectArray jSeqIdArray = jni::get2dInt32Array(env, jBatchClass,jBatch, "seqId");
+
+    jbyteArray jLogitsArray = jni::getByteArray(env, jBatchClass,jBatch, "logits");
+    jbyte* jLogits = env->GetByteArrayElements(jLogitsArray, nullptr);
+
+    for (int i = 0; i < nTokens; i++) {
+      if (jTokens) {
+        batch->token[i] = jTokens[i];
+      }
+      if (jEmbd) {
+        batch->embd[i] = jEmbd[i];
+      }
+      batch->pos[i] = jPos[i];
+      batch->n_seq_id[i] = jNSeqId[i];
+      auto jSeqIdPiecesArray = reinterpret_cast<jintArray>(env->GetObjectArrayElement(jSeqIdArray, i));
+      jint* jSeqIdPieces = env->GetIntArrayElements(jSeqIdPiecesArray, nullptr);
+      for (int j = 0; j < jNSeqId[i]; j++) {
+        batch->seq_id[i][j] = jSeqIdPieces[j];
+      }
+      env->ReleaseIntArrayElements(jSeqIdPiecesArray, jSeqIdPieces, JNI_ABORT);
+      batch->logits[i] = jLogits[i];
+    }
+    if (jTokens) {
+      env->ReleaseIntArrayElements(jTokenArray, jTokens, JNI_ABORT);
+    }
+    if (jEmbd) {
+        env->ReleaseFloatArrayElements(jEmbdArray, jEmbd, JNI_ABORT);
+    }
+    env->ReleaseIntArrayElements(jPosArray, jPos, JNI_ABORT);
+    env->ReleaseIntArrayElements(jNSeqIdArray, jNSeqId, JNI_ABORT);
+    env->ReleaseByteArrayElements(jLogitsArray, jLogits, JNI_ABORT);
     return decode(context, *batch);
   });
 }

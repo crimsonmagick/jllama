@@ -46,13 +46,12 @@ public class LlamaContext implements Closeable {
     batch.setCurrentTokenCount(0);
   }
 
-  private native int decodeNative(final LlamaBatch batch);
-  public int decode(final LlamaBatch batch) {
+  private native int llamaDecodeNative(final LlamaBatch batch);
+  public int llamaDecode(final LlamaBatch batch) {
     validateState();
     batch.validateState();
-    return decodeNative(batch);
+    return llamaDecodeNative(batch);
   }
-
 
   public native void llamaSampleSoftMaxNative(LlamaTokenDataArray candidates);
 
@@ -101,6 +100,13 @@ public class LlamaContext implements Closeable {
   public float[] getLogits(final Sequence sequence) {
     validateState();
     return getLogitsNative(sequence.getLastLogitPosition());
+  }
+
+  public native float[] llamaGetLogitsIthNative(int i);
+
+  public float[] llamaGetLogitsIth(int i) {
+    validateState();
+    return getLogitsNative(i);
   }
 
   public native int llamaSampleTokenNative(LlamaTokenDataArray candidates);
@@ -273,7 +279,7 @@ public class LlamaContext implements Closeable {
    *
    * {@link LlamaBatch#nTokens nTokens} represents the number of tokens or embedding values you want decoded from this batch. All
    *
-   * @see LlamaContext#decode(LlamaBatch)
+   * @see LlamaContext#llamaDecode(LlamaBatch)
    */
   public class LlamaBatch {
 

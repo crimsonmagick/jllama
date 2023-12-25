@@ -33,7 +33,10 @@ namespace jni {
   template <typename T>
   T newPrimitiveArray(JNIEnv* env, jint size);
   jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType);
-  jfloatArray getJFloatArray(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  jbyteArray getByteArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
+  jintArray getInt32Array(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
+  jobjectArray get2dInt32Array(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
+  jfloatArray getFloatArray(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   jobject constructLlamaModel(JNIEnv* env, llama_model* modelPointer);
   jobject constructBatchOld(JNIEnv* env, jobject jContext, jint maxTokenCount, llama_batch* batch);
   jobject constructBatch(JNIEnv* env, jobject jContext,  llama_batch *batch, jint jNTokens, jint jEmbd, jint nSeqId);

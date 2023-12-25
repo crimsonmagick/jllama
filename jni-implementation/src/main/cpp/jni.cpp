@@ -232,8 +232,33 @@ jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType) {
     env->SetBooleanField(jInstance, fieldId, value);
   }
 
+  // TODO for these getArray() functions, use either templates or a utility class, and consider returning an instance of this "array manager" to ensure resource cleanup
+  jbyteArray getByteArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "[B");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    return (jbyteArray) env->GetObjectField(jInstance, fieldId);
+  }
+
+  jintArray getInt32Array(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "[I");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    return (jintArray) env->GetObjectField(jInstance, fieldId);
+  }
+
+  jobjectArray get2dInt32Array(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, "[[I");
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    return (jobjectArray) env->GetObjectField(jInstance, fieldId);
+  }
+
   // WARNING must release const float * with ReleaseFloatArrayElements()
-  jfloatArray getJFloatArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName) {
+  jfloatArray getFloatArray(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "[F");
     if (!fieldId) {
       throw JNIException(fieldNotFound(fieldName).c_str());

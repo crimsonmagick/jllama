@@ -61,10 +61,10 @@ LlamaManager::LlamaSession::LlamaModelParamsManager::LlamaModelParamsManager(
   JNIEnv* env = session->env;
   jclass javaParamsClass = env->GetObjectClass(javaContextParams);
 
-  tensorSplitFloatArray = jni::getJFloatArray(env,
-                                              javaParamsClass,
-                                              javaContextParams,
-                                              "tensorSplit");
+  tensorSplitFloatArray = jni::getFloatArray(env,
+                                             javaParamsClass,
+                                             javaContextParams,
+                                             "tensorSplit");
   tensorSplit = tensorSplitFloatArray ? env->GetFloatArrayElements(tensorSplitFloatArray, nullptr) : nullptr;
 
   jfieldID callbackFieldId = env->GetFieldID( javaParamsClass, "progressCallback", "Ljava/util/function/Consumer;");

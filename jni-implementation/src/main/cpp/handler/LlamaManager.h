@@ -30,7 +30,7 @@ class LlamaManager {
                   jint jnPast);
 
         jfloatArray getLogits(jobject jContext);
-        jfloatArray getLogits(jobject jContext, jint batchTokenIndex);
+        jfloatArray getLogitsIth(jobject jContext, jint i);
 
         jint sampleTokenGreedy(jobject jContext, jobject jCandidates);
 
