@@ -1,49 +1,21 @@
 package net.jllama.core;
 
 import java.io.Closeable;
-import java.util.HashMap;
-import net.jllama.core.exceptions.LlamaCppException;
 
 public class LlamaContext implements Closeable {
 
   private long contextPointer;
   private boolean closed;
-  private final HashMap<Integer, Sequence> sequences;
-  private int contextTokenCount;
 
   public LlamaContext(final long contextPointer) {
     this.contextPointer = contextPointer;
     closed = false;
-    sequences = new HashMap<>();
-    contextTokenCount = 0;
   }
 
   private void validateState() {
     if (isClosed()) {
       throw new IllegalStateException("LlamaModel is closed.");
     }
-  }
-
-  private native int evaluateNative(LlamaBatchOld batch);
-
-  public void evaluate(final LlamaBatchOld batch) {
-    validateState();
-    if (batch.isClosed()) {
-      throw new IllegalStateException("LlamaBatch is closed.");
-    }
-    if (batch.getCurrentTokenCount() == 0) {
-      throw new IllegalStateException("LlamaBatch is empty.");
-    }
-    final int returnValue = evaluateNative(batch);
-    if (returnValue < 0) {
-      throw new LlamaCppException("LlamaBatch evaluation failed.");
-    }
-    if (returnValue == 1) {
-      throw new LlamaCppException("Could not find a KV slot for the batch (try reducing the size of the batch or increase the context).");
-    }
-
-    contextTokenCount += batch.currentTokenCount;
-    batch.setCurrentTokenCount(0);
   }
 
   private native int llamaDecodeNative(final LlamaBatch batch);
@@ -95,18 +67,11 @@ public class LlamaContext implements Closeable {
     llamaSampleTemperatureNative(candidates, temp);
   }
 
-  public native float[] getLogitsNative(int batchTokenIndex);
-
-  public float[] getLogits(final Sequence sequence) {
-    validateState();
-    return getLogitsNative(sequence.getLastLogitPosition());
-  }
-
   public native float[] llamaGetLogitsIthNative(int i);
 
   public float[] llamaGetLogitsIth(int i) {
     validateState();
-    return getLogitsNative(i);
+    return llamaGetLogitsIthNative(i);
   }
 
   public native int llamaSampleTokenNative(LlamaTokenDataArray candidates);
@@ -138,13 +103,6 @@ public class LlamaContext implements Closeable {
     llamaSampleFrequencyAndPresencePenaltiesNative(candidates, lastTokens, alphaFrequency, alphaPresence);
   }
 
-  private native LlamaBatchOld llamaBatchInitOldNative(int nTokens, int embd, int nSeqMax);
-
-  public LlamaBatchOld llamaBatchInitOld(int nTokens, int embd, int nSeqMax) {
-    validateState();
-    return llamaBatchInitOldNative(nTokens, embd, nSeqMax);
-  }
-
   private native LlamaBatch llamaBatchInitNative(final int nTokens, final int embd, final int nSeqMax);
 
   public LlamaBatch llamaBatchInit(int nTokens, int embd, int nSeqMax) {
@@ -166,97 +124,6 @@ public class LlamaContext implements Closeable {
 
   public boolean isClosed() {
     return closed;
-  }
-
-  public class LlamaBatchOld implements Closeable {
-
-    private long batchPointer;
-    private boolean closed;
-    private int currentTokenCount;
-    private final int maxTokenCount;
-
-    private LlamaBatchOld(final long batchPointer, final int maxTokenCount) {
-      this.batchPointer = batchPointer;
-      this.maxTokenCount = maxTokenCount;
-      this.currentTokenCount = 0;
-      closed = false;
-    }
-
-    private void validateState() {
-      if (isClosed()) {
-        throw new IllegalStateException("LlamaBatch is closed.");
-      }
-    }
-
-    private native void submitSequenceOldNative(int[] tokens, int sequenceId, int tokenSequenceIndex);
-
-//    public native void submitSequencePieceNative(int[] token, float[] embd, int[] pos, int[][] seq_id, boolean[] logits);
-//
-//    public void submitSequencePiece(int[] token, float[] embd, int[] pos, int[][] seq_id, boolean[] logits) {
-//      validateState();
-//    }
-
-    public Sequence submitSequenceOld(final int[] tokens) {
-      validateState();
-      if (currentTokenCount + tokens.length > maxTokenCount) {
-        throw new IllegalStateException("LlamaBatch is full.");
-      }
-      final int sequenceId;
-      if (sequences.isEmpty()) {
-        sequenceId = 0;
-      } else {
-        sequenceId = sequences.keySet().stream().max(Integer::compareTo).get() + 1;
-      }
-      final Sequence sequence = new Sequence();
-      sequence.setId(sequenceId);
-      sequence.setLength(tokens.length);
-      sequence.setLastLogitPosition(tokens.length - 1);
-      submitSequenceOldNative(tokens, sequenceId, 0);
-      sequences.put(sequenceId, sequence);
-      return sequence;
-    }
-
-    public void appendToSequence(final int[] tokens, final Sequence sequence) {
-      validateState();
-      if (!sequences.containsKey(sequence.getId())) {
-        throw new IllegalStateException("Sequence does not exist.");
-      }
-      if (currentTokenCount + tokens.length > maxTokenCount) {
-        throw new IllegalStateException("LlamaBatch is full.");
-      }
-      submitSequenceOldNative(tokens, sequence.getId(), sequence.getLength());
-      sequence.setLength(sequence.getLength() + tokens.length);
-      sequence.setLastLogitPosition(tokens.length - 1);
-    }
-
-    private native void closeNative();
-
-    @Override
-    public void close() {
-      validateState();
-      closeNative();
-      this.batchPointer = 0;
-      closed = true;
-    }
-
-    public boolean isClosed() {
-      return closed;
-    }
-
-    public int getMaxTokenCount() {
-      return maxTokenCount;
-    }
-
-    private native void setCurrentTokenCountNative(int currentTokenCount);
-
-    private void setCurrentTokenCount(final int currentTokenCount) {
-      this.currentTokenCount = currentTokenCount;
-      setCurrentTokenCountNative(currentTokenCount);
-    }
-
-    public int getCurrentTokenCount() {
-      return currentTokenCount;
-    }
   }
 
   /**
@@ -281,8 +148,7 @@ public class LlamaContext implements Closeable {
    *
    * @see LlamaContext#llamaDecode(LlamaBatch)
    */
-  public class LlamaBatch {
-
+  public class LlamaBatch implements Closeable {
     private final long batchPointer;
     private boolean freed;
     public int nTokens;
@@ -317,6 +183,11 @@ public class LlamaContext implements Closeable {
       validateState();
       llamaBatchFreeNative();
       freed = true;
+    }
+
+    @Override
+    public void close() {
+      llamaBatchFree();
     }
 
     public boolean isFreed() {

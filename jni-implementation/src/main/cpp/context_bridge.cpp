@@ -54,13 +54,6 @@ extern "C" {
   }
 
   JNIEXPORT jobject
-  JNICALL Java_net_jllama_core_LlamaContext_llamaBatchInitOldNative
-    (JNIEnv* env, jobject jContext, jint nTokens, jint embd, jint nSeqMax) {
-    return LlamaManager::getLlamaManager(env)
-        ->newSession(env).llamaBatchInitOld(jContext, nTokens, embd, nSeqMax);
-  }
-
-  JNIEXPORT jobject
   JNICALL Java_net_jllama_core_LlamaContext_llamaBatchInitNative
       (JNIEnv* env, jobject jContext, jint nTokens, jint embd, jint nSeqId
       ) {
@@ -83,13 +76,6 @@ extern "C" {
     (JNIEnv* env, jobject jContext, jint batchTokenIndex) {
     return LlamaManager::getLlamaManager(env)
         ->newSession(env).getLogitsIth(jContext, batchTokenIndex);
-  }
-
-  JNIEXPORT jint
-  JNICALL Java_net_jllama_core_LlamaContext_evaluateNative
-      (JNIEnv* env, jobject jContext, jobject jBatch) {
-    return LlamaManager::getLlamaManager(env)
-        ->newSession(env).evaluate(jContext, jBatch);
   }
 
   JNIEXPORT jint

@@ -167,21 +167,6 @@ jint LlamaManager::LlamaSession::eval(jobject jContext,
 typedef int (* llama_n_vocab_pointer)(const struct llama_model*);
 typedef float* (* llama_get_logits_pointer)(llama_context*);
 typedef llama_model* (* llama_get_model_pointer)(llama_context* ctx);
-jfloatArray LlamaManager::LlamaSession::getLogits(jobject jContext) {
-  return withJniExceptions(env, [&jContext, this] {
-    auto getLogits = (llama_get_logits_pointer) getFunctionAddress(
-        "llama_get_logits");
-    auto getModel = (llama_get_model_pointer) getFunctionAddress("llama_get_model");
-    auto getVocabLength = (llama_n_vocab_pointer) getFunctionAddress("llama_n_vocab");
-    auto llamaContext = jni::getLlamaContextPointer(env, jContext);
-    float* logits = getLogits(llamaContext);
-    auto llamaModel = getModel(llamaContext);
-    int vocabLength = getVocabLength(llamaModel);
-    auto jLogits = env->NewFloatArray(vocabLength);
-    env->SetFloatArrayRegion(jLogits, 0, vocabLength, logits);
-    return jLogits;
-  });
-}
 
 jfloatArray LlamaManager::LlamaSession::getLogitsIth(jobject jContext, jint i) {
   return withJniExceptions(env, [&jContext, this, i] {
@@ -324,7 +309,6 @@ void LlamaManager::LlamaSession::setLogger(jobject logger) {
     env->DeleteLocalRef(logger);
   });
 }
-
 
 typedef void (* llama_free_model_pointer)(struct llama_model*);
 void LlamaManager::LlamaSession::freeModel(jobject jModel) {
@@ -521,19 +505,6 @@ void LlamaManager::LlamaSession::llamaSampleTemperature(jobject jContext,
 }
 
 typedef llama_batch (* llama_batch_init_pointer) (int32_t n_tokens, int32_t embd, int32_t n_seq_max);
-jobject LlamaManager::LlamaSession::llamaBatchInitOld(jobject jContext,
-                                                      jint jMaxTokenCount,
-                                                      jint jEmbeddingVectorSize,
-                                                      jint jSequenceIdLength) {
-  return withJniExceptions(env, [this, jContext, jMaxTokenCount, jEmbeddingVectorSize, jSequenceIdLength] {
-    auto batchInit = reinterpret_cast<llama_batch_init_pointer>(getFunctionAddress("llama_batch_init"));
-    llama_batch batchStack = batchInit(jMaxTokenCount, jEmbeddingVectorSize, jSequenceIdLength);
-    llama_batch* batchHeap = new llama_batch;
-    std::memcpy(batchHeap, &batchStack, sizeof(llama_batch));
-    return jni::constructBatchOld(env, jContext, jMaxTokenCount, batchHeap);
-  });
-}
-
 jobject LlamaManager::LlamaSession::llamaBatchInit(jobject jContext,
                                                    jint jNTokens,
                                                    jint jEmbd,
@@ -557,74 +528,7 @@ void LlamaManager::LlamaSession::llamaBatchFree(jobject jBatch) {
   });
 }
 
-void LlamaManager::LlamaSession::submitSequence(jobject jBatch,
-                                                jintArray jTokens,
-                                                jint jSequenceId,
-                                                jint sequenceTokenIndex) {
-  withJniExceptions(env, [this, jBatch, jTokens, jSequenceId, sequenceTokenIndex] {
-    llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
-    jint* tokens = env->GetIntArrayElements(jTokens, nullptr);
-    jsize tokenCount = env->GetArrayLength(jTokens);
-    int32_t startingBatchSize = batch->n_tokens;
-    for (jsize i = 0; i < tokenCount; i++) {
-      int32_t index = startingBatchSize + i;
-      batch->token[index] = tokens[i];
-      batch->pos[index] = sequenceTokenIndex + i;
-      batch->n_seq_id[index] = 1;
-      batch->seq_id[index][0] = jSequenceId;
-      batch->logits[index] = 0;
-    }
-    batch->logits[startingBatchSize + tokenCount - 1] = 1;
-    batch->n_tokens += tokenCount;
-    jclass batchClass = env->GetObjectClass(jBatch);
-    jni::setSignedInt32(batch->n_tokens, env, batchClass, jBatch, "currentTokenCount");
-    env->ReleaseIntArrayElements(jTokens, tokens, 0); // TODO should we use JNI_ABORT?
-  });
-}
-
-void LlamaManager::LlamaSession::submitSequenceNative(jobject jBatch,
-                                                jintArray jTokens,
-                                                jint jSequenceId,
-                                                jint sequenceTokenIndex) {
-  withJniExceptions(env, [this, jBatch, jTokens, jSequenceId, sequenceTokenIndex] {
-    llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
-    jint* tokens = env->GetIntArrayElements(jTokens, nullptr);
-    jsize tokenCount = env->GetArrayLength(jTokens);
-    int32_t startingBatchSize = batch->n_tokens;
-    for (jsize i = 0; i < tokenCount; i++) {
-      int32_t index = startingBatchSize + i;
-      batch->token[index] = tokens[i];
-      batch->pos[index] = sequenceTokenIndex + i;
-      batch->n_seq_id[index] = 1;
-      batch->seq_id[index][0] = jSequenceId;
-      batch->logits[index] = 0;
-    }
-    batch->logits[startingBatchSize + tokenCount - 1] = 1;
-    batch->n_tokens += tokenCount;
-    jclass batchClass = env->GetObjectClass(jBatch);
-    jni::setSignedInt32(batch->n_tokens, env, batchClass, jBatch, "currentTokenCount");
-    env->ReleaseIntArrayElements(jTokens, tokens, 0); // TODO should we use JNI_ABORT?
-  });
-}
-
 typedef int (* llama_decode_pointer) (llama_context*, llama_batch);
-jint LlamaManager::LlamaSession::evaluate(jobject jContext, jobject jBatch) {
-  return withJniExceptions(env, [this, jContext, jBatch] {
-    auto decode = reinterpret_cast<llama_decode_pointer>(getFunctionAddress("llama_decode"));
-    llama_context* context = jni::getLlamaContextPointer(env, jContext);
-    llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
-    return decode(context, *batch);
-  });
-}
-
-void LlamaManager::LlamaSession::setCurrentTokenCount(jobject jBatch,
-                                                      jint currentTokenCount) {
-    withJniExceptions(env, [this, jBatch, currentTokenCount] {
-        llama_batch* batch = jni::getLlamaBatchPointer(env, jBatch);
-        batch->n_tokens = currentTokenCount;
-    });
-}
-
 jint LlamaManager::LlamaSession::decodeNative(jobject jContext, jobject jBatch) {
   return withJniExceptions(env, [this, jContext, jBatch] {
     auto decode = reinterpret_cast<llama_decode_pointer>(getFunctionAddress("llama_decode"));
