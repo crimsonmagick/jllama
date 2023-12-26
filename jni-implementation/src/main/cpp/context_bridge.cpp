@@ -96,9 +96,16 @@ extern "C" {
 
   JNIEXPORT void
   JNICALL Java_net_jllama_core_LlamaContext_llamaKvCacheSeqRmNative
-      (JNIEnv* jEnv, jobject jContext, jint seqId, jint p0, jint p1) {
+    (JNIEnv* jEnv, jobject jContext, jint seqId, jint p0, jint p1) {
     return LlamaManager::getLlamaManager(jEnv)
         ->newSession(jEnv).kvCacheSeqRm(jContext, seqId, p0, p1);
+  }
+
+  JNIEXPORT void
+  JNICALL Java_net_jllama_core_LlamaContext_llamaKvCacheSeqCpNative
+    (JNIEnv* env, jobject jContext, jint seqId, jint seqIdDst, jint p0, jint p1) {
+    return LlamaManager::getLlamaManager(env)
+        ->newSession(env).kvCacheSeqCp(jContext, seqId, seqIdDst, p0, p1);
   }
 
 }

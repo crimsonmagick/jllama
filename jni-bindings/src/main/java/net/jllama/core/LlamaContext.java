@@ -45,6 +45,13 @@ public class LlamaContext implements Closeable {
     llamaKvCacheSeqRmNative(seq_id, p0, p1);
   }
 
+  private native void llamaKvCacheSeqCpNative(int seqId, int seqIdDst, int p0, int p1);
+
+  public void llamaKvCacheSeqCp(int seqId, int seqIdDst, int p0, int p1) {
+    validateState();
+    llamaKvCacheSeqCpNative(seqId, seqIdDst, p0, p1);
+  }
+
   public native void llamaSampleTopKNative(LlamaTokenDataArray candidates, int k, long minKeep);
 
   public void llamaSampleTopK(LlamaTokenDataArray candidates, int k, long minKeep) {

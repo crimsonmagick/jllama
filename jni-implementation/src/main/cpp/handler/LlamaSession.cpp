@@ -557,3 +557,15 @@ void LlamaManager::LlamaSession::kvCacheSeqRm(jobject jContext, jint jSeqId, jin
     removeSeq(jni::getLlamaContextPointer(env, jContext), jSeqId, p0, p1);
   });
 }
+
+typedef void (* llama_kv_cache_seq_cp_pointer)(llama_context*, int, int, int, int);
+void LlamaManager::LlamaSession::kvCacheSeqCp(jobject jContext, jint jSeqId,
+                                              jint jSeqIdDst, jint p0, jint p1) {
+  withJniExceptions(env, [this, jContext, jSeqId, jSeqIdDst, p0, p1] {
+    auto copySeq =
+        reinterpret_cast<llama_kv_cache_seq_cp_pointer>(getFunctionAddress(
+            "llama_kv_cache_seq_rm"));
+    copySeq(jni::getLlamaContextPointer(env, jContext), jSeqId, jSeqIdDst, p0,
+            p1);
+  });
+}
