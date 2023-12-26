@@ -362,7 +362,7 @@ jobject LlamaManager::LlamaSession::defaultModelParams() {
   return withJniExceptions(env, [this] {
     auto getDefaultParams =
         reinterpret_cast<llama_model_default_params_pointer>(getFunctionAddress(
-            "llama_context_default_params"));
+            "llama_model_default_params"));
     llama_model_params params = getDefaultParams();
     auto paramsManager = LlamaModelParamsManager(params, this);
     jobject jParams = paramsManager.getJavaParams();
