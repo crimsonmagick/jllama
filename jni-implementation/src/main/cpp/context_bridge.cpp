@@ -80,4 +80,11 @@ extern "C" {
         ->newSession(env).getLogitsIth(jContext, i);
   }
 
+  JNIEXPORT jint
+  JNICALL Java_net_jllama_core_LlamaContext_llamaGetKvCacheUsedCellsNative
+      (JNIEnv* env, jobject jContext) {
+    return LlamaManager::getLlamaManager(env)
+        ->newSession(env).getKvCacheUsedCells(jContext);
+  }
+
 }

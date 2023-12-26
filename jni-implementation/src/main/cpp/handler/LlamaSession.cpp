@@ -386,7 +386,7 @@ void LlamaManager::LlamaSession::llamaSampleTopK(jobject jContext,
   });
 }
 
-typedef void (* llama_sample_top_p_pointer) (struct llama_context * ctx, llama_token_data_array * candidates, float p, size_t min_keep);
+typedef void (* llama_sample_top_p_pointer)(struct llama_context * ctx, llama_token_data_array * candidates, float p, size_t min_keep);
 void LlamaManager::LlamaSession::llamaSampleTopP(jobject jContext,
                                                  jobject jCandidates,
                                                  jfloat p,
@@ -401,7 +401,7 @@ void LlamaManager::LlamaSession::llamaSampleTopP(jobject jContext,
   });
 }
 
-typedef void (* llama_sample_tail_free_pointer) (struct llama_context * ctx, llama_token_data_array * candidates, float z, size_t min_keep);
+typedef void (* llama_sample_tail_free_pointer)(struct llama_context * ctx, llama_token_data_array * candidates, float z, size_t min_keep);
 void LlamaManager::LlamaSession::llamaSampleTailFree(jobject jContext,
                                                      jobject jCandidates,
                                                      jfloat z,
@@ -416,7 +416,7 @@ void LlamaManager::LlamaSession::llamaSampleTailFree(jobject jContext,
   });
 }
 
-typedef void (* llama_sample_typical_pointer) (struct llama_context * ctx, llama_token_data_array * candidates, float p, size_t min_keep);
+typedef void (* llama_sample_typical_pointer)(struct llama_context * ctx, llama_token_data_array * candidates, float p, size_t min_keep);
 void LlamaManager::LlamaSession::llamaSampleTypical(jobject jContext,
                                                     jobject jCandidates,
                                                     jfloat p,
@@ -431,7 +431,7 @@ void LlamaManager::LlamaSession::llamaSampleTypical(jobject jContext,
   });
 }
 
-typedef void (* llama_sample_temperature_pointer) (struct llama_context * ctx, llama_token_data_array * candidates, float temp);
+typedef void (* llama_sample_temperature_pointer)(struct llama_context * ctx, llama_token_data_array * candidates, float temp);
 void LlamaManager::LlamaSession::llamaSampleTemperature(jobject jContext,
                                                         jobject jCandidates,
                                                         jfloat temp) {
@@ -445,7 +445,7 @@ void LlamaManager::LlamaSession::llamaSampleTemperature(jobject jContext,
   });
 }
 
-typedef llama_batch (* llama_batch_init_pointer) (int32_t n_tokens, int32_t embd, int32_t n_seq_max);
+typedef llama_batch (* llama_batch_init_pointer)(int32_t n_tokens, int32_t embd, int32_t n_seq_max);
 jobject LlamaManager::LlamaSession::llamaBatchInit(jobject jContext,
                                                    jint jNTokens,
                                                    jint jEmbd,
@@ -459,7 +459,7 @@ jobject LlamaManager::LlamaSession::llamaBatchInit(jobject jContext,
   });
 }
 
-typedef void (* llama_batch_free_pointer) (llama_batch);
+typedef void (* llama_batch_free_pointer)(llama_batch);
 void LlamaManager::LlamaSession::llamaBatchFree(jobject jBatch) {
   return withJniExceptions(env, [this, jBatch] {
     auto batchFree = reinterpret_cast<llama_batch_free_pointer>(getFunctionAddress("llama_batch_free"));
@@ -469,7 +469,7 @@ void LlamaManager::LlamaSession::llamaBatchFree(jobject jBatch) {
   });
 }
 
-typedef int (* llama_decode_pointer) (llama_context*, llama_batch);
+typedef int (* llama_decode_pointer)(llama_context*, llama_batch);
 jint LlamaManager::LlamaSession::decodeNative(jobject jContext, jobject jBatch) {
   return withJniExceptions(env, [this, jContext, jBatch] {
     auto decode = reinterpret_cast<llama_decode_pointer>(getFunctionAddress("llama_decode"));
@@ -527,3 +527,14 @@ jint LlamaManager::LlamaSession::decodeNative(jobject jContext, jobject jBatch) 
     return decode(context, *batch);
   });
 }
+
+typedef int (* llama_get_kv_cache_used_cells_pointer)(llama_context*);
+jint LlamaManager::LlamaSession::getKvCacheUsedCells(jobject jContext) {
+  return withJniExceptions(env, [this, jContext] {
+    auto getUsedCells =
+        reinterpret_cast<llama_get_kv_cache_used_cells_pointer>(getFunctionAddress(
+            "llama_get_kv_cache_used_cells"));
+    return getUsedCells(jni::getLlamaContextPointer(env, jContext));
+  });
+}
+

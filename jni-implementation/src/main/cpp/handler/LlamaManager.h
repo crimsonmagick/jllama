@@ -93,7 +93,8 @@ class LlamaManager {
                                jbooleanArray jLogits);
       jobject
       llamaBatchInit(jobject jContext, jint nTokens, jint jEmbd, jint nSeqId);
-     private:
+        jint getKvCacheUsedCells(jobject jContext);
+      private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
             : env(env), manager(outer) {}
