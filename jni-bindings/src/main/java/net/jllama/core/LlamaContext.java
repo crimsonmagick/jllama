@@ -32,6 +32,13 @@ public class LlamaContext implements Closeable {
     return llamaGetKvCacheUsedCellsNative();
   }
 
+  private native void llamaKvCacheClearNative();
+
+  public void llamaKvCacheClear() {
+    validateState();
+    llamaKvCacheClearNative();
+  }
+
   public native void llamaSampleTopKNative(LlamaTokenDataArray candidates, int k, long minKeep);
 
   public void llamaSampleTopK(LlamaTokenDataArray candidates, int k, long minKeep) {

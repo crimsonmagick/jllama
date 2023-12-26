@@ -87,4 +87,11 @@ extern "C" {
         ->newSession(env).getKvCacheUsedCells(jContext);
   }
 
+  JNIEXPORT void
+  JNICALL Java_net_jllama_core_LlamaContext_llamaKvCacheClearNative
+    (JNIEnv* env, jobject jContext) {
+    return LlamaManager::getLlamaManager(env)
+      ->newSession(env).kvCacheClear(jContext);
+  }
+
 }

@@ -94,6 +94,7 @@ class LlamaManager {
       jobject
       llamaBatchInit(jobject jContext, jint nTokens, jint jEmbd, jint nSeqId);
         jint getKvCacheUsedCells(jobject jContext);
+        void kvCacheClear(jobject jContext);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

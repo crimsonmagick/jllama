@@ -538,3 +538,12 @@ jint LlamaManager::LlamaSession::getKvCacheUsedCells(jobject jContext) {
   });
 }
 
+typedef void (* llama_kv_cache_clear_pointer)(llama_context*);
+void LlamaManager::LlamaSession::kvCacheClear(jobject jContext) {
+  withJniExceptions(env, [this, jContext] {
+    auto clearCache =
+        reinterpret_cast<llama_kv_cache_clear_pointer >(getFunctionAddress(
+            "llama_kv_cache_clear"));
+    clearCache(jni::getLlamaContextPointer(env, jContext));
+  });
+}
