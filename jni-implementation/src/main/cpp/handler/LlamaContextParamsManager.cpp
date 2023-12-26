@@ -1,4 +1,5 @@
 #include <jni.h>
+#include <sstream>
 #include "../jni.h"
 #include "../j_classes_consts.h"
 #include "LlamaManager.h"
@@ -96,17 +97,28 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
   if (!ggmlTypeMethodId) {
     throw jni::JNIException("Unable to find GgmlType method getType().");
   }
-  jobject ggmlType = env->CallStaticObjectMethod(ggmlTypeClass, ggmlTypeMethodId, llamaContextParams.type_k);
-  if (!ggmlType) {
-      throw jni::JNIException("Unable to get GgmlType using value.");
+
+  jobject kGgmlType = env->CallStaticObjectMethod(ggmlTypeClass, ggmlTypeMethodId, llamaContextParams.type_k);
+  jni::setObject(kGgmlType, env, jParamsClass, jLlamaContextParams, "typeK", GGML_TYPE_SIG);
+  if (!kGgmlType) {
+    std::ostringstream errorMessage;
+    errorMessage << "Unable to set GgmlType typeK to value=" << llamaContextParams.type_k;
+    throw jni::JNIException(errorMessage.str().c_str());
   }
-  jni::setObject(ggmlType, env, jParamsClass, jLlamaContextParams, "typeK", GGML_TYPE_SIG);
+
+  jobject vGgmlType = env->CallStaticObjectMethod(ggmlTypeClass, ggmlTypeMethodId, llamaContextParams.type_v);
+  jni::setObject(vGgmlType, env, jParamsClass, jLlamaContextParams, "typeV", GGML_TYPE_SIG);
+  if (!vGgmlType) {
+    std::ostringstream errorMessage;
+    errorMessage << "Unable to set GgmlType typeV to value=" << llamaContextParams.type_v;
+    throw jni::JNIException(errorMessage.str().c_str());
+  }
+
   jni::setBoolean(llamaContextParams.embedding,
                   env,
                   jParamsClass,
                   jLlamaContextParams,
                   "embedding");
-
 }
 
 LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager(
