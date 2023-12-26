@@ -14,10 +14,10 @@ public class LlamaContextParams {
     private float yarnBetaFast;
     private float yarnBetaSlow;
     private int yarnOrigCtx;
-    private boolean mulMatQ;
-    private boolean f16Kv;
-    private boolean logitsAll;
+    GgmlType typeK;
+    GgmlType typeV;
     private boolean embedding;
+    private boolean offloadKqv;
 
     public int getSeed() {
         return seed;
@@ -123,28 +123,20 @@ public class LlamaContextParams {
         this.yarnOrigCtx = yarnOrigCtx;
     }
 
-    public boolean isMulMatQ() {
-        return mulMatQ;
+    public GgmlType getTypeK() {
+        return typeK;
     }
 
-    public void setMulMatQ(boolean mulMatQ) {
-        this.mulMatQ = mulMatQ;
+    public void setTypeK(GgmlType typeK) {
+        this.typeK = typeK;
     }
 
-    public boolean isF16Kv() {
-        return f16Kv;
+    public GgmlType getTypeV() {
+        return typeV;
     }
 
-    public void setF16Kv(boolean f16Kv) {
-        this.f16Kv = f16Kv;
-    }
-
-    public boolean isLogitsAll() {
-        return logitsAll;
-    }
-
-    public void setLogitsAll(boolean logitsAll) {
-        this.logitsAll = logitsAll;
+    public void setTypeV(GgmlType typeV) {
+        this.typeV = typeV;
     }
 
     public boolean isEmbedding() {
@@ -153,5 +145,13 @@ public class LlamaContextParams {
 
     public void setEmbedding(boolean embedding) {
         this.embedding = embedding;
+    }
+
+    public boolean isOffloadKqv() {
+        return offloadKqv;
+    }
+
+    public void setOffloadKqv(boolean offloadKqv) {
+        this.offloadKqv = offloadKqv;
     }
 }

@@ -30,6 +30,9 @@ namespace jni {
   void setFloat(float value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   bool getBool(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   void setBoolean(bool value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  size_t getSizeT(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  void setObject(jobject value, JNIEnv* env, jclass jType, jobject jInstance,
+                 const char* fieldName, const char* signature);
   template <typename T>
   T newPrimitiveArray(JNIEnv* env, jint size);
   jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType);

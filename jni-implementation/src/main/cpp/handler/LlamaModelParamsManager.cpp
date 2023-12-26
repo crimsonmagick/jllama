@@ -54,33 +54,33 @@ LlamaManager::LlamaSession::LlamaModelParamsManager::LlamaModelParamsManager(
 }
 
 LlamaManager::LlamaSession::LlamaModelParamsManager::LlamaModelParamsManager(
-    jobject javaContextParams,
+    jobject javaModelParams,
     LlamaSession* session)
-    : jLlamaModelParams(javaContextParams), session(session) {
+    : jLlamaModelParams(javaModelParams), session(session) {
 
   JNIEnv* env = session->env;
-  jclass javaParamsClass = env->GetObjectClass(javaContextParams);
+  jclass javaParamsClass = env->GetObjectClass(javaModelParams);
 
   tensorSplitFloatArray = jni::getFloatArray(env,
                                              javaParamsClass,
-                                             javaContextParams,
+                                             javaModelParams,
                                              "tensorSplit");
   tensorSplit = tensorSplitFloatArray ? env->GetFloatArrayElements(tensorSplitFloatArray, nullptr) : nullptr;
 
   llamaModelParams = {
-      .n_gpu_layers = jni::getInt32(env, javaParamsClass, javaContextParams, "nGpuLayers"),
-      .main_gpu = jni::getInt32(env, javaParamsClass, javaContextParams, "mainGpu"),
+      .n_gpu_layers = jni::getInt32(env, javaParamsClass, javaModelParams, "nGpuLayers"),
+      .main_gpu = jni::getInt32(env, javaParamsClass, javaModelParams, "mainGpu"),
       .tensor_split = tensorSplit,
-      .vocab_only = jni::getBool(env, javaParamsClass, javaContextParams, "vocabOnly"),
-      .use_mmap = jni::getBool(env, javaParamsClass, javaContextParams, "useMmap"),
-      .use_mlock = jni::getBool(env, javaParamsClass, javaContextParams, "useMlock")
+      .vocab_only = jni::getBool(env, javaParamsClass, javaModelParams, "vocabOnly"),
+      .use_mmap = jni::getBool(env, javaParamsClass, javaModelParams, "useMmap"),
+      .use_mlock = jni::getBool(env, javaParamsClass, javaModelParams, "useMlock")
   };
 
   jfieldID callbackFieldId = env->GetFieldID( javaParamsClass, "progressCallback", "Ljava/util/function/Consumer;");
   if (callbackFieldId == nullptr) {
     throw jni::JNIException("field \"progressCallback\" must exist on Java LlamaModelParams class");
   }
-  jobject jprogressCallback = env->GetObjectField(javaContextParams, callbackFieldId);
+  jobject jprogressCallback = env->GetObjectField(javaModelParams, callbackFieldId);
 
   CallbackContext* callbackContext;
 

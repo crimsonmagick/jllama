@@ -87,21 +87,10 @@ public class ContextConfigurer {
       return this;
     }
 
-    public ParametrizedLoader setF16Kv(final boolean f16Kv) {
-      llamaContextParams.setF16Kv(f16Kv);
-      return this;
-    }
-
-    public ParametrizedLoader setLogitsAll(final boolean logitsAll) {
-      llamaContextParams.setLogitsAll(logitsAll);
-      return this;
-    }
-
     public ParametrizedLoader setEmbedding(final boolean embedding) {
       llamaContextParams.setEmbedding(embedding);
       return this;
     }
-
 
   }
 

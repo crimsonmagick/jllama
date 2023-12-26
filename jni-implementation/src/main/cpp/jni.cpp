@@ -111,18 +111,18 @@ namespace jni {
     return newArray;
   }
 
-template<>
-jdoubleArray newPrimitiveArray<jdoubleArray>(JNIEnv* env, jint size) {
-  jdoubleArray newArray = env->NewDoubleArray(size);
-  validateArray(env, newArray, size, ARRAY_TYPE::DOUBLE);
-  return newArray;
-}
+  template<>
+  jdoubleArray newPrimitiveArray<jdoubleArray>(JNIEnv* env, jint size) {
+    jdoubleArray newArray = env->NewDoubleArray(size);
+    validateArray(env, newArray, size, ARRAY_TYPE::DOUBLE);
+    return newArray;
+  }
 
-jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType) {
-  jobjectArray newArray = env->NewObjectArray(size, memberType, nullptr);
-  validateArray(env, newArray, size, ARRAY_TYPE::OBJECT);
-  return newArray;
-}
+  jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType) {
+    jobjectArray newArray = env->NewObjectArray(size, memberType, nullptr);
+    validateArray(env, newArray, size, ARRAY_TYPE::OBJECT);
+    return newArray;
+  }
 
   int8_t getByte(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, "B");
@@ -190,6 +190,15 @@ jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType) {
       throw JNIException(fieldNotFound(fieldName).c_str());
     }
     return static_cast<size_t>(env->GetIntField(jInstance, fieldId));
+  }
+
+  void setObject(jobject value, JNIEnv* env, jclass jType, jobject jInstance,
+                 const char* fieldName, const char* signature) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, signature);
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    env->SetObjectField(jInstance, fieldId, value);
   }
 
   float getFloat(JNIEnv *env, jclass jType, jobject jInstance, const char *fieldName) {
@@ -545,7 +554,6 @@ jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType) {
     }
     env->SetObjectField(destination, jArrayFieldId, jNewDataArray);
   }
-
 
   jintArray newJIntArray(JNIEnv* env, jint size) {
     jintArray newArray = env->NewIntArray(size);

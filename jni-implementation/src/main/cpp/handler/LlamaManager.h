@@ -29,7 +29,6 @@ class LlamaManager {
                   jint jnTokens,
                   jint jnPast);
 
-        jfloatArray getLogits(jobject jContext);
         jfloatArray getLogitsIth(jobject jContext, jint i);
 
         jint sampleTokenGreedy(jobject jContext, jobject jCandidates);
@@ -128,11 +127,6 @@ class LlamaManager {
         const float* tensorSplit;
         LlamaSession* session;
       };
-
-      void submitSequenceNative(jobject jBatch,
-                                jintArray jTokens,
-                                jint jSequenceId,
-                                jint sequenceTokenIndex);
     };
     static LlamaManager* singleton;
     static JavaVM* javaVm;

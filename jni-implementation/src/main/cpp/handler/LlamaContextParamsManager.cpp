@@ -87,21 +87,26 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                   jParamsClass,
                   jLlamaContextParams,
                   "yarnOrigCtx");
-  jni::setBoolean(llamaContextParams.mul_mat_q,
-                  env,
-                  jParamsClass,
-                  jLlamaContextParams,
-                  "mulMatQ");
-  jni::setBoolean(llamaContextParams.logits_all,
-                  env,
-                  jParamsClass,
-                  jLlamaContextParams,
-                  "logitsAll");
+
+  jclass ggmlTypeClass = env->FindClass(GGML_TYPE_NAME);
+  if (!ggmlTypeClass)  {
+    throw jni::JNIException("Unable to find class GgmlType.");
+  }
+  jmethodID ggmlTypeMethodId = env->GetStaticMethodID(ggmlTypeClass, "getType", GGML_TYPE_GET_TYPE_SIG);
+  if (!ggmlTypeMethodId) {
+    throw jni::JNIException("Unable to find GgmlType method getType().");
+  }
+  jobject ggmlType = env->CallStaticObjectMethod(ggmlTypeClass, ggmlTypeMethodId, llamaContextParams.type_k);
+  if (!ggmlType) {
+      throw jni::JNIException("Unable to get GgmlType using value.");
+  }
+  jni::setObject(ggmlType, env, jParamsClass, jLlamaContextParams, "typeK", GGML_TYPE_SIG);
   jni::setBoolean(llamaContextParams.embedding,
                   env,
                   jParamsClass,
                   jLlamaContextParams,
                   "embedding");
+
 }
 
 LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager(
@@ -165,14 +170,6 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                                       javaParamsClass,
                                       javaContextParams,
                                       "yarnOrigCtx"),
-      .mul_mat_q = jni::getBool(env,
-                                javaParamsClass,
-                                javaContextParams,
-                                "mulMatQ"),
-      .logits_all = jni::getBool(env,
-                                 javaParamsClass,
-                                 javaContextParams,
-                                 "logitsAll"),
       .embedding = jni::getBool(env,
                                 javaParamsClass,
                                 javaContextParams,
