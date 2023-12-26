@@ -547,3 +547,13 @@ void LlamaManager::LlamaSession::kvCacheClear(jobject jContext) {
     clearCache(jni::getLlamaContextPointer(env, jContext));
   });
 }
+
+typedef void (* llama_kv_cache_seq_rm_pointer)(llama_context*, int, int, int);
+void LlamaManager::LlamaSession::kvCacheSeqRm(jobject jContext, jint jSeqId, jint p0, jint p1) {
+  withJniExceptions(env, [this, jContext, jSeqId, p0, p1] {
+    auto removeSeq =
+        reinterpret_cast<llama_kv_cache_seq_rm_pointer>(getFunctionAddress(
+            "llama_kv_cache_seq_rm"));
+    removeSeq(jni::getLlamaContextPointer(env, jContext), jSeqId, p0, p1);
+  });
+}

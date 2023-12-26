@@ -44,24 +44,11 @@ class LlamaManager {
         jlong getTimestampInMicroseconds();
         jobject defaultContextParams();
         jint sampleToken(jobject jContext, jobject jCandidates);
-        void applyRepetitionPenalty(jobject jContext,
-                                    jobject jCandidates,
-                                    jintArray jPreviousTokens,
-                                    jfloat penalty);
-
-        void applyFrequencyAndPresencePenalties(jobject jContext,
-                                                jobject jCandidates,
-                                                jintArray jLastTokens,
-                                                jfloat jAlphaFrequency,
-                                                jfloat jPresence);
-        void llamaSampleSoftMax(jobject jContext, jobject jCandidates);
-        void
-        llamaSampleTopK(jobject jContext,
-                        jobject jCandidates,
-                        jint k,
-                        jlong minkKeep);
-        void
-        llamaSampleTopP(jobject jContext,
+        void llamaSampleTopK(jobject jContext,
+                             jobject jCandidates,
+                             jint k,
+                             jlong minkKeep);
+        void llamaSampleTopP(jobject jContext,
                         jobject jCandidates,
                         jfloat p,
                         jlong minKeep);
@@ -76,25 +63,13 @@ class LlamaManager {
         void llamaSampleTemperature(jobject jContext,
                                     jobject jCandidates,
                                     jfloat temp);
-      jobject defaultModelParams();
-      jobject llamaBatchInitOld(jobject jContext, jint jMaxTokenCount,
-                                jint jEmbeddingVectorSize, jint jSequenceIdLength);
-      void llamaBatchFree(jobject jBatch);
-        void
-        submitSequence(jobject jBatch, jintArray jTokens, jint jSequenceId, jint sequenceTokenIndex);
-        jint evaluate(jobject jContext, jobject jBatch);
-        void setCurrentTokenCount(jobject jBatch, jint currentTokenCount);
-      jint decodeNative(jobject jContext, jobject jBatch);
-      void submitSequencePiece(jobject jBatch,
-                               jintArray jToken,
-                               jfloatArray jEmbd,
-                               jintArray jPos,
-                               jobjectArray jSeqId,
-                               jbooleanArray jLogits);
-      jobject
-      llamaBatchInit(jobject jContext, jint nTokens, jint jEmbd, jint nSeqId);
+        jobject defaultModelParams();
+        void llamaBatchFree(jobject jBatch);
+        jint decodeNative(jobject jContext, jobject jBatch);
+        jobject llamaBatchInit(jobject jContext, jint nTokens, jint jEmbd, jint nSeqId);
         jint getKvCacheUsedCells(jobject jContext);
         void kvCacheClear(jobject jContext);
+        void kvCacheSeqRm(jobject jContext, jint jSeqId, jint p0, jint p1);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
@@ -103,8 +78,10 @@ class LlamaManager {
         LlamaManager* manager;
         class LlamaContextParamsManager {
           public:
-            LlamaContextParamsManager(llama_context_params contextParams, LlamaSession* session);
-            LlamaContextParamsManager(jobject javaContextParams, LlamaSession* session);
+            LlamaContextParamsManager(llama_context_params contextParams,
+                                      LlamaSession* session);
+            LlamaContextParamsManager(jobject javaContextParams,
+                                      LlamaSession* session);
             llama_context_params getParams();
             jobject getJavaParams();
 
@@ -114,21 +91,23 @@ class LlamaManager {
             LlamaSession* session;
         };
 
-      class LlamaModelParamsManager {
-       public:
-        LlamaModelParamsManager(llama_model_params modelParams, LlamaSession* session);
-        LlamaModelParamsManager(jobject javaModelParams, LlamaSession* session);
-        ~LlamaModelParamsManager();
-        llama_model_params getParams();
-        jobject getJavaParams();
+        class LlamaModelParamsManager {
+          public:
+            LlamaModelParamsManager(llama_model_params modelParams,
+                                    LlamaSession* session);
+            LlamaModelParamsManager(jobject javaModelParams,
+                                    LlamaSession* session);
+            ~LlamaModelParamsManager();
+            llama_model_params getParams();
+            jobject getJavaParams();
 
-       private:
-        llama_model_params llamaModelParams{};
-        jobject jLlamaModelParams;
-        jfloatArray tensorSplitFloatArray;
-        const float* tensorSplit;
-        LlamaSession* session;
-      };
+          private:
+            llama_model_params llamaModelParams{};
+            jobject jLlamaModelParams;
+            jfloatArray tensorSplitFloatArray;
+            const float* tensorSplit;
+            LlamaSession* session;
+        };
     };
     static LlamaManager* singleton;
     static JavaVM* javaVm;
@@ -136,7 +115,9 @@ class LlamaManager {
     static inline std::once_flag initFlag;
     explicit LlamaManager();
     static bool progressCallback(float progress, void* ctx);
-    static void loggerCallback(enum ggml_log_level level, const char * text, void * user_data);
+    static void loggerCallback(enum ggml_log_level level,
+                               const char* text,
+                               void* user_data);
 
   public:
     static LlamaManager* getLlamaManager(JNIEnv* env);
