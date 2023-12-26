@@ -119,6 +119,11 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                   jParamsClass,
                   jLlamaContextParams,
                   "embedding");
+  jni::setBoolean(llamaContextParams.offload_kqv,
+                  env,
+                  jParamsClass,
+                  jLlamaContextParams,
+                  "offloadKqv");
 }
 
 LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager(
@@ -128,6 +133,20 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
 
   JNIEnv* env = session->env;
   jclass javaParamsClass = env->GetObjectClass(javaContextParams);
+  jobject jTypeK = jni::getObject(env, javaParamsClass, javaContextParams, "typeK", GGML_TYPE_SIG);
+  jobject jTypeV = jni::getObject(env, javaParamsClass, javaContextParams, "typeV", GGML_TYPE_SIG);
+
+  jclass ggmlTypeClass = env->FindClass(GGML_TYPE_NAME);
+  if (!ggmlTypeClass)  {
+    throw jni::JNIException("Unable to find class GgmlType.");
+  }
+  jmethodID ggmlValueMethodId = env->GetMethodID(ggmlTypeClass, "getValue", GGML_TYPE_GET_VALUE_SIG);
+  if (!ggmlValueMethodId) {
+    throw jni::JNIException("Unable to find GgmlType method getValue().");
+  }
+
+  jint kValue = env->CallIntMethod(jTypeK, ggmlValueMethodId);
+  jint vValue = env->CallIntMethod(jTypeV, ggmlValueMethodId);
 
   llamaContextParams = {
       .seed = jni::getUnsignedInt32(env,
@@ -182,9 +201,15 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                                       javaParamsClass,
                                       javaContextParams,
                                       "yarnOrigCtx"),
+      .type_k = static_cast<ggml_type>(kValue),
+      .type_v = static_cast<ggml_type>(vValue),
       .embedding = jni::getBool(env,
                                 javaParamsClass,
                                 javaContextParams,
-                                "embedding")
+                                "embedding"),
+     .offload_kqv = jni::getBool(env,
+                                 javaParamsClass,
+                                 javaContextParams,
+                                 "offloadKqv")
   };
 }

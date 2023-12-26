@@ -31,6 +31,7 @@ namespace jni {
   bool getBool(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   void setBoolean(bool value, JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   size_t getSizeT(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
+  jobject getObject(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName, const char* signature);
   void setObject(jobject value, JNIEnv* env, jclass jType, jobject jInstance,
                  const char* fieldName, const char* signature);
   template <typename T>
@@ -41,7 +42,6 @@ namespace jni {
   jobjectArray get2dInt32Array(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
   jfloatArray getFloatArray(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   jobject constructLlamaModel(JNIEnv* env, llama_model* modelPointer);
-  jobject constructBatchOld(JNIEnv* env, jobject jContext, jint maxTokenCount, llama_batch* batch);
   jobject constructBatch(JNIEnv* env, jobject jContext,  llama_batch *batch, jint jNTokens, jint jEmbd, jint nSeqId);
   llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaModel);
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);

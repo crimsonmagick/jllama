@@ -27,67 +27,67 @@ public class ContextConfigurer {
       return this;
     }
 
-    public ParametrizedLoader setnCtx(final int nCtx) {
+    public ParametrizedLoader nCtx(final int nCtx) {
       llamaContextParams.setnCtx(nCtx);
       return this;
     }
 
-    public ParametrizedLoader setnBatch(final int nBatch) {
+    public ParametrizedLoader nBatch(final int nBatch) {
       llamaContextParams.setnBatch(nBatch);
       return this;
     }
 
-    public ParametrizedLoader setnThreads(final int nThreads) {
+    public ParametrizedLoader nThreads(final int nThreads) {
       llamaContextParams.setnThreads(nThreads);
       return this;
     }
 
-    public ParametrizedLoader setnThreadsBatch(final int nThreadsBatch) {
+    public ParametrizedLoader nThreadsBatch(final int nThreadsBatch) {
       llamaContextParams.setnThreadsBatch(nThreadsBatch);
       return this;
     }
 
-    public ParametrizedLoader setRopeScalingType(final byte ropeScalingType) {
+    public ParametrizedLoader ropeScalingType(final byte ropeScalingType) {
       llamaContextParams.setRopeScalingType(ropeScalingType);
       return this;
     }
 
-    public ParametrizedLoader setRopeFreqBase(final float ropeFreqBase) {
+    public ParametrizedLoader ropeFreqBase(final float ropeFreqBase) {
       llamaContextParams.setRopeFreqBase(ropeFreqBase);
       return this;
     }
 
-    public ParametrizedLoader setRopeFreqScale(final float ropeFreqScale) {
+    public ParametrizedLoader ropeFreqScale(final float ropeFreqScale) {
       llamaContextParams.setRopeFreqScale(ropeFreqScale);
       return this;
     }
 
-    public ParametrizedLoader setYarnExtFactor(final float yarnExtFactor) {
+    public ParametrizedLoader yarnExtFactor(final float yarnExtFactor) {
       llamaContextParams.setYarnExtFactor(yarnExtFactor);
       return this;
     }
 
-    public ParametrizedLoader setYarnAttnFactor(final float yarnAttnFactor) {
+    public ParametrizedLoader yarnAttnFactor(final float yarnAttnFactor) {
       llamaContextParams.setYarnAttnFactor(yarnAttnFactor);
       return this;
     }
 
-    public ParametrizedLoader setYarnBetaFast(final float yarnBetaFast) {
+    public ParametrizedLoader yarnBetaFast(final float yarnBetaFast) {
       llamaContextParams.setYarnBetaFast(yarnBetaFast);
       return this;
     }
 
-    public ParametrizedLoader setYarnBetaSlow(final float yarnBetaSlow) {
+    public ParametrizedLoader yarnBetaSlow(final float yarnBetaSlow) {
       llamaContextParams.setYarnBetaSlow(yarnBetaSlow);
       return this;
     }
 
-    public ParametrizedLoader setYarnOrigCtx(final int yarnOrigCtx) {
+    public ParametrizedLoader yarnOrigCtx(final int yarnOrigCtx) {
       llamaContextParams.setYarnOrigCtx(yarnOrigCtx);
       return this;
     }
 
-    public ParametrizedLoader setEmbedding(final boolean embedding) {
+    public ParametrizedLoader embedding(final boolean embedding) {
       llamaContextParams.setEmbedding(embedding);
       return this;
     }

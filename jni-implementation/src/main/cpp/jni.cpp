@@ -192,6 +192,14 @@ namespace jni {
     return static_cast<size_t>(env->GetIntField(jInstance, fieldId));
   }
 
+  jobject getObject(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName, const char* signature) {
+    jfieldID fieldId = env->GetFieldID(jType, fieldName, signature);
+    if (!fieldId) {
+      throw JNIException(fieldNotFound(fieldName).c_str());
+    }
+    return env->GetObjectField(jInstance, fieldId);
+  }
+
   void setObject(jobject value, JNIEnv* env, jclass jType, jobject jInstance,
                  const char* fieldName, const char* signature) {
     jfieldID fieldId = env->GetFieldID(jType, fieldName, signature);
@@ -331,24 +339,6 @@ namespace jni {
       throw JNIException("Unable to initialize LlamaModel");
     }
     return llamaModelObj;
-  }
-
-  jobject constructBatchOld(JNIEnv* env, jobject jContext, jint maxTokenCount, llama_batch* batch) {
-    auto jBatchPointer = reinterpret_cast<jlong>(batch);
-    jclass jBatchClass = env->FindClass("net/jllama/core/LlamaContext$LlamaBatchOld");
-    if (jBatchClass == nullptr) {
-      throw JNIException("Unable to find LlamaBatch class");
-    }
-
-    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(Lnet/jllama/core/LlamaContext;JI)V");
-    if (jConstructor == nullptr) {
-      throw JNIException("Unable to find LlamaBatch constructor");
-    }
-    jobject jBatch = env->NewObject(jBatchClass, jConstructor, jContext, jBatchPointer, maxTokenCount);
-    if (jBatch == nullptr) {
-      throw JNIException("Unable to initialize LlamaBatch");
-    }
-    return jBatch;
   }
 
   jobject constructBatch(JNIEnv* env, jobject jContext,  llama_batch *batch, jint jNTokens, jint jEmbd, jint nSeqId) {

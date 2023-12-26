@@ -9,6 +9,6 @@
 #define GGML_TYPE_NAME "net/jllama/core/GgmlType"
 #define GGML_TYPE_SIG "Lnet/jllama/core/GgmlType;"
 #define GGML_TYPE_GET_TYPE_SIG "(I)Lnet/jllama/core/GgmlType;"
-#define GGML_TYPE_GET_VALUE_SIG "(Lnet/jllama/core/GgmlType;)I"
+#define GGML_TYPE_GET_VALUE_SIG "()I"
 
 #endif
