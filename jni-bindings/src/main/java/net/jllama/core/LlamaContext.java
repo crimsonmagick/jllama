@@ -66,6 +66,16 @@ public class LlamaContext implements Closeable {
     llamaKvCacheSeqShiftNative(seq_id, p0, p1, delta);
   }
 
+  private native void llamaSampleRepetitionPenaltiesNative(LlamaTokenDataArray candidates,
+      int[] lastTokens, long penaltyLastN, float penaltyRepeat, float penaltyFreq,
+      float penaltyPresent);
+
+  public void llamaSampleRepetitionPenalties(LlamaTokenDataArray candidates, int[] last_tokens,
+      long penalty_last_n, float penalty_repeat, float penalty_freq, float penalty_present) {
+    validateState();
+    llamaSampleRepetitionPenaltiesNative(candidates, last_tokens, penalty_last_n, penalty_repeat, penalty_freq, penalty_present);
+  }
+
   private native void llamaSampleSoftmaxNative(LlamaTokenDataArray candidates);
 
   public void llamaSampleSoftmax(LlamaTokenDataArray candidates) {

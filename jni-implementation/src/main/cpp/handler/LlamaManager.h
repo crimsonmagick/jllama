@@ -84,6 +84,13 @@ class LlamaManager {
                            jobject jCandidates,
                            jfloat jP,
                            jlong jMinKeep);
+      void llamaSampleRepetitionPenalties(jobject jContext,
+                                          jobject jCandidates,
+                                          jintArray jLastTokens,
+                                          jlong jPenaltyLastN,
+                                          jfloat jPenaltyRepeat,
+                                          jfloat jPenaltyFreq,
+                                          jfloat jPeanltyPresent);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

@@ -604,3 +604,12 @@ void LlamaManager::LlamaSession::kvCacheSeqShift(jobject jContext, jint seqId, j
         shiftSeq(jni::getLlamaContextPointer(env, jContext), seqId, p0, p1, delta);
     });
 }
+
+
+void LlamaManager::LlamaSession::llamaSampleRepetitionPenalties(jobject jContext,
+  jobject jCandidates, jintArray jLastTokens, jlong jPenaltyLastN,
+  jfloat jPenaltyRepeat, jfloat jPenaltyFreq, jfloat jPeanltyPresent) {
+  withJniExceptions(env, [] {
+
+  });
+}

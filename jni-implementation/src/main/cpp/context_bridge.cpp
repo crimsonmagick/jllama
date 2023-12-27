@@ -10,6 +10,13 @@ extern "C" {
   }
 
   JNIEXPORT void
+  JNICALL Java_net_jllama_core_LlamaContext_llamaSampleRepetitionPenaltiesNative
+    (JNIEnv* env, jobject jContext, jobject jCandidates, jintArray jLastTokens, jlong jPenaltyLastN, jfloat jPenaltyRepeat, jfloat jPenaltyFreq, jfloat jPenaltyPresent) {
+    LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleRepetitionPenalties(jContext, jCandidates, jLastTokens, jPenaltyLastN, jPenaltyRepeat, jPenaltyFreq, jPenaltyPresent);
+  }
+
+
+JNIEXPORT void
   JNICALL Java_net_jllama_core_LlamaContext_llamaSampleSoftmaxNative(JNIEnv* jniEnv, jobject jContext, jobject jCandidates) {
     LlamaManager::getLlamaManager(jniEnv)->newSession(jniEnv).llamaSampleSoftmax(jContext, jCandidates);
   }
