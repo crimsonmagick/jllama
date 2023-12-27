@@ -44,6 +44,8 @@ class LlamaManager {
         jlong getTimestampInMicroseconds();
         jobject defaultContextParams();
         jint sampleToken(jobject jContext, jobject jCandidates);
+        void llamaSampleSoftmax(jobject jContext,
+                           jobject jCandidates);
         void llamaSampleTopK(jobject jContext,
                              jobject jCandidates,
                              jint k,

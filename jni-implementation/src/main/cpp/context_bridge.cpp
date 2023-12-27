@@ -9,16 +9,25 @@ extern "C" {
     LlamaManager::getLlamaManager(env)->newSession(env).freeContext(jContext);
   }
 
-  JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTopKNative
-      (JNIEnv* env, jobject jContext, jobject jCandidates, jint k, jlong minKeep) {
-    LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleTopK(jContext, jCandidates, k, minKeep);
+  JNIEXPORT void
+  JNICALL Java_net_jllama_core_LlamaContext_llamaSampleSoftmaxNative(JNIEnv* jniEnv, jobject jContext, jobject jCandidates) {
+    LlamaManager::getLlamaManager(jniEnv)->newSession(jniEnv).llamaSampleSoftmax(jContext, jCandidates);
   }
 
-  JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTopPNative(JNIEnv* env, jobject jContext, jobject jCandidates, jfloat p, jlong minKeep) {
+  JNIEXPORT void
+  JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTopKNative
+    (JNIEnv* env, jobject jContext, jobject jCandidates, jint k, jlong minKeep) {
+      LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleTopK(jContext, jCandidates, k, minKeep);
+  }
+
+  JNIEXPORT void
+  JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTopPNative
+    (JNIEnv* env, jobject jContext, jobject jCandidates, jfloat p, jlong minKeep) {
     LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleTopP(jContext, jCandidates, p, minKeep);
   }
 
-  JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTailFreeNative(JNIEnv* env, jobject jContext, jobject jCandidates, jfloat z, jlong minKeep) {
+  JNIEXPORT void
+  JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTailFreeNative(JNIEnv* env, jobject jContext, jobject jCandidates, jfloat z, jlong minKeep) {
     LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleTailFree(jContext, jCandidates, z, minKeep);
   }
 
@@ -26,7 +35,7 @@ extern "C" {
     LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleTypical(jContext, jCandidates, p, minKeep);
   }
 
-  JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTemperatureNative(JNIEnv* env, jobject jContext, jobject jCandidates, jfloat temp) {
+  JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTempNative(JNIEnv* env, jobject jContext, jobject jCandidates, jfloat temp) {
     LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleTemperature(jContext, jCandidates, temp);
   }
 

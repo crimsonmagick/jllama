@@ -66,6 +66,13 @@ public class LlamaContext implements Closeable {
     llamaKvCacheSeqShiftNative(seq_id, p0, p1, delta);
   }
 
+  private native void llamaSampleSoftmaxNative(LlamaTokenDataArray candidates);
+
+  public void llamaSampleSoftmax(LlamaTokenDataArray candidates) {
+    validateState();
+    llamaSampleSoftmaxNative(candidates);
+  }
+
   public native void llamaSampleTopKNative(LlamaTokenDataArray candidates, int k, long minKeep);
 
   public void llamaSampleTopK(LlamaTokenDataArray candidates, int k, long minKeep) {
@@ -94,11 +101,11 @@ public class LlamaContext implements Closeable {
     llamaSampleTypicalNative(candidates, p, minKeep);
   }
 
-  public native void llamaSampleTemperatureNative(LlamaTokenDataArray candidates, float temp);
+  public native void llamaSampleTempNative(LlamaTokenDataArray candidates, float temp);
 
-  public void llamaSampleTemperature(LlamaTokenDataArray candidates, float temp) {
+  public void llamaSampleTemp(LlamaTokenDataArray candidates, float temp) {
     validateState();
-    llamaSampleTemperatureNative(candidates, temp);
+    llamaSampleTempNative(candidates, temp);
   }
 
   public native float[] llamaGetLogitsIthNative(int i);
