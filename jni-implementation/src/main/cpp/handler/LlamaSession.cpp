@@ -605,11 +605,18 @@ void LlamaManager::LlamaSession::kvCacheSeqShift(jobject jContext, jint seqId, j
     });
 }
 
-
-void LlamaManager::LlamaSession::llamaSampleRepetitionPenalties(jobject jContext,
-  jobject jCandidates, jintArray jLastTokens, jlong jPenaltyLastN,
-  jfloat jPenaltyRepeat, jfloat jPenaltyFreq, jfloat jPeanltyPresent) {
-  withJniExceptions(env, [] {
-
+typedef void (* llama_sample_repetition_penalties_pointer)(llama_context*, llama_token_data_array*, llama_token*, size_t, float, float, float);
+void LlamaManager::LlamaSession::llamaSampleRepetitionPenalties(jobject jContext, jobject jCandidates, jintArray jLastTokensArray, jlong jPenaltyLastN, jfloat jPenaltyRepeat, jfloat jPenaltyFreq, jfloat jPenaltyPresent) {
+  withJniExceptions(env, [jContext, jCandidates, jLastTokensArray, jPenaltyLastN, jPenaltyRepeat, jPenaltyFreq, jPenaltyPresent, this] {
+    auto sampleRepetitionPenalties = reinterpret_cast<llama_sample_repetition_penalties_pointer>(getFunctionAddress("llama_sample_repetition_penalties"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    jint* jLastTokens = env->GetIntArrayElements(jLastTokensArray, nullptr);
+    if (!jLastTokens) {
+      jni::throwJNIException(env, jni::JNIException("Unable to get lastTokens array elements"));
+    }
+    sampleRepetitionPenalties(context, &candidates, reinterpret_cast<llama_token*>(jLastTokens), jPenaltyLastN, jPenaltyRepeat, jPenaltyFreq, jPenaltyPresent);
+    env->ReleaseIntArrayElements(jLastTokensArray, jLastTokens, JNI_ABORT);
+    jni::updateTokenDateArray(env, jCandidates, &candidates);
   });
 }

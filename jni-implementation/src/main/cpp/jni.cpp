@@ -507,9 +507,7 @@ namespace jni {
     };
   }
 
-  void updateTokenDateArray(JNIEnv* env,
-                            jobject destination,
-                            llama_token_data_array* src) {
+  void updateTokenDateArray(JNIEnv* env, jobject destination,llama_token_data_array* src) {
     jclass jTokenDataArrayClass = env->FindClass("net/jllama/core/LlamaTokenDataArray");
     if (jTokenDataArrayClass == nullptr) {
       throw JNIException("Unable to find LlamaTokenDataArray class");

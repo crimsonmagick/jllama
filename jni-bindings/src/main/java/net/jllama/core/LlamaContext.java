@@ -70,10 +70,10 @@ public class LlamaContext implements Closeable {
       int[] lastTokens, long penaltyLastN, float penaltyRepeat, float penaltyFreq,
       float penaltyPresent);
 
-  public void llamaSampleRepetitionPenalties(LlamaTokenDataArray candidates, int[] last_tokens,
-      long penalty_last_n, float penalty_repeat, float penalty_freq, float penalty_present) {
+  public void llamaSampleRepetitionPenalties(LlamaTokenDataArray candidates, int[] lastTokens,
+      long penaltyLastN, float penaltyRepeat, float penaltyFreq, float penaltyPresent) {
     validateState();
-    llamaSampleRepetitionPenaltiesNative(candidates, last_tokens, penalty_last_n, penalty_repeat, penalty_freq, penalty_present);
+    llamaSampleRepetitionPenaltiesNative(candidates, lastTokens, penaltyLastN, penaltyRepeat, penaltyFreq, penaltyPresent);
   }
 
   private native void llamaSampleSoftmaxNative(LlamaTokenDataArray candidates);

@@ -90,7 +90,7 @@ class LlamaManager {
                                           jlong jPenaltyLastN,
                                           jfloat jPenaltyRepeat,
                                           jfloat jPenaltyFreq,
-                                          jfloat jPeanltyPresent);
+                                          jfloat jPenaltyPresent);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
