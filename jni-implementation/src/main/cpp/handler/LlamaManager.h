@@ -80,6 +80,10 @@ class LlamaManager {
                         jint p0,
                         jint p1,
                         jint delta);
+      void llamaSampleMinP(jobject jContext,
+                           jobject jCandidates,
+                           jfloat jP,
+                           jlong jMinKeep);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

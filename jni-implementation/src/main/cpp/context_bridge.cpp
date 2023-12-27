@@ -27,6 +27,13 @@ extern "C" {
   }
 
   JNIEXPORT void
+  JNICALL Java_net_jllama_core_LlamaContext_llamaSampleMinPNative
+    (JNIEnv* env, jobject jContext, jobject jCandidates, jfloat jP, jlong jMinKeep) {
+    LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleMinP(jContext, jCandidates, jP, jMinKeep);
+  }
+
+
+JNIEXPORT void
   JNICALL Java_net_jllama_core_LlamaContext_llamaSampleTailFreeNative(JNIEnv* env, jobject jContext, jobject jCandidates, jfloat z, jlong minKeep) {
     LlamaManager::getLlamaManager(env)->newSession(env).llamaSampleTailFree(jContext, jCandidates, z, minKeep);
   }

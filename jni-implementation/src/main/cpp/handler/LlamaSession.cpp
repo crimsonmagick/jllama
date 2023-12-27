@@ -397,19 +397,35 @@ void LlamaManager::LlamaSession::llamaSampleTopK(jobject jContext,
   });
 }
 
-typedef void (* llama_sample_top_p_pointer)(struct llama_context * ctx, llama_token_data_array * candidates, float p, size_t min_keep);
+typedef void (* llama_sample_p_pointer)(struct llama_context * ctx, llama_token_data_array * candidates, float p, size_t min_keep);
 void LlamaManager::LlamaSession::llamaSampleTopP(jobject jContext,
                                                  jobject jCandidates,
                                                  jfloat p,
                                                  jlong minKeep) {
   withJniExceptions(env, [jContext, this, jCandidates, p, minKeep] {
-    auto sampleTopP = reinterpret_cast<llama_sample_top_p_pointer>(getFunctionAddress("llama_sample_top_p"));
+    auto sampleTopP = reinterpret_cast<llama_sample_p_pointer>(getFunctionAddress("llama_sample_top_p"));
     llama_context* context = jni::getLlamaContextPointer(env, jContext);
     llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
     sampleTopP(context, &candidates, p, minKeep);
     jni::updateTokenDateArray(env, jCandidates, &candidates);
   });
 }
+void LlamaManager::LlamaSession::llamaSampleMinP(jobject jContext,
+                                                 jobject jCandidates,
+                                                 jfloat jP,
+                                                 jlong jMinKeep) {
+  withJniExceptions(env, [jContext, this, jCandidates, jP, jMinKeep] {
+    auto sampleMinP = reinterpret_cast<llama_sample_p_pointer>(getFunctionAddress("llama_sample_min_p"));
+    llama_context* context = jni::getLlamaContextPointer(env, jContext);
+    llama_token_data_array candidates = jni::getTokenDataArray(env, jCandidates);
+    sampleMinP(context, &candidates, jP, jMinKeep);
+    jni::updateTokenDateArray(env, jCandidates, &candidates);
+  });
+}
+
+JNIEXPORT void JNICALL Java_net_jllama_core_LlamaContext_llamaSampleMinPNative
+  (JNIEnv *, jobject, jobject, jfloat, jlong);
+
 
 typedef void (* llama_sample_tail_free_pointer)(struct llama_context * ctx, llama_token_data_array * candidates, float z, size_t min_keep);
 void LlamaManager::LlamaSession::llamaSampleTailFree(jobject jContext,

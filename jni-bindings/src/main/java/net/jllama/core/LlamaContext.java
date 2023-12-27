@@ -87,6 +87,13 @@ public class LlamaContext implements Closeable {
     llamaSampleTopPNative(candidates, p, minKeep);
   }
 
+  private native void llamaSampleMinPNative(LlamaTokenDataArray candidates, float p, long minKeep);
+
+  public void llamaSampleMinP(LlamaTokenDataArray candidates, float p, long MinKeep) {
+    validateState();
+    llamaSampleMinPNative(candidates, p, MinKeep);
+  }
+
   public native void llamaSampleTailFreeNative(LlamaTokenDataArray candidates, float z, long minKeep);
 
   public void llamaSampleTailFree(LlamaTokenDataArray candidates, float z, long minKeep) {
@@ -120,7 +127,7 @@ public class LlamaContext implements Closeable {
   public int llamaSampleToken(LlamaTokenDataArray candidates) {
     validateState();
     return llamaSampleTokenNative(candidates);
-  }
+}
 
   public native int llamaSampleTokenGreedyNative(LlamaTokenDataArray candidates);
 
