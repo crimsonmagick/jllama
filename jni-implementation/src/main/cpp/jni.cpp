@@ -118,6 +118,19 @@ namespace jni {
     return newArray;
   }
 
+  template <typename T>
+  T newPrimitiveArray(JNIEnv* env, jint size) {
+    static_assert(std::is_base_of<_jarray, T>::value,
+                  "T must be a Java primitive array subclass");
+    static_assert(std::is_same<T, jobjectArray>::value,
+                  "T must be a Java primitive array subclass");
+    static_assert(std::is_same<T, _jarray*>::value,
+                  "T must be a Java primitive array subclass");
+    throw JNIException(
+      "Unsupported type, typeName= " + std::string(typeid(T).name())
+        + ". This is likely a bug in the code.");
+  }
+
   jobjectArray newObjectArray(JNIEnv* env, jint size, jclass memberType) {
     jobjectArray newArray = env->NewObjectArray(size, memberType, nullptr);
     validateArray(env, newArray, size, ARRAY_TYPE::OBJECT);
@@ -543,36 +556,6 @@ namespace jni {
       env->DeleteLocalRef(jTokenData);
     }
     env->SetObjectField(destination, jArrayFieldId, jNewDataArray);
-  }
-
-  jintArray newJIntArray(JNIEnv* env, jint size) {
-    jintArray newArray = env->NewIntArray(size);
-    jthrowable const jException = env->ExceptionOccurred();
-    if (jException) {
-      std::ostringstream errorMessage;
-      errorMessage << "Failed to create new int[] array with size=" << size << ".";
-      throw JNIException(errorMessage.str().c_str(), jException);
-    }
-    if (!newArray) {
-      std::ostringstream errorMessage;
-      errorMessage << "Failed to create new int[] array with size=" << size << ", reason unknown.";
-      throw JNIException("Failed to create new int[] array, reason unknown.");
-    }
-    return newArray;
-  }
-
-
-  template <typename T>
-  T newPrimitiveArray(JNIEnv* env, jint size) {
-    static_assert(std::is_base_of<_jarray, T>::value,
-                  "T must be a Java primitive array subclass");
-    static_assert(std::is_same<T, jobjectArray>::value,
-                  "T must be a Java primitive array subclass");
-    static_assert(std::is_same<T, _jarray*>::value,
-                  "T must be a Java primitive array subclass");
-    throw JNIException(
-        "Unsupported type, typeName= " + std::string(typeid(T).name())
-            + ". This is likely a bug in the code.");
   }
 
 }
