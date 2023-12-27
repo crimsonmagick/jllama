@@ -26,10 +26,10 @@ public class LlamaModel implements Closeable {
     return createContextNative(llamaContextParams);
   }
 
-  private native int tokenizeNative(byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
-  public int tokenize(byte[] text, int[] tokens, int nMaxTokens, boolean addBos) {
+  private native int llamaTokenizeNative(byte[] text, int[] tokens, int nMaxTokens, boolean addBos, boolean special);
+  public int llamaTokenize(byte[] text, int[] tokens, int nMaxTokens, boolean addBos, boolean special) {
     validateState();
-    return tokenizeNative(text, tokens, nMaxTokens, addBos);
+    return llamaTokenizeNative(text, tokens, nMaxTokens, addBos, special);
   }
 
   private native int detokenizeNative(int llamaToken, byte[] buf);

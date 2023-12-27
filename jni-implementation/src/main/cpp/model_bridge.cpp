@@ -17,10 +17,10 @@ extern "C" {
   }
 
   JNIEXPORT jint
-  JNICALL Java_net_jllama_core_LlamaModel_tokenizeNative
-    (JNIEnv* env, jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos) {
+  JNICALL Java_net_jllama_core_LlamaModel_llamaTokenizeNative
+    (JNIEnv* env, jobject jModel, jbyteArray jToTokenize, jintArray jTokensOut, jint jmaxTokens, jboolean jBos, jboolean jSpecial) {
     return LlamaManager::getLlamaManager(env)->newSession(env)
-        .tokenizeWithModel(jModel, jToTokenize, jTokensOut, jmaxTokens, jBos);
+    .tokenizeWithModel(jModel, jToTokenize, jTokensOut, jmaxTokens, jBos, jSpecial);
   }
 
   JNIEXPORT jint

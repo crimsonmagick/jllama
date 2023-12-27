@@ -20,7 +20,8 @@ class LlamaManager {
                                jbyteArray jToTokenize,
                                jintArray jTokensOut,
                                jint jmaxTokens,
-                               jboolean jBos);
+                               jboolean jBos,
+                               jboolean jSpecial);
 
         jobject loadContextWithModel(jobject jModel, jobject jContextParams);
         void freeContext(jobject pJobject);

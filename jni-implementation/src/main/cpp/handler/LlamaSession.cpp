@@ -117,11 +117,11 @@ jint LlamaManager::LlamaSession::tokenizeWithModel(jobject jModel,
                                      jbyteArray jToTokenize,
                                      jintArray jTokensOut,
                                      jint jmaxTokens,
-                                     jboolean jBos) {
-  return withJniExceptions(env, [&jModel, &jToTokenize, &jTokensOut, &jmaxTokens, &jBos, this] {
+                                     jboolean jBos,
+                                     jboolean jSpecial) {
+  return withJniExceptions(env, [jModel, jToTokenize, jTokensOut, jmaxTokens, jBos, jSpecial, this] {
     llama_tokenize_pointer tokenize =
         (llama_tokenize_pointer) getFunctionAddress("llama_tokenize");
-
 
     auto llamaModel = jni::getLlamaModelPointer(env, jModel);
 
@@ -133,7 +133,7 @@ jint LlamaManager::LlamaSession::tokenizeWithModel(jobject jModel,
                           length,
                           reinterpret_cast<llama_token*>(tokensOut),
                           jmaxTokens,
-                          jBos, true);
+                          jBos, jSpecial);
     if (result > 0) {
       env->ReleaseIntArrayElements(jTokensOut, tokensOut, 0);
     } else {
