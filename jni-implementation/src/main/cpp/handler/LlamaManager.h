@@ -70,12 +70,8 @@ class LlamaManager {
         jint getKvCacheUsedCells(jobject jContext);
         void kvCacheClear(jobject jContext);
         void kvCacheSeqRm(jobject jContext, jint jSeqId, jint p0, jint p1);
-        void
-        kvCacheSeqCp(jobject jContext,
-                     jint jSeqId,
-                     jint jSeqIdDst,
-                     jint p0,
-                     jint p1);
+        void kvCacheSeqCp(jobject jContext, jint jSeqId, jint jSeqIdDst, jint p0, jint p1);
+        void kvCacheSeqKeep(jobject jContext, jint seqId);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
