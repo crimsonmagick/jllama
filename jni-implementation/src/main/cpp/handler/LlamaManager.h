@@ -72,6 +72,12 @@ class LlamaManager {
         void kvCacheSeqRm(jobject jContext, jint jSeqId, jint p0, jint p1);
         void kvCacheSeqCp(jobject jContext, jint jSeqId, jint jSeqIdDst, jint p0, jint p1);
         void kvCacheSeqKeep(jobject jContext, jint seqId);
+        void
+        kvCacheSeqShift(jobject jContext,
+                        jint seqId,
+                        jint p0,
+                        jint p1,
+                        jint delta);
       private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)

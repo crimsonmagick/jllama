@@ -115,4 +115,10 @@ extern "C" {
         ->newSession(env).kvCacheSeqKeep(jContext, seqId);
   }
 
+  JNIEXPORT void
+  JNICALL Java_net_jllama_core_LlamaContext_llamaKvCacheSeqShiftNative(JNIEnv* env, jobject jContext, jint seqId, jint p0, jint p1, jint delta) {
+    return LlamaManager::getLlamaManager(env)
+        ->newSession(env).kvCacheSeqShift(jContext, seqId, p0, p1, delta);
+  }
+
 }
