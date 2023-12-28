@@ -16,7 +16,6 @@ public class ContextConfigurer {
     }
 
     private final LlamaContextParams llamaContextParams;
-    private String path;
 
     public Context create() {
       return model.createContext(llamaContextParams);

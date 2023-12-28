@@ -25,7 +25,7 @@ public class Model implements Closeable {
   }
   Context createContext(final LlamaContextParams llamaContextParams) {
     final LlamaContext llamaContext = llamaModel.createContext(llamaContextParams);
-    return new Context(llamaContext);
+    return new Context(llamaContext, llamaContextParams);
   }
 
   public LlamaModel getLlamaModel() {
