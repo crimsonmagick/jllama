@@ -1,12 +1,16 @@
 package net.jllama.api;
 
 
-import net.jllama.api.Context.Batch;
+import static net.jllama.api.Context.SequenceType.EMBEDDING;
+import static net.jllama.api.Context.SequenceType.TOKEN;
+
 import net.jllama.api.Context.SequenceType;
+import net.jllama.api.batch.Batch;
 import net.jllama.api.batch.BatchConfigurer;
 import net.jllama.api.batch.BatchResolver;
 import net.jllama.api.batch.BatchManager;
 import net.jllama.api.batch.BatchSpecifier;
+import net.jllama.core.LlamaContext.LlamaBatch;
 
 public class FluentBatch implements BatchConfigurer, BatchManager, BatchResolver, BatchSpecifier {
 
@@ -64,7 +68,10 @@ public class FluentBatch implements BatchConfigurer, BatchManager, BatchResolver
   private Batch buildBatchOnChange(final Batch oldBatch) {
     final Batch batch;
     if (oldBatch == null || hasBatchConfigChanged(oldBatch)) {
-      batch = context.new Batch(type, batchSize, maxSequenceLength);
+      final int embeddingsSize = type == EMBEDDING ? batchSize : 0;
+      final int tokensSize = type == TOKEN ? batchSize : 0;
+      final LlamaBatch llamaBatch = context.llamaContext.llamaBatchInit(batchSize, embeddingsSize, tokensSize);
+      batch = new Batch(type, batchSize, maxSequenceLength, llamaBatch);
     } else {
       batch = oldBatch;
     }

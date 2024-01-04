@@ -5,6 +5,7 @@ import net.jllama.core.LlamaContextParams;
 
 public class ContextConfigurer {
 
+  // TODO refactor to use interfaces, add documentation
   public class ParametrizedLoader {
 
     private ParametrizedLoader() {
@@ -26,26 +27,27 @@ public class ContextConfigurer {
       return this;
     }
 
-    public ParametrizedLoader nCtx(final int nCtx) {
-      llamaContextParams.setnCtx(nCtx);
+    public ParametrizedLoader contextLength(final int contextLength) {
+      llamaContextParams.setnCtx(contextLength);
       return this;
     }
 
-    public ParametrizedLoader nBatch(final int nBatch) {
+    public ParametrizedLoader maximumBatchSize(final int nBatch) {
       llamaContextParams.setnBatch(nBatch);
       return this;
     }
 
-    public ParametrizedLoader nThreads(final int nThreads) {
-      llamaContextParams.setnThreads(nThreads);
+    public ParametrizedLoader evaluationThreads(final int evaluationThreads) {
+      llamaContextParams.setnThreads(evaluationThreads);
       return this;
     }
 
-    public ParametrizedLoader nThreadsBatch(final int nThreadsBatch) {
-      llamaContextParams.setnThreadsBatch(nThreadsBatch);
+    public ParametrizedLoader batchEvaluationThreads(final int batchEvaluationThreads) {
+      llamaContextParams.setnThreadsBatch(batchEvaluationThreads);
       return this;
     }
 
+    // TODO add enum
     public ParametrizedLoader ropeScalingType(final byte ropeScalingType) {
       llamaContextParams.setRopeScalingType(ropeScalingType);
       return this;
@@ -86,7 +88,7 @@ public class ContextConfigurer {
       return this;
     }
 
-    public ParametrizedLoader embedding(final boolean embedding) {
+    public ParametrizedLoader embeddingOnly(final boolean embedding) {
       llamaContextParams.setEmbedding(embedding);
       return this;
     }
