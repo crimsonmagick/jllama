@@ -41,6 +41,10 @@ public class Context {
     return new FluentBatch(this);
   }
 
+  public Sampler sampler(float[] logits) {
+    return new Sampler(llamaContext, logits);
+  }
+
   public Context evaluate(final Batch batch) {
     validateStaged(batch);
     final int ret = llamaContext.llamaDecode(batch.prepare());
