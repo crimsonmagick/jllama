@@ -1,12 +1,14 @@
 package net.jllama.api;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.jllama.api.Sequence.SequenceId;
 import net.jllama.api.Sequence.SequencePiece;
 import net.jllama.api.batch.Batch;
 import net.jllama.api.batch.BatchSpecifier;
 import net.jllama.api.exceptions.LlamaApiException;
+import net.jllama.api.util.FloatUtil;
 import net.jllama.core.LlamaContext;
 import net.jllama.core.LlamaContextParams;
 
@@ -41,8 +43,8 @@ public class Context {
     return new FluentBatch(this);
   }
 
-  public Sampler sampler(float[] logits) {
-    return new Sampler(llamaContext, logits);
+  public Sampler sampler(List<Float> logits) {
+    return new Sampler(llamaContext,  FloatUtil.toArray(logits));
   }
 
   public Context evaluate(final Batch batch) {
@@ -65,12 +67,13 @@ public class Context {
   }
 
   // TODO move to sequence??
-  public float[] getLogitsAtIndex(final Sequence sequence, final int index) {
+  public List<Float> getLogitsAtIndex(final Sequence sequence, final int index) {
     final Map<Integer, Integer> lastLogitIndiciesMap = sequence.getLastLogitIndiciesMap();
     if (!lastLogitIndiciesMap.containsKey(index)) {
       throw new IllegalArgumentException(String.format("Logit with index=%s was not generated for sequenceId=%s", index, sequence.getSequenceId()));
     }
-    return llamaContext.llamaGetLogitsIth(index);
+    final float[] logits = llamaContext.llamaGetLogitsIth(index);
+    return FloatUtil.toList(logits);
   }
 
   private void validateStaged(final Batch batch) {

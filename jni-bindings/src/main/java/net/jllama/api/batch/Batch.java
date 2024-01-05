@@ -1,5 +1,6 @@
 package net.jllama.api.batch;
 
+import static net.jllama.api.Context.SequenceType.EMBEDDING;
 import static net.jllama.api.Context.SequenceType.TOKEN;
 
 import java.io.Closeable;
@@ -12,6 +13,8 @@ import net.jllama.api.Context.SequenceType;
 import net.jllama.api.Sequence;
 import net.jllama.api.Sequence.SequenceId;
 import net.jllama.api.Sequence.SequencePiece;
+import net.jllama.api.util.FloatUtil;
+import net.jllama.api.util.IntegerUtil;
 import net.jllama.core.LlamaContext.LlamaBatch;
 
 public class Batch implements Closeable {
@@ -81,9 +84,9 @@ public class Batch implements Closeable {
       final int sequenceBatchStartPos = batchPos;
 
       int seqPos = sequence.getLength();
-      final int[] rawSequenceId = sequenceId.getId();
-      final int[] pieceTokens = piece.getTokens();
-      final float[] embeddings = piece.getEmbeddings();
+      final int[] rawSequenceId = IntegerUtil.toArray(sequenceId.getId());
+      final int[] pieceTokens = sequenceType == TOKEN ? IntegerUtil.toArray(piece.getTokens()) : null;
+      final float[] embeddings = sequenceType == EMBEDDING ? FloatUtil.toArray(piece.getEmbeddings()) : null;
 
       for (int i = 0; i < piece.getLength(); i++) {
         if (sequenceType == TOKEN) {
@@ -98,7 +101,7 @@ public class Batch implements Closeable {
         batchPos += 1;
         seqPos += 1;
       }
-      final Map<Integer, Integer> relativeToAbsolute = new HashMap<>(piece.getLogitIndicies().length);
+      final Map<Integer, Integer> relativeToAbsolute = new HashMap<>(piece.getLogitIndicies().size());
       for (final int i : piece.getLogitIndicies()) {
         final int absolutePos = sequenceBatchStartPos + i;
         llamaBatch.logits[absolutePos] = 1;

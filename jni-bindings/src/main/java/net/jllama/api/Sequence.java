@@ -2,10 +2,15 @@ package net.jllama.api;
 
 import static java.util.stream.Collectors.joining;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import net.jllama.api.Context.SequenceType;
+import net.jllama.api.exceptions.LlamaApiException;
+import net.jllama.api.util.FloatUtil;
+import net.jllama.api.util.IntegerUtil;
 
 public class Sequence {
 
@@ -17,8 +22,8 @@ public class Sequence {
 
     int[] id;
 
-    public int[] getId() {
-      return id;
+    public List<Integer> getId() {
+      return IntegerUtil.toList(id);
     }
 
     @Override
@@ -68,16 +73,16 @@ public class Sequence {
       this.tokens = null;
     }
 
-    public float[] getEmbeddings() {
-      return embeddings;
+    public List<Float> getEmbeddings() {
+      return FloatUtil.toList(embeddings);
     }
 
-    public int[] getTokens() {
-      return tokens;
+    public List<Integer> getTokens() {
+      return IntegerUtil.toList(tokens);
     }
 
-    public int[] getLogitIndicies() {
-      return logitIndicies;
+    public List<Integer> getLogitIndicies() {
+      return IntegerUtil.toList(logitIndicies);
     }
 
     public Sequence getSequence() {
@@ -117,13 +122,24 @@ public class Sequence {
     return sequenceType;
   }
 
-  public SequencePiece piece(int[] tokens, int[] logitIndicies) {
-    if (tokens == null || tokens.length == 0) {
+  public SequencePiece piece(final List<? extends Number> tokensOrEmbeddings, final List<Integer> logitIndicies) {
+    if (tokensOrEmbeddings == null || tokensOrEmbeddings.isEmpty()) {
       throw new IllegalArgumentException("A sequence piece cannot be empty.");
     }
     if (logitIndicies == null) {
       throw new IllegalArgumentException("logitIndicies must be provided.");
     }
+    Class<? extends Number> numberClass = tokensOrEmbeddings.get(0).getClass();
+    if (Integer.class.isAssignableFrom(numberClass)) {
+      return piece(IntegerUtil.toArray((List<Integer>) tokensOrEmbeddings), IntegerUtil.toArray(logitIndicies));
+    }
+    if (Float.class.isAssignableFrom(numberClass)) {
+      return piece(FloatUtil.toArray((List<Float>) tokensOrEmbeddings), IntegerUtil.toArray(logitIndicies));
+    }
+    throw new LlamaApiException("tokensOrEmbeddings must container either Integers or Floats.");
+  }
+
+  private SequencePiece piece(int[] tokens, int[] logitIndicies) {
     if (sequenceType == SequenceType.EMBEDDING) {
       throw new IllegalArgumentException(
           String.format("Sequence with sequenceId=%s and sequenceType=%s does not support tokens.", sequenceId, sequenceType.name()));
@@ -132,12 +148,6 @@ public class Sequence {
   }
 
   public SequencePiece piece(float[] embeddings, int[] logitIndicies) {
-    if (embeddings == null || embeddings.length == 0) {
-      throw new IllegalArgumentException("A sequence piece cannot be empty.");
-    }
-    if (logitIndicies == null) {
-      throw new IllegalArgumentException("logitIndicies must be provided.");
-    }
     if (sequenceType == SequenceType.TOKEN) {
       throw new IllegalArgumentException(
           String.format("Sequence with sequenceType=%s does not support embeddings.", sequenceType.name()));
@@ -153,11 +163,8 @@ public class Sequence {
     this.length = length;
   }
 
-  public int[] getLastLogitIndicies() {
-    return lastLogitIndiciesMap.values()
-        .stream()
-        .mapToInt(Integer::valueOf)
-        .toArray();
+  public List<Integer> getLastLogitIndicies() {
+    return new ArrayList<>(lastLogitIndiciesMap.values());
   }
 
   public Map<Integer, Integer> getLastLogitIndiciesMap() {
@@ -168,7 +175,11 @@ public class Sequence {
     lastLogitIndiciesMap = logitIndicies;
   }
 
-  public static Sequence sequence(final int[] id, final SequenceType type) {
-    return new Sequence(Arrays.copyOf(id, id.length), type);
+  public static Sequence sequence(int id, final SequenceType sequenceType) {
+    return sequence(Collections.singletonList(id), sequenceType);
+  }
+
+  public static Sequence sequence(final List<Integer> id, final SequenceType type) {
+    return new Sequence(IntegerUtil.toArray(id), type);
   }
 }

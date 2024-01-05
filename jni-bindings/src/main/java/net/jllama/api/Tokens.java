@@ -3,6 +3,7 @@ package net.jllama.api;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.jllama.api.util.IntegerUtil;
 import net.jllama.core.LlamaModel;
 
 public class Tokens {
@@ -44,16 +45,16 @@ public class Tokens {
     return llamaModel.llamaTokenNl();
   }
 
-  public int[] tokenize(final String toTokenize) {
+  public List<Integer> tokenize(final String toTokenize) {
     return tokenize(toTokenize, false, false);
   }
 
-  public int[] tokenize(final String toTokenize, boolean addBos, boolean special) {
+  public List<Integer> tokenize(final String toTokenize, boolean addBos, boolean special) {
     final int maxLength = toTokenize.length();
     final int[] temp = new int[maxLength];
     int length = llamaModel.llamaTokenize(toTokenize.getBytes(StandardCharsets.UTF_8), temp, maxLength, addBos, special);
-    final int[] ret = new int[length];
-    System.arraycopy(temp, 0, ret, 0, length);
-    return ret;
+    final int[] tokenized = new int[length];
+    System.arraycopy(temp, 0, tokenized, 0, length);
+    return IntegerUtil.toList(tokenized);
   }
 }

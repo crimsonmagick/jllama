@@ -1,5 +1,8 @@
 package net.jllama.api;
 
+import java.util.ArrayList;
+import java.util.List;
+import net.jllama.api.util.IntegerUtil;
 import net.jllama.core.LlamaContext;
 import net.jllama.core.LlamaTokenData;
 import net.jllama.core.LlamaTokenDataArray;
@@ -14,9 +17,10 @@ public class Sampler {
     candidates = LlamaTokenDataArray.logitsToTokenDataArray(logits);
   }
 
-  public Sampler applyRepetitionPenalties(final int[] previousTokens, final float repetitionPenalty, final float frequencyPenalty,
+  public Sampler applyRepetitionPenalties(final List<Integer> previousTokens, final float repetitionPenalty, final float frequencyPenalty,
       final float presencePenalty) {
-    llamaContext.llamaSampleRepetitionPenalties(candidates, previousTokens, previousTokens.length, repetitionPenalty, frequencyPenalty, presencePenalty);
+    llamaContext.llamaSampleRepetitionPenalties(candidates, IntegerUtil.toArray(previousTokens), previousTokens.size(), repetitionPenalty, frequencyPenalty,
+        presencePenalty);
     return this;
   }
 
@@ -55,11 +59,11 @@ public class Sampler {
     return this;
   }
 
-  public float[] getLogits() {
-    final float[] logits = new float[candidates.getData().length];
+  public List<Float> getLogits() {
+    final List<Float> logits = new ArrayList<>(candidates.getData().length);
     final LlamaTokenData[] tokenData = candidates.getData();
     for (int i = 0; i < candidates.getData().length; i++) {
-      logits[i] = tokenData[i].getLogit();
+      logits.add(i, tokenData[i].getLogit());
     }
     return logits;
   }
