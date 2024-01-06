@@ -5,17 +5,18 @@ import static java.util.stream.Collectors.joining;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.jllama.api.Context.SequenceType;
-import net.jllama.api.exceptions.LlamaApiException;
 import net.jllama.api.util.FloatUtil;
 import net.jllama.api.util.IntegerUtil;
 
-public class Sequence {
+public abstract class Sequence<T extends Number> {
 
   public static class SequenceId {
 
+    // FIXME this especially needs a refactor. A SequenceId is really an int, and that sequence in turn can have sub-sequences; a sub-sequence is a "draft" sequence used for speculative evaluation/decoding where the first int of the "id" is the "parent" id, and the subsequent ids distinguish it as a "draft." The decode engine of llama.cpp then uses submitted draft tokens to help "guide" the next decoding of logits. Not sure about its use with embeddings.
     SequenceId(final int[] id) {
       this.id = id;
     }
@@ -53,20 +54,20 @@ public class Sequence {
 
   public class SequencePiece {
 
-    private final int length;
-    private final float[] embeddings;
-    private Map<Integer, Integer> logitsIndiciesMap;
-    private final int[] tokens;
-    private final int[] logitIndicies;
+    int length;
+    float[] embeddings;
+    LinkedHashMap<Integer, Integer> logitsIndiciesMap;
+    int[] tokens;
+    int[] logitIndicies;
 
-    private SequencePiece(final int[] tokens, final int[] logitIndicies) {
+    protected SequencePiece(final int[] tokens, final int[] logitIndicies) {
       this.tokens = Arrays.copyOf(tokens, tokens.length);
       length = tokens.length;
       this.logitIndicies = Arrays.copyOf(logitIndicies, logitIndicies.length);
       this.embeddings = null;
     }
 
-    private SequencePiece(final float[] embeddings, final int[] logitIndicies) {
+    protected SequencePiece(final float[] embeddings, final int[] logitIndicies) {
       this.embeddings = Arrays.copyOf(embeddings, embeddings.length);
       length = embeddings.length;
       this.logitIndicies = Arrays.copyOf(logitIndicies, logitIndicies.length);
@@ -85,7 +86,7 @@ public class Sequence {
       return IntegerUtil.toList(logitIndicies);
     }
 
-    public Sequence getSequence() {
+    public Sequence<T> getSequence() {
       return Sequence.this;
     }
 
@@ -93,26 +94,26 @@ public class Sequence {
       return length;
     }
 
-    public Map<Integer, Integer> getLogitsIndiciesMap() {
+    LinkedHashMap<Integer, Integer> getLogitsIndiciesMap() {
       return logitsIndiciesMap;
     }
 
-    public void setLogitsIndiciesMap(final Map<Integer, Integer> relativeToAbsoluteLogits) {
+    void setLogitsIndiciesMap(final LinkedHashMap<Integer, Integer> relativeToAbsoluteLogits) {
       this.logitsIndiciesMap = relativeToAbsoluteLogits;
     }
   }
 
-  public Sequence(final int[] sequenceId, final SequenceType sequenceType) {
+  Sequence(final int[] sequenceId, final SequenceType sequenceType) {
     this.sequenceId = new SequenceId(sequenceId);
     this.sequenceType = sequenceType;
     length = 0;
     this.lastLogitIndiciesMap = Collections.emptyMap();
   }
 
-  private Map<Integer, Integer> lastLogitIndiciesMap;
-  private SequenceId sequenceId;
-  private SequenceType sequenceType;
-  private int length;
+  Map<Integer, Integer> lastLogitIndiciesMap;
+  SequenceId sequenceId;
+  SequenceType sequenceType;
+  int length;
 
   public SequenceId getSequenceId() {
     return sequenceId;
@@ -122,38 +123,10 @@ public class Sequence {
     return sequenceType;
   }
 
-  public SequencePiece piece(final List<? extends Number> tokensOrEmbeddings, final List<Integer> logitIndicies) {
-    if (tokensOrEmbeddings == null || tokensOrEmbeddings.isEmpty()) {
-      throw new IllegalArgumentException("A sequence piece cannot be empty.");
-    }
-    if (logitIndicies == null) {
-      throw new IllegalArgumentException("logitIndicies must be provided.");
-    }
-    Class<? extends Number> numberClass = tokensOrEmbeddings.get(0).getClass();
-    if (Integer.class.isAssignableFrom(numberClass)) {
-      return piece(IntegerUtil.toArray((List<Integer>) tokensOrEmbeddings), IntegerUtil.toArray(logitIndicies));
-    }
-    if (Float.class.isAssignableFrom(numberClass)) {
-      return piece(FloatUtil.toArray((List<Float>) tokensOrEmbeddings), IntegerUtil.toArray(logitIndicies));
-    }
-    throw new LlamaApiException("tokensOrEmbeddings must container either Integers or Floats.");
-  }
+  public abstract SequencePiece piece(List<T> tokensOrEmbeddings);
 
-  private SequencePiece piece(int[] tokens, int[] logitIndicies) {
-    if (sequenceType == SequenceType.EMBEDDING) {
-      throw new IllegalArgumentException(
-          String.format("Sequence with sequenceId=%s and sequenceType=%s does not support tokens.", sequenceId, sequenceType.name()));
-    }
-    return new SequencePiece(tokens, logitIndicies);
-  }
 
-  public SequencePiece piece(float[] embeddings, int[] logitIndicies) {
-    if (sequenceType == SequenceType.TOKEN) {
-      throw new IllegalArgumentException(
-          String.format("Sequence with sequenceType=%s does not support embeddings.", sequenceType.name()));
-    }
-    return new SequencePiece(embeddings, logitIndicies);
-  }
+  public abstract SequencePiece piece(List<T> tokensOrEmbeddings, List<Integer> logitIndicies);
 
   public int getLength() {
     return length;
@@ -171,15 +144,24 @@ public class Sequence {
     return lastLogitIndiciesMap;
   }
 
-  void setLastLogitIndiciesMap(final Map<Integer, Integer> logitIndicies) {
+  // require caller to preserve insertion order
+  void setLastLogitIndiciesMap(final LinkedHashMap<Integer, Integer> logitIndicies) {
     lastLogitIndiciesMap = logitIndicies;
   }
 
-  public static Sequence sequence(int id, final SequenceType sequenceType) {
-    return sequence(Collections.singletonList(id), sequenceType);
+  public static Sequence<Integer> tokenSequence(final int id) {
+    return tokenSequence(Collections.singletonList(id));
   }
 
-  public static Sequence sequence(final List<Integer> id, final SequenceType type) {
-    return new Sequence(IntegerUtil.toArray(id), type);
+  public static Sequence<Integer> tokenSequence(final List<Integer> id) {
+    return new TokenSequence(IntegerUtil.toArray(id));
+  }
+
+  public static Sequence<Float> embeddingSequence(final int id) {
+    return embeddingSequence(Collections.singletonList(id));
+  }
+
+  public static Sequence<Float> embeddingSequence(final List<Integer> id) {
+    return new EmbeddingSequence(IntegerUtil.toArray(id));
   }
 }

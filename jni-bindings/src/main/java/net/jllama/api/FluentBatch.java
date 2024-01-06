@@ -5,7 +5,6 @@ import static net.jllama.api.Context.SequenceType.EMBEDDING;
 import static net.jllama.api.Context.SequenceType.TOKEN;
 
 import net.jllama.api.Context.SequenceType;
-import net.jllama.api.batch.Batch;
 import net.jllama.api.batch.BatchConfigurer;
 import net.jllama.api.batch.BatchResolver;
 import net.jllama.api.batch.BatchManager;

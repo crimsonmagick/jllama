@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import net.jllama.api.Sequence.SequenceId;
 import net.jllama.api.Sequence.SequencePiece;
-import net.jllama.api.batch.Batch;
 import net.jllama.api.batch.BatchSpecifier;
 import net.jllama.api.exceptions.LlamaApiException;
 import net.jllama.api.util.FloatUtil;
@@ -55,7 +54,7 @@ public class Context {
     }
     batch.getStagedSequences()
         .forEach(piece -> {
-          final Sequence sequence = piece.getSequence();
+          final Sequence<?> sequence = piece.getSequence();
           sequence.setLastLogitIndiciesMap(piece.getLogitsIndiciesMap());
           sequence.setLength(sequence.getLength() + piece.getLength());
           if (!sequences.containsKey(sequence.getSequenceId())) {
@@ -66,14 +65,35 @@ public class Context {
     return this;
   }
 
-  // TODO move to sequence??
-  public List<Float> getLogitsAtIndex(final Sequence sequence, final int index) {
+  /**
+   * Retrieves the logits for the highest index provided in the last evaluation.
+   *
+   * @param sequence The sequence that was previously evaluated
+   * @param index A sequence index provided to the previously evaluated batch
+   * @return A list of logit probabilities with a size of the model's vocab
+   */
+  public List<Float> getLogitsAtIndex(final Sequence<?> sequence, final int index) {
     final Map<Integer, Integer> lastLogitIndiciesMap = sequence.getLastLogitIndiciesMap();
     if (!lastLogitIndiciesMap.containsKey(index)) {
       throw new IllegalArgumentException(String.format("Logit with index=%s was not generated for sequenceId=%s", index, sequence.getSequenceId()));
     }
     final float[] logits = llamaContext.llamaGetLogitsIth(index);
     return FloatUtil.toList(logits);
+  }
+
+  /**
+   * Retrieves the logits for the highest sequence index provided in the last evaluation.
+   *
+   * @param sequence The sequence that was previously evaluated
+   * @return A list of logit probabilities with a size of the model's vocab
+   */
+  public List<Float> getLogits(final Sequence<?> sequence) {
+    if (sequence.getLastLogitIndicies().isEmpty()) {
+      throw new LlamaApiException("Context has not yet evaluated a sequence.");
+    }
+    final int lastIndex = sequence.getLastLogitIndicies()
+        .get(sequence.getLastLogitIndicies().size() - 1);
+    return getLogitsAtIndex(sequence, lastIndex);
   }
 
   private void validateStaged(final Batch batch) {

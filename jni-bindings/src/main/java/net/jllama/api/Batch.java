@@ -1,4 +1,4 @@
-package net.jllama.api.batch;
+package net.jllama.api;
 
 import static net.jllama.api.Context.SequenceType.EMBEDDING;
 import static net.jllama.api.Context.SequenceType.TOKEN;
@@ -6,6 +6,7 @@ import static net.jllama.api.Context.SequenceType.TOKEN;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,6 +17,7 @@ import net.jllama.api.Sequence.SequencePiece;
 import net.jllama.api.util.FloatUtil;
 import net.jllama.api.util.IntegerUtil;
 import net.jllama.core.LlamaContext.LlamaBatch;
+import sun.awt.image.ImageWatched.Link;
 
 public class Batch implements Closeable {
 
@@ -79,30 +81,27 @@ public class Batch implements Closeable {
     int batchPos = 0;
     for (final Entry<SequenceId, SequencePiece> entry : stagedSequences.entrySet()) {
       final SequenceId sequenceId = entry.getKey();
-      final SequencePiece piece = entry.getValue();
-      final Sequence sequence = entry.getValue().getSequence();
+      final Sequence<?>.SequencePiece piece = entry.getValue();
+      final Sequence<?> sequence = entry.getValue().getSequence();
       final int sequenceBatchStartPos = batchPos;
 
       int seqPos = sequence.getLength();
-      final int[] rawSequenceId = IntegerUtil.toArray(sequenceId.getId());
-      final int[] pieceTokens = sequenceType == TOKEN ? IntegerUtil.toArray(piece.getTokens()) : null;
-      final float[] embeddings = sequenceType == EMBEDDING ? FloatUtil.toArray(piece.getEmbeddings()) : null;
 
-      for (int i = 0; i < piece.getLength(); i++) {
+      for (int i = 0; i < piece.length; i++) {
         if (sequenceType == TOKEN) {
-          llamaBatch.token[batchPos] = pieceTokens[i];
+          llamaBatch.token[batchPos] = piece.tokens[i];
         } else {
-          llamaBatch.embd[batchPos] = embeddings[i];
+          llamaBatch.embd[batchPos] = piece.embeddings[i];
         }
         llamaBatch.pos[batchPos] = seqPos;
-        llamaBatch.seqId[batchPos] = rawSequenceId;
+        llamaBatch.seqId[batchPos] = sequenceId.id;
         llamaBatch.logits[batchPos] = 0;
-        llamaBatch.nSeqId[batchPos] = rawSequenceId.length;
+        llamaBatch.nSeqId[batchPos] = sequenceId.id.length;
         batchPos += 1;
         seqPos += 1;
       }
-      final Map<Integer, Integer> relativeToAbsolute = new HashMap<>(piece.getLogitIndicies().size());
-      for (final int i : piece.getLogitIndicies()) {
+      final LinkedHashMap<Integer, Integer> relativeToAbsolute = new LinkedHashMap<>(piece.logitIndicies.length);
+      for (int i : piece.logitIndicies) {
         final int absolutePos = sequenceBatchStartPos + i;
         llamaBatch.logits[absolutePos] = 1;
         relativeToAbsolute.put(i, absolutePos);
