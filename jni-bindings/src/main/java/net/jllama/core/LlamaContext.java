@@ -1,8 +1,6 @@
 package net.jllama.core;
 
-import java.io.Closeable;
-
-public class LlamaContext implements Closeable {
+public class LlamaContext implements AutoCloseable {
 
   private long contextPointer;
   private boolean closed;
@@ -190,7 +188,7 @@ public class LlamaContext implements Closeable {
    *
    * @see LlamaContext#llamaDecode(LlamaBatch)
    */
-  public class LlamaBatch implements Closeable {
+  public class LlamaBatch implements AutoCloseable {
     private final long batchPointer;
     private boolean freed;
     public int nTokens;
@@ -217,19 +215,15 @@ public class LlamaContext implements Closeable {
 
     private void validateState() {
       if (isFreed()) {
-        throw new IllegalStateException("LlamaBatch has already been freed.");
+        throw new IllegalStateException("LlamaBatch has already been closed/freed.");
       }
-    }
-
-    public void llamaBatchFree() {
-      validateState();
-      llamaBatchFreeNative();
-      freed = true;
     }
 
     @Override
     public void close() {
-      llamaBatchFree();
+      validateState();
+      llamaBatchFreeNative();
+      freed = true;
     }
 
     public boolean isFreed() {

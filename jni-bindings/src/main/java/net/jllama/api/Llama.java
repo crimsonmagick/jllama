@@ -1,6 +1,5 @@
 package net.jllama.api;
 
-import java.io.Closeable;
 import java.nio.charset.StandardCharsets;
 import net.jllama.api.exceptions.LlamaApiException;
 import net.jllama.api.exceptions.MissingParameterException;
@@ -11,7 +10,7 @@ import net.jllama.core.LlamaModelParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Llama implements Closeable {
+public class Llama implements AutoCloseable {
 
   final private static Logger log = LogManager.getLogger(Llama.class);
   private static Llama singleton;
@@ -70,13 +69,14 @@ public class Llama implements Closeable {
   @Override
   public synchronized void close() {
     // TODO add method for deregistering the logger (avoid a possible memory leak)
-    if (!closed) {
-      LlamaCpp.llamaBackendFree();
-      LlamaCpp.closeLibrary();
-      initializedUseNuma = null;
-      singleton = null;
-      closed = true;
+    if (closed) {
+      throw new IllegalStateException("Llama has already been closed.");
     }
+    LlamaCpp.llamaBackendFree();
+    LlamaCpp.closeLibrary();
+    initializedUseNuma = null;
+    singleton = null;
+    closed = true;
   }
 
 }

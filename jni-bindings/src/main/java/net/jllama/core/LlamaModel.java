@@ -1,8 +1,6 @@
 package net.jllama.core;
 
-import java.io.Closeable;
-
-public class LlamaModel implements Closeable {
+public class LlamaModel implements AutoCloseable {
 
   private boolean closed;
   private long modelPointer;

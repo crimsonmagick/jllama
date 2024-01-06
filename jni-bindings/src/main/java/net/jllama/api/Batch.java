@@ -1,9 +1,7 @@
 package net.jllama.api;
 
-import static net.jllama.api.Context.SequenceType.EMBEDDING;
 import static net.jllama.api.Context.SequenceType.TOKEN;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -11,15 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.jllama.api.Context.SequenceType;
-import net.jllama.api.Sequence;
 import net.jllama.api.Sequence.SequenceId;
 import net.jllama.api.Sequence.SequencePiece;
-import net.jllama.api.util.FloatUtil;
-import net.jllama.api.util.IntegerUtil;
 import net.jllama.core.LlamaContext.LlamaBatch;
-import sun.awt.image.ImageWatched.Link;
 
-public class Batch implements Closeable {
+public class Batch implements AutoCloseable {
 
   public static final int DEFAULT_BATCH_SIZE = 1024;
   public static final int DEFAULT_MAX_SEQUENCE_LENGTH = 1;
@@ -41,10 +35,11 @@ public class Batch implements Closeable {
 
   @Override
   public void close() {
-    if (!closed) {
-      llamaBatch.llamaBatchFree();
-      closed = true;
+    if (closed) {
+      throw new IllegalStateException("Batch has already been closed.");
     }
+    llamaBatch.close();
+    closed = true;
   }
 
   public boolean isClosed() {

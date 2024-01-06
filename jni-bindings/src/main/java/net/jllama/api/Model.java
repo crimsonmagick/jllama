@@ -1,11 +1,10 @@
 package net.jllama.api;
 
-import java.io.Closeable;
 import net.jllama.core.LlamaContext;
 import net.jllama.core.LlamaContextParams;
 import net.jllama.core.LlamaModel;
 
-public class Model implements Closeable {
+public class Model implements AutoCloseable {
 
   public Model(final LlamaModel llamaModel) {
     this.llamaModel = llamaModel;
