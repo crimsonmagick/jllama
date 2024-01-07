@@ -2,7 +2,6 @@ package net.jllama.api;
 
 
 import static net.jllama.api.Context.SequenceType.EMBEDDING;
-import static net.jllama.api.Context.SequenceType.TOKEN;
 
 import net.jllama.api.Context.SequenceType;
 import net.jllama.api.batch.BatchConfigurer;
@@ -16,12 +15,12 @@ public class FluentBatch implements BatchConfigurer, BatchManager, BatchResolver
   final Context context;
   private SequenceType type;
   private int batchSize;
-  private int maxSequenceLength;
+  private int maxSeqIdLength;
 
   FluentBatch(final Context context) {
     this.context = context;
     batchSize = Batch.DEFAULT_BATCH_SIZE;
-    maxSequenceLength = Batch.DEFAULT_MAX_SEQUENCE_LENGTH;
+    maxSeqIdLength = Batch.DEFAULT_MAX_SEQUENCE_LENGTH;
   }
 
   @Override
@@ -49,7 +48,7 @@ public class FluentBatch implements BatchConfigurer, BatchManager, BatchResolver
     if (maxSequenceLength <= 0) {
       throw new IllegalStateException("Max sequence length must be greater than 0.");
     }
-    this.maxSequenceLength = maxSequenceLength;
+    this.maxSeqIdLength = maxSequenceLength;
     return this;
   }
 
@@ -67,10 +66,10 @@ public class FluentBatch implements BatchConfigurer, BatchManager, BatchResolver
   private Batch buildBatchOnChange(final Batch oldBatch) {
     final Batch batch;
     if (oldBatch == null || hasBatchConfigChanged(oldBatch)) {
-      final int embeddingsSize = type == EMBEDDING ? batchSize : 0;
-      final int tokensSize = type == TOKEN ? batchSize : 0;
-      final LlamaBatch llamaBatch = context.llamaContext.llamaBatchInit(batchSize, embeddingsSize, tokensSize);
-      batch = new Batch(type, batchSize, maxSequenceLength, llamaBatch);
+      final int isEmbedding = type == EMBEDDING ? 1 : 0;
+      final LlamaBatch llamaBatch = context.llamaContext.llamaBatchInit(batchSize, isEmbedding,
+          maxSeqIdLength);
+      batch = new Batch(type, batchSize, maxSeqIdLength, llamaBatch);
     } else {
       batch = oldBatch;
     }
@@ -81,7 +80,7 @@ public class FluentBatch implements BatchConfigurer, BatchManager, BatchResolver
   }
 
   private boolean hasBatchConfigChanged(final Batch batch) {
-    return batch.getBatchSize() != batchSize || batch.getMaxSequenceLength() != maxSequenceLength;
+    return batch.getBatchSize() != batchSize || batch.getMaxSequenceLength() != maxSeqIdLength;
   }
 
 }
