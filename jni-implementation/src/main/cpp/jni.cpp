@@ -354,9 +354,9 @@ namespace jni {
     return llamaModelObj;
   }
 
-  jobject constructBatch(JNIEnv* env, jobject jContext,  llama_batch *batch, jint jNTokens, jint jEmbd, jint nSeqId) {
+  jobject constructBatch(JNIEnv* env, llama_batch *batch, jint jNTokens, jint jEmbd, jint nSeqId) {
     auto jBatchPointer = reinterpret_cast<jlong>(batch);
-    jclass jBatchClass = env->FindClass("net/jllama/core/LlamaContext$LlamaBatch");
+    jclass jBatchClass = env->FindClass("net/jllama/core/LlamaBatch");
     if (jBatchClass == nullptr) {
       throw JNIException("Unable to find LlamaBatch class");
     }
@@ -390,11 +390,11 @@ namespace jni {
     jintArray jPos = newPrimitiveArray<jintArray>(env, jLength);
     jbyteArray jLogits = newPrimitiveArray<jbyteArray>(env, jLength);
 
-    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(Lnet/jllama/core/LlamaContext;JI[I[F[I[I[[I[B)V");
+    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(LJI[I[F[I[I[[I[B)V");
     if (jConstructor == nullptr) {
       throw JNIException("Unable to find LlamaBatch constructor");
     }
-    jobject jBatch = env->NewObject(jBatchClass, jConstructor, jContext,
+    jobject jBatch = env->NewObject(jBatchClass, jConstructor,
                                     jBatchPointer, batch->n_tokens, jTokenArray,
                                     jEmbdArray, jPos, jNSeqIdArray, jSeqIdArray,
                                     jLogits);
@@ -448,7 +448,7 @@ namespace jni {
   }
 
   llama_batch* getLlamaBatchPointer(JNIEnv* env, jobject jBatch) {
-    jclass llamaBatchClass = env->FindClass("net/jllama/core/LlamaContext$LlamaBatch");
+    jclass llamaBatchClass = env->FindClass("net/jllama/core/LlamaBatch");
     if (llamaBatchClass == nullptr) {
       throw JNIException("Unable to find LlamaContext class");
     }

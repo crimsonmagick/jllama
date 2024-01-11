@@ -1,4 +1,4 @@
-#include "net_jllama_core_LlamaContext_LlamaBatch.h"
+#include "net_jllama_core_LlamaBatch.h"
 #include "handler/LlamaManager.h"
 
 extern "C" {

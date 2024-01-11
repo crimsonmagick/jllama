@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import net.jllama.api.Context.SequenceType;
 import net.jllama.api.Sequence.SequenceId;
 import net.jllama.api.Sequence.SequencePiece;
-import net.jllama.core.LlamaContext.LlamaBatch;
+import net.jllama.core.LlamaBatch;
 
 public class Batch implements AutoCloseable {
 

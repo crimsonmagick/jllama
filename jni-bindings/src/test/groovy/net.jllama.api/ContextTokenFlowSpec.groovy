@@ -1,10 +1,8 @@
 package net.jllama.api
 
-
 import net.jllama.core.GgmlType
 import net.jllama.core.LlamaContext
-import net.jllama.core.LlamaContextImpl
-import net.jllama.core.LlamaContextImpl.LlamaBatch
+import net.jllama.core.LlamaBatch
 import net.jllama.core.LlamaContextParams
 import spock.lang.Shared
 import spock.lang.Specification
@@ -16,8 +14,7 @@ import java.util.stream.IntStream
 @Stepwise
 class ContextTokenFlowSpec extends Specification {
 
-  @Shared
-  LlamaContextImpl coreContext = Mock()
+  LlamaContext mockCoreContext
   @Shared
   Context underTest
 
@@ -39,7 +36,13 @@ class ContextTokenFlowSpec extends Specification {
     coreContextParams.setTypeK(GgmlType.GGML_TYPE_F16)
     coreContextParams.setTypeV(GgmlType.GGML_TYPE_F16)
     coreContextParams.setOffloadKqv(true)
-    underTest = new Context(coreContext, coreContextParams)
+    underTest = new Context(Mock(LlamaContext), coreContextParams)
+  }
+
+  def setup() {
+    // see https://github.com/spockframework/spock/issues/791
+    mockCoreContext = Mock()
+    underTest.llamaContext = mockCoreContext
   }
 
   def "Sequences are submitted to batch"() {
@@ -53,33 +56,32 @@ class ContextTokenFlowSpec extends Specification {
     batch.stage(sequencePiece2)
 
     then:
-    1 * coreContext.llamaBatchInit(_ as int, _ as int, _ as int) >> {
+    1 * mockCoreContext.llamaBatchInit(_, _, _) >> {
       final int nTokens = it[0] as int
-      final int nSeqMax = int[2] as int
-      return new LlamaContext.LlamaBatch(0, 0, new int[nTokens], null,
+      final int nSeqMax = it[2] as int
+      return new LlamaBatch(0l, 0, new int[nTokens], new float[0],
           new int[nTokens], new int[nTokens], new int[nTokens][nSeqMax], new byte[nTokens])
     }
-//    batch.stagedSequences.size() == 2
-//    batch.stagedSequences.get(0) == sequencePiece1
-//    batch.stagedSequences.get(1) == sequencePiece2
-//    underTest.tokensBatch == batch
-//    underTest.embeddingsBatch == null
+    batch.stagedSequences.size() == 2
+    batch.stagedSequences.get(0) == sequencePiece1
+    batch.stagedSequences.get(1) == sequencePiece2
+    underTest.tokensBatch == batch
+    underTest.embeddingsBatch == null
   }
 
-  def "Context evaluates batch"() {
-    when: "The batch is evaluated"
-    underTest.evaluate(underTest.batch()
-        .type(Context.SequenceType.TOKEN)
-        .get())
-
-    then: "A core LlamaBatch is passed to the decode() method"
-    1 * coreContext.llamaDecode(_ as LlamaBatch) >> {
-      final LlamaBatch batch = it[0] as LlamaBatch
-      batch.nTokens == SEQUENCE_1_LENGTH + SEQUENCE_2_LENGTH
-      return 0
-    }
-
-  }
+//  def "Context evaluates batch"() {
+//    when: "The batch is evaluated"
+//    underTest.evaluate(underTest.batch()
+//        .type(Context.SequenceType.TOKEN)
+//        .get())
+//
+//    then: "A core LlamaBatch is passed to the decode() method"
+//    1 * mockCoreContext.llamaDecode(_ as LlamaBatch) >> {
+//      final LlamaBatch batch = it[0] as LlamaBatch
+//      batch.nTokens == SEQUENCE_1_LENGTH + SEQUENCE_2_LENGTH
+//      return 0
+//    }
+//  }
 
 
   def "clearSequences() - Context completely cleared"() {

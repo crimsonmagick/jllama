@@ -42,7 +42,7 @@ namespace jni {
   jobjectArray get2dInt32Array(JNIEnv *env, jclass jType, jobject jInstance, const char* fieldName);
   jfloatArray getFloatArray(JNIEnv* env, jclass jType, jobject jInstance, const char* fieldName);
   jobject constructLlamaModel(JNIEnv* env, llama_model* modelPointer);
-  jobject constructBatch(JNIEnv* env, jobject jContext,  llama_batch *batch, jint jNTokens, jint jEmbd, jint nSeqId);
+  jobject constructBatch(JNIEnv* env, llama_batch *batch, jint jNTokens, jint jEmbd, jint nSeqId);
   llama_model* getLlamaModelPointer(JNIEnv* env, jobject llamaModel);
   void throwDLLException(JNIEnv* env, const DynamicLibraryException& e);
   void throwJNIException(JNIEnv* env, const JNIException& e);

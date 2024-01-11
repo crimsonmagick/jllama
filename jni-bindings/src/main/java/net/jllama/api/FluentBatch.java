@@ -8,7 +8,7 @@ import net.jllama.api.batch.BatchConfigurer;
 import net.jllama.api.batch.BatchResolver;
 import net.jllama.api.batch.BatchManager;
 import net.jllama.api.batch.BatchSpecifier;
-import net.jllama.core.LlamaContext.LlamaBatch;
+import net.jllama.core.LlamaBatch;
 
 public class FluentBatch implements BatchConfigurer, BatchManager, BatchResolver, BatchSpecifier {
 

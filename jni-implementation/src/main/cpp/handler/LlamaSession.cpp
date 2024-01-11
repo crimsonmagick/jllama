@@ -478,7 +478,7 @@ jobject LlamaManager::LlamaSession::llamaBatchInit(jobject jContext,
     llama_batch batchStack = batchInit(jNTokens, jEmbd, nSeqId);
     llama_batch* batchHeap = new llama_batch;
     std::memcpy(batchHeap, &batchStack, sizeof(llama_batch));
-    return jni::constructBatch(env, jContext, batchHeap, jNTokens, jEmbd, nSeqId);
+    return jni::constructBatch(env, batchHeap, jNTokens, jEmbd, nSeqId);
   });
 }
 
