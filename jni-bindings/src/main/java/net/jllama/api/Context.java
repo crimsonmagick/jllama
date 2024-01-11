@@ -128,13 +128,13 @@ public class Context implements AutoCloseable {
     if (segmentLength > sequence.getLength()) {
       throw new IllegalArgumentException("pos1 - pos0 must be less than sequence length.");
     }
-    sequence.length -= segmentLength;
     final int sequenceId = sequence.getSequenceId().getId().get(0);
     llamaContext.llamaKvCacheSeqRm(sequenceId, posStart, posEnd);
     // shift remaining tokens/embeddings to the left if necessary
     if (pos1 < sequence.getLength()) {
       llamaContext.llamaKvCacheSeqShift(sequenceId, pos1, sequence.getLength(), -1 * segmentLength);
     }
+    sequence.length -= segmentLength;
   }
 
   public Sampler sampler(final List<Float> logits) {

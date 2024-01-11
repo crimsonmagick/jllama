@@ -390,7 +390,7 @@ namespace jni {
     jintArray jPos = newPrimitiveArray<jintArray>(env, jLength);
     jbyteArray jLogits = newPrimitiveArray<jbyteArray>(env, jLength);
 
-    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(LJI[I[F[I[I[[I[B)V");
+    jmethodID jConstructor = env->GetMethodID(jBatchClass, "<init>", "(JI[I[F[I[I[[I[B)V");
     if (jConstructor == nullptr) {
       throw JNIException("Unable to find LlamaBatch constructor");
     }
