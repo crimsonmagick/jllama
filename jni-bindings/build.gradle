@@ -1,10 +1,18 @@
 plugins {
-    id 'java'
+    id 'groovy'
     id 'maven-publish'
 }
 
 dependencies {
-    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.22.0'
+
+    implementation platform('org.apache.groovy:groovy-bom:4.0.17')
+    implementation 'org.apache.groovy:groovy'
+    testImplementation platform("org.spockframework:spock-bom:2.3-groovy-4.0")
+    testImplementation "org.spockframework:spock-core"
+    testRuntimeOnly "net.bytebuddy:byte-buddy:1.14.10"
+    testRuntimeOnly "org.objenesis:objenesis:3.3"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -70,5 +78,12 @@ publishing {
                 password = System.hasProperty("OSSHR_TOKEN_PASSWORD") ? System.getProperty("OSSRH_TOKEN_PASSWORD") : System.getenv("OSSRH_TOKEN_PASSWORD")
             }
         }
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
     }
 }

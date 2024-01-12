@@ -1,4 +1,5 @@
 #include <jni.h>
+#include <sstream>
 #include "../jni.h"
 #include "../j_classes_consts.h"
 #include "LlamaManager.h"
@@ -87,26 +88,42 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                   jParamsClass,
                   jLlamaContextParams,
                   "yarnOrigCtx");
-  jni::setBoolean(llamaContextParams.mul_mat_q,
-                  env,
-                  jParamsClass,
-                  jLlamaContextParams,
-                  "mulMatQ");
-  jni::setBoolean(llamaContextParams.f16_kv,
-                  env,
-                  jParamsClass,
-                  jLlamaContextParams,
-                  "f16Kv");
-  jni::setBoolean(llamaContextParams.logits_all,
-                  env,
-                  jParamsClass,
-                  jLlamaContextParams,
-                  "logitsAll");
+
+  jclass ggmlTypeClass = env->FindClass(GGML_TYPE_NAME);
+  if (!ggmlTypeClass)  {
+    throw jni::JNIException("Unable to find class GgmlType.");
+  }
+  jmethodID ggmlTypeMethodId = env->GetStaticMethodID(ggmlTypeClass, "getType", GGML_TYPE_GET_TYPE_SIG);
+  if (!ggmlTypeMethodId) {
+    throw jni::JNIException("Unable to find GgmlType method getType().");
+  }
+
+  jobject kGgmlType = env->CallStaticObjectMethod(ggmlTypeClass, ggmlTypeMethodId, llamaContextParams.type_k);
+  jni::setObject(kGgmlType, env, jParamsClass, jLlamaContextParams, "typeK", GGML_TYPE_SIG);
+  if (!kGgmlType) {
+    std::ostringstream errorMessage;
+    errorMessage << "Unable to set GgmlType typeK to value=" << llamaContextParams.type_k;
+    throw jni::JNIException(errorMessage.str().c_str());
+  }
+
+  jobject vGgmlType = env->CallStaticObjectMethod(ggmlTypeClass, ggmlTypeMethodId, llamaContextParams.type_v);
+  jni::setObject(vGgmlType, env, jParamsClass, jLlamaContextParams, "typeV", GGML_TYPE_SIG);
+  if (!vGgmlType) {
+    std::ostringstream errorMessage;
+    errorMessage << "Unable to set GgmlType typeV to value=" << llamaContextParams.type_v;
+    throw jni::JNIException(errorMessage.str().c_str());
+  }
+
   jni::setBoolean(llamaContextParams.embedding,
                   env,
                   jParamsClass,
                   jLlamaContextParams,
                   "embedding");
+  jni::setBoolean(llamaContextParams.offload_kqv,
+                  env,
+                  jParamsClass,
+                  jLlamaContextParams,
+                  "offloadKqv");
 }
 
 LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager(
@@ -116,6 +133,20 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
 
   JNIEnv* env = session->env;
   jclass javaParamsClass = env->GetObjectClass(javaContextParams);
+  jobject jTypeK = jni::getObject(env, javaParamsClass, javaContextParams, "typeK", GGML_TYPE_SIG);
+  jobject jTypeV = jni::getObject(env, javaParamsClass, javaContextParams, "typeV", GGML_TYPE_SIG);
+
+  jclass ggmlTypeClass = env->FindClass(GGML_TYPE_NAME);
+  if (!ggmlTypeClass)  {
+    throw jni::JNIException("Unable to find class GgmlType.");
+  }
+  jmethodID ggmlValueMethodId = env->GetMethodID(ggmlTypeClass, "getValue", GGML_TYPE_GET_VALUE_SIG);
+  if (!ggmlValueMethodId) {
+    throw jni::JNIException("Unable to find GgmlType method getValue().");
+  }
+
+  jint kValue = env->CallIntMethod(jTypeK, ggmlValueMethodId);
+  jint vValue = env->CallIntMethod(jTypeV, ggmlValueMethodId);
 
   llamaContextParams = {
       .seed = jni::getUnsignedInt32(env,
@@ -170,21 +201,15 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                                       javaParamsClass,
                                       javaContextParams,
                                       "yarnOrigCtx"),
-      .mul_mat_q = jni::getBool(env,
-                                javaParamsClass,
-                                javaContextParams,
-                                "mulMatQ"),
-      .f16_kv = jni::getBool(env,
-                             javaParamsClass,
-                             javaContextParams,
-                             "f16Kv"),
-      .logits_all = jni::getBool(env,
-                                 javaParamsClass,
-                                 javaContextParams,
-                                 "logitsAll"),
+      .type_k = static_cast<ggml_type>(kValue),
+      .type_v = static_cast<ggml_type>(vValue),
       .embedding = jni::getBool(env,
                                 javaParamsClass,
                                 javaContextParams,
-                                "embedding")
+                                "embedding"),
+     .offload_kqv = jni::getBool(env,
+                                 javaParamsClass,
+                                 javaContextParams,
+                                 "offloadKqv")
   };
 }

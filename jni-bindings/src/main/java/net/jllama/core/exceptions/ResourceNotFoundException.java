@@ -1,6 +1,4 @@
-package net.jllama.llama.cpp.java.bindings.exceptions;
-
-import java.io.IOException;
+package net.jllama.core.exceptions;
 
 public class ResourceNotFoundException extends RuntimeException {
 

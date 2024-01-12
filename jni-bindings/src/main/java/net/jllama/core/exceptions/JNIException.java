@@ -1,4 +1,4 @@
-package net.jllama.llama.cpp.java.bindings.exceptions;
+package net.jllama.core.exceptions;
 
 public class JNIException extends RuntimeException {
 

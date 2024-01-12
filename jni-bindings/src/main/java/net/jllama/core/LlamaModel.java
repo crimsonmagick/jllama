@@ -1,11 +1,9 @@
-package net.jllama.llama.cpp.java.bindings;
+package net.jllama.core;
 
-import java.io.Closeable;
+public class LlamaModel implements AutoCloseable {
 
-public class LlamaModel implements Closeable {
-
-  boolean closed;
-  long modelPointer;
+  private boolean closed;
+  private long modelPointer;
 
   public LlamaModel(final long modelPointer) {
     this.modelPointer = modelPointer;
@@ -26,15 +24,15 @@ public class LlamaModel implements Closeable {
     return createContextNative(llamaContextParams);
   }
 
-  private native int tokenizeNative(byte[] text, int[] tokens, int nMaxTokens, boolean addBos);
-  public int tokenize(byte[] text, int[] tokens, int nMaxTokens, boolean addBos) {
+  private native int llamaTokenizeNative(byte[] text, int[] tokens, int nMaxTokens, boolean addBos, boolean special);
+  public int llamaTokenize(byte[] text, int[] tokens, int nMaxTokens, boolean addBos, boolean special) {
     validateState();
-    return tokenizeNative(text, tokens, nMaxTokens, addBos);
+    return llamaTokenizeNative(text, tokens, nMaxTokens, addBos, special);
   }
 
   private native int detokenizeNative(int llamaToken, byte[] buf);
 
-  public int detokenize(int llamaToken, byte[] buf) {
+  public int llamaDetokenize(int llamaToken, byte[] buf) {
     validateState();
     return detokenizeNative(llamaToken, buf);
   }

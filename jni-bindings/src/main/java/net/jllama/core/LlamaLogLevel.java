@@ -1,4 +1,4 @@
-package net.jllama.llama.cpp.java.bindings;
+package net.jllama.core;
 
 public enum LlamaLogLevel {
   ERROR(2), WARN(3), INFO(4);
