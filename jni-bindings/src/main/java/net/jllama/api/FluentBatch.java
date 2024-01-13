@@ -5,12 +5,11 @@ import static net.jllama.api.Context.SequenceType.EMBEDDING;
 
 import net.jllama.api.Context.SequenceType;
 import net.jllama.api.batch.BatchConfigurer;
-import net.jllama.api.batch.BatchResolver;
 import net.jllama.api.batch.BatchManager;
 import net.jllama.api.batch.BatchSpecifier;
 import net.jllama.core.LlamaBatch;
 
-public class FluentBatch implements BatchConfigurer, BatchManager, BatchResolver, BatchSpecifier {
+public class FluentBatch implements BatchConfigurer, BatchManager, BatchSpecifier {
 
   final Context context;
   private SequenceType type;
@@ -55,32 +54,33 @@ public class FluentBatch implements BatchConfigurer, BatchManager, BatchResolver
   @Override
   public Batch get() {
     if (type == SequenceType.EMBEDDING) {
-      context.setEmbeddingsBatch(buildBatchOnChange(context.getEmbeddingsBatch()));
+      if (context.getEmbeddingsBatch() == null) {
+        context.setEmbeddingsBatch(buildBatch());
+      }
       return context.getEmbeddingsBatch();
     } else {
-      context.setTokensBatch(buildBatchOnChange(context.getTokensBatch()));
+      if (context.getTokensBatch() == null) {
+        context.setTokensBatch(buildBatch());
+      }
       return context.getTokensBatch();
     }
   }
 
-  private Batch buildBatchOnChange(final Batch oldBatch) {
-    final Batch batch;
-    if (oldBatch == null || hasBatchConfigChanged(oldBatch)) {
-      final int isEmbedding = type == EMBEDDING ? 1 : 0;
-      final LlamaBatch llamaBatch = context.llamaContext.llamaBatchInit(batchSize, isEmbedding,
-          maxSeqIdLength);
-      batch = new Batch(type, batchSize, maxSeqIdLength, llamaBatch);
+  @Override
+  public BatchConfigurer update() {
+    if (type == SequenceType.EMBEDDING) {
+      context.setEmbeddingsBatch(buildBatch());
     } else {
-      batch = oldBatch;
+      context.setTokensBatch(buildBatch());
     }
-    if (oldBatch != null && batch != oldBatch) {
-      oldBatch.close();
-    }
-    return batch;
+    return this;
   }
 
-  private boolean hasBatchConfigChanged(final Batch batch) {
-    return batch.getBatchSize() != batchSize || batch.getMaxSequenceLength() != maxSeqIdLength;
+  private Batch buildBatch() {
+    final int isEmbedding = type == EMBEDDING ? 1 : 0;
+    final LlamaBatch llamaBatch = context.llamaContext.llamaBatchInit(batchSize, isEmbedding,
+        maxSeqIdLength);
+    return new Batch(type, batchSize, maxSeqIdLength, llamaBatch);
   }
 
 }

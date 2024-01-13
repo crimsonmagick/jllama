@@ -4,7 +4,7 @@
 extern "C" {
 
   JNIEXPORT void
-  JNICALL Java_net_jllama_core_LlamaContext_00024LlamaBatch_llamaBatchFreeNative
+  JNICALL Java_net_jllama_core_LlamaBatch_llamaBatchFreeNative
       (JNIEnv* env, jobject jBatch) {
     LlamaManager::getLlamaManager(env)->newSession(env).llamaBatchFree(jBatch);
   }
