@@ -544,10 +544,11 @@ jint LlamaManager::LlamaSession::decodeNative(jobject jContext, jobject jBatch) 
     if (jEmbd) {
         env->ReleaseFloatArrayElements(jEmbdArray, jEmbd, JNI_ABORT);
     }
+    int decodeStatus = decode(context, *batch);
     env->ReleaseIntArrayElements(jPosArray, jPos, JNI_ABORT);
     env->ReleaseIntArrayElements(jNSeqIdArray, jNSeqId, JNI_ABORT);
     env->ReleaseByteArrayElements(jLogitsArray, jLogits, JNI_ABORT);
-    return decode(context, *batch);
+    return decodeStatus;
   });
 }
 

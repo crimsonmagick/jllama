@@ -6,6 +6,7 @@ public interface BatchConfigurer {
 
   BatchConfigurer batchSize(int batchSize);
   Batch get();
+  BatchConfigurer update();
   BatchConfigurer maxSequenceLength(int maxSequenceLength);
 
 }
