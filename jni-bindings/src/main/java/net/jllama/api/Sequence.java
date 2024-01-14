@@ -149,6 +149,10 @@ public abstract class Sequence<T extends Number> {
     lastLogitIndiciesMap = logitIndicies;
   }
 
+  public static SequenceId sequenceId(final int id) {
+    return new SequenceId(new int[]{id});
+  }
+
   public static Sequence<Integer> tokenSequence(final int id) {
     return tokenSequence(Collections.singletonList(id));
   }
