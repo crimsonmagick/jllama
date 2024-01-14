@@ -42,6 +42,10 @@ public class Context implements AutoCloseable {
     llamaContext.llamaKvCacheClear();
   }
 
+  public Map<SequenceId, Sequence<?>> getSequences() {
+    return sequences;
+  }
+
   @Override
   public void close() {
     validateState();
