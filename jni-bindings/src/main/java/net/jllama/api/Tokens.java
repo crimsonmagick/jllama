@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import net.jllama.api.util.IntegerUtil;
 import net.jllama.core.LlamaModel;
+import net.jllama.core.exceptions.LlamaCppException;
 
 public class Tokens {
+
   private final LlamaModel llamaModel;
 
   Tokens(final LlamaModel llamaModel) {
@@ -28,7 +30,8 @@ public class Tokens {
       length = llamaModel.llamaDetokenize(token, buf);
     }
     if (length < 0) {
-      throw new RuntimeException("Unable to allocate a large enough buffer for detokenized string length.");
+      throw new RuntimeException(
+          "Unable to allocate a large enough buffer for detokenized string length.");
     }
     return new String(buf, 0, length, StandardCharsets.UTF_8);
   }
@@ -50,9 +53,15 @@ public class Tokens {
   }
 
   public List<Integer> tokenize(final String toTokenize, boolean addBos, boolean special) {
-    final int maxLength = toTokenize.length();
+    final int maxLength = toTokenize.length() + (addBos ? 1 : 0);
     final int[] temp = new int[maxLength];
-    int length = llamaModel.llamaTokenize(toTokenize.getBytes(StandardCharsets.UTF_8), temp, maxLength, addBos, special);
+    int length = llamaModel.llamaTokenize(toTokenize.getBytes(StandardCharsets.UTF_8), temp,
+        maxLength, addBos, special);
+    if (length < 0) {
+      throw new LlamaCppException(
+          String.format("Reserved %s ints for max length, but required length was %s", maxLength,
+              Math.abs(length)));
+    }
     final int[] tokenized = new int[length];
     System.arraycopy(temp, 0, tokenized, 0, length);
     return IntegerUtil.toList(tokenized);
