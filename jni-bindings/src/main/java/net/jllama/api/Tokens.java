@@ -6,9 +6,12 @@ import java.util.stream.Collectors;
 import net.jllama.api.util.IntegerUtil;
 import net.jllama.core.LlamaModel;
 import net.jllama.core.exceptions.LlamaCppException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Tokens {
 
+  final static Logger log = LogManager.getLogger(Tokens.class);
   private final LlamaModel llamaModel;
 
   Tokens(final LlamaModel llamaModel) {
@@ -53,14 +56,18 @@ public class Tokens {
   }
 
   public List<Integer> tokenize(final String toTokenize, boolean addBos, boolean special) {
-    final int maxLength = toTokenize.length() + (addBos ? 1 : 0);
-    final int[] temp = new int[maxLength];
-    int length = llamaModel.llamaTokenize(toTokenize.getBytes(StandardCharsets.UTF_8), temp,
-        maxLength, addBos, special);
-    if (length < 0) {
-      throw new LlamaCppException(
-          String.format("Reserved %s ints for max length, but required length was %s", maxLength,
-              Math.abs(length)));
+    final int estimatedLength = toTokenize.length() + (addBos ? 1 : 0);
+    final int[] temp = new int[estimatedLength];
+    final int reqLength = llamaModel.llamaTokenize(toTokenize.getBytes(StandardCharsets.UTF_8), temp,
+        estimatedLength, addBos, special);
+    final int length;
+    if (reqLength < 0) {
+      log.trace(
+          () -> String.format("Reserved %d ints for estimatedLength, but requiredLength was %d",
+              estimatedLength, reqLength));
+      length = Math.abs(reqLength);
+    } else {
+      length = reqLength;
     }
     final int[] tokenized = new int[length];
     System.arraycopy(temp, 0, tokenized, 0, length);
