@@ -61,6 +61,10 @@ extern "C" {
     return LlamaManager::getLlamaManager(env)->newSession(env).tokenNl(jModel);
   }
 
-
+  JNIEXPORT jbyteArray
+  JNICALL Java_net_jllama_core_LlamaModel_thereAndBackAgainNative
+    (JNIEnv* env, jobject thisObject, jbyteArray jText) {
+    return LlamaManager::getLlamaManager(env)->newSession(env).thereBack(jText);
+  }
 
 }

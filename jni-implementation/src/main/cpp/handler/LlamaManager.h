@@ -92,7 +92,8 @@ class LlamaManager {
                                           jfloat jPenaltyRepeat,
                                           jfloat jPenaltyFreq,
                                           jfloat jPenaltyPresent);
-      private:
+      jbyteArray thereBack(jbyteArray jText);
+     private:
         friend class LlamaManager;
         explicit LlamaSession(JNIEnv* env, LlamaManager* outer)
             : env(env), manager(outer) {}

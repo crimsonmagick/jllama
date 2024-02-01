@@ -144,6 +144,16 @@ jint LlamaManager::LlamaSession::tokenizeWithModel(jobject jModel,
 
 }
 
+jbyteArray LlamaManager::LlamaSession::thereBack(jbyteArray jText) {
+  jbyte* jBytes = env->GetByteArrayElements(jText, nullptr);
+  char* charBytes = reinterpret_cast<char*>(jBytes);
+  jsize len = env->GetArrayLength(jText);
+  jbyteArray copy = env->NewByteArray(len);
+  env->SetByteArrayRegion(copy, 0, len, reinterpret_cast<jbyte*>(charBytes));
+
+  env->ReleaseByteArrayElements(jText, jBytes, 0);
+  return copy;
+}
 
 typedef int(* llama_eval_pointer)(llama_context*, llama_token*, int, int);
 jint LlamaManager::LlamaSession::eval(jobject jContext,

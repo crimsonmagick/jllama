@@ -1,9 +1,17 @@
 package net.jllama.core;
 
+import java.nio.charset.StandardCharsets;
+
 public class LlamaModel implements AutoCloseable {
 
   private boolean closed;
   private long modelPointer;
+  private native byte[] thereAndBackAgainNative(byte[] utf8);
+  public String thereAndBackAgain(final String text) {
+    final byte[] back = thereAndBackAgainNative(text.getBytes(StandardCharsets.UTF_8));
+    return new String(back, StandardCharsets.UTF_8);
+//    return new String(text.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+  }
 
   public LlamaModel(final long modelPointer) {
     this.modelPointer = modelPointer;
