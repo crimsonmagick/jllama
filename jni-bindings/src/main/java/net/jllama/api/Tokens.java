@@ -2,10 +2,8 @@ package net.jllama.api;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import net.jllama.api.util.ByteUtil;
 import net.jllama.api.util.IntegerUtil;
 import net.jllama.core.LlamaModel;
 import net.jllama.core.exceptions.LlamaCppException;
@@ -22,31 +20,22 @@ public class Tokens {
     this.llamaModel = llamaModel;
   }
 
-  public String detokenize(final int token) {
-    return detokenize(Collections.singletonList(token));
+  public int bos() {
+    return llamaModel.llamaTokenBos();
   }
 
-  public String detokenize(final List<Integer> tokens) {
-    final List<Byte> buffer = new ArrayList<>();
-    boolean leadingSpace = true;
+  public byte[] detokenize(final List<Integer> tokens) {
+    final List<Byte> utf8Text = new ArrayList<>();
     for (int token : tokens) {
-      final byte[] detokenized = detokenizeUtf8(token);
-      if (leadingSpace && detokenized.length == 1 && detokenized[0] == UTF8_SPACE) {
-        leadingSpace = false;
-      } else {
-        for (byte piece : detokenized) {
-          buffer.add(piece);
-        }
+      final byte[] detokenized = detokenize(token);
+      for (byte utf8piece : detokenized) {
+        utf8Text.add(utf8piece);
       }
     }
-    final byte[] utf8String = new byte[buffer.size()];
-    for (int i = 0; i < buffer.size(); i++) {
-      utf8String[i] = buffer.get(i);
-    }
-    return new String(utf8String, StandardCharsets.UTF_8);
+    return ByteUtil.toArray(utf8Text);
   }
 
-  private byte[] detokenizeUtf8(final int token) {
+  public byte[] detokenize(final int token) {
     byte[] buf = new byte[8];
     int length = llamaModel.llamaDetokenize(token, buf);
     if (length < 0) {
@@ -56,16 +45,11 @@ public class Tokens {
     }
     if (length < 0) {
       throw new RuntimeException(
-          "Unable to allocate a large enough buffer for detokenized string length.");
+          "Unable to allocate a large enough buffer for detokenized byte[] length.");
     }
     byte[] rawUtf8String = new byte[length];
     System.arraycopy(buf, 0, rawUtf8String, 0, length);
     return rawUtf8String;
-  }
-
-
-  public int bos() {
-    return llamaModel.llamaTokenBos();
   }
 
   public int eos() {

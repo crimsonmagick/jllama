@@ -134,7 +134,7 @@ Context context = mode.newContext()
 ```
 
 ## Tokens
-A token represents a word-piece, a piece of the model's vocabulary. Llama operates on tokens using contexts, so text must be converted to and from tokens when interacting with the context.
+A token represents a word-piece, a piece of the model's vocabulary. Llama operates on tokens using contexts, so text must be converted to and from tokens when interacting with the context. A token can represent multiple characters, or only part of a multi-byte character. The encoding is UTF-8.
 
 The model provides access to special tokens and to tokenization functionality.
 
@@ -147,8 +147,17 @@ List<Integer> tokens = model.tokens().tokenize(text);
 ### Detokenizing Text
 
 ```java
-String text = model.tokens().detokenize(tokens);
+byte[] detokenized = model.tokens().detokenize(tokens);
 ```
+
+To transform into a Java String, use 
+
+```java
+String stringPiece = new String(detokenized, StandardCharsets.UTF_8);
+```
+
+Care must be taken with detokenized bytes - they need to be buffered so that incomplete UTF-8 characters are not included in the java String. Java will recognize an incomplete byte and render each byte as "�".
+
 ### Evaluation
 Sequences are added to a context with the evaluation of a "batch" of tokens. Evaluation adds the batched sequences (or sequence updates) and internally calculates the probabilities for the next token.
 
