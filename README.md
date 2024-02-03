@@ -4,7 +4,7 @@ A WIP library that provides Java bindings for [llama.cpp](https://github.com/gge
 The project is split into two parts, a fluent API for managing Llama models and contexts, and a lower level API that provides direct access to the "public" interface of llama.cpp
 
 ## llama.cpp compatibility
-Built against tag [b1698](https://github.com/ggerganov/llama.cpp/releases/tag/b1698).
+Built against tag [b2050](https://github.com/ggerganov/llama.cpp/releases/tag/b2050).
 
 jLlama may be compatible with newer versions of llama.cpp if you use a custom build, so long as no breaking changes have been made to [`llama.h`](https://github.com/ggerganov/llama.cpp/blob/master/llama.h) and its implementation.
 
