@@ -53,9 +53,9 @@ jLlama has 3 dependencies that must be included:
 
 Gradle Dependencies Example:
 ```groovy
-    implementation "net.jllama:jni-bindings:0.0.1-SNAPSHOT"
-    implementation "net.jllama:jni-implementation:0.0.1-SNAPSHOT:${classifier}"
-    implementation "net.jllama:llama-cpp:0.0.1-SNAPSHOT:${classifier}"
+    implementation "net.jllama:jni-bindings:0.0.2-SNAPSHOT"
+    implementation "net.jllama:jni-implementation:0.0.2-SNAPSHOT:${classifier}"
+    implementation "net.jllama:llama-cpp:0.0.2-SNAPSHOT:${classifier}"
 ```
 
 Maven Dependencies Example:
@@ -63,18 +63,18 @@ Maven Dependencies Example:
   <dependency>
     <groupId>net.jllama</groupId>
     <artifactId>jni-bindings</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </dependency>
   <dependency>
     <groupId>net.jllama</groupId>
     <artifactId>jni-implementation</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <classifier>{classifier}</classifier>
   </dependency>
   <dependency>
     <groupId>net.jllama</groupId>
     <artifactId>llama-cpp</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <classifier>${classifier}</classifier>
   </dependency>
 ```

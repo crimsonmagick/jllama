@@ -26,7 +26,7 @@ if (BUILD_LLAMA_CPP)
             LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/llama/debug"
             LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/llama/release")
     add_dependencies(jni-implementation llama)
-    if(USING_MINGW_TOOLCHAIN)
+    if(MINGW)
         set_target_properties(llama PROPERTIES PREFIX "")
     endif()
 endif()
