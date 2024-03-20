@@ -14,7 +14,7 @@ set_target_properties(jni-implementation PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/jni-implementation/debug"
         LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/jni-implementation/release")
 
-if (USING_MINGW_TOOLCHAIN)
+if (MINGW)
     set_target_properties(jni-implementation PROPERTIES PREFIX "")
 endif ()
 
