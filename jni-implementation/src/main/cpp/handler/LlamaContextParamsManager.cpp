@@ -114,7 +114,7 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
     throw jni::JNIException(errorMessage.str().c_str());
   }
 
-  jni::setBoolean(llamaContextParams.embedding,
+  jni::setBoolean(llamaContextParams.embeddings,
                   env,
                   jParamsClass,
                   jLlamaContextParams,
@@ -169,10 +169,10 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                                                javaParamsClass,
                                                javaContextParams,
                                                "nThreadsBatch"),
-      .rope_scaling_type = jni::getByte(env,
+      .rope_scaling_type = static_cast<llama_rope_scaling_type>(jni::getByte(env,
                                         javaParamsClass,
                                         javaContextParams,
-                                        "ropeScalingType"),
+                                        "ropeScalingType")),
       .rope_freq_base = jni::getFloat(env,
                                       javaParamsClass,
                                       javaContextParams,
@@ -203,7 +203,7 @@ LlamaManager::LlamaSession::LlamaContextParamsManager::LlamaContextParamsManager
                                       "yarnOrigCtx"),
       .type_k = static_cast<ggml_type>(kValue),
       .type_v = static_cast<ggml_type>(vValue),
-      .embedding = jni::getBool(env,
+      .embeddings = jni::getBool(env,
                                 javaParamsClass,
                                 javaContextParams,
                                 "embedding"),
