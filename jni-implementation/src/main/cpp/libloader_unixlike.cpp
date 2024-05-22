@@ -54,7 +54,7 @@ void loadLibrary(const std::string libname, JNIEnv* env) {
 
   const char* libPath;
   if (env->ExceptionCheck()){
-    std::cerr << "DllUtil#extract error, errorMessage=";
+    std::cerr << "libloader_unixlike#loadLibrary error, errorMessage=";
     env->ExceptionDescribe();
     std::cerr << std::endl;
     env->ExceptionClear();
