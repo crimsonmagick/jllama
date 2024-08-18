@@ -8,6 +8,8 @@ plugins {
   id("dev.welbyseely.gradle-cmake-plugin") version "0.1.0"
 }
 
+print("hi?!?!")
+
 def workingFolders = []
 if (project.hasProperty("RELEASE")) {
   final windowsX64Folder = new File(project.getBuildDir(), "cmake" + File.separator + getClassifier(OperatingSystem.WINDOWS,  Architectures.x64))
